@@ -146,10 +146,17 @@ public abstract class TableViewBehaviorBase<C extends Control, T, TC extends Tab
                 new KeyMapping(PAGE_UP, e -> scrollUp()),
                 new KeyMapping(PAGE_DOWN, e -> scrollDown()),
 
-                new KeyMapping(LEFT, e -> selectLeftCell()),
-                new KeyMapping(KP_LEFT, e -> selectLeftCell()),
-                new KeyMapping(RIGHT, e -> selectRightCell()),
-                new KeyMapping(KP_RIGHT, e -> selectRightCell()),
+//                new KeyMapping(LEFT, e -> selectLeftCell()),
+//                new KeyMapping(KP_LEFT, e -> selectLeftCell()),
+//                new KeyMapping(RIGHT, e -> selectRightCell()),
+//                new KeyMapping(KP_RIGHT, e -> selectRightCell()),
+
+                // fix from ajit: decide on callback based on current rtl
+                new KeyMapping(LEFT, e -> { if(isRTL()) selectRightCell(); else selectLeftCell(); }),
+                new KeyMapping(KP_LEFT,e -> { if(isRTL()) selectRightCell(); else selectLeftCell(); }),
+                new KeyMapping(RIGHT, e -> { if(isRTL()) selectLeftCell(); else selectRightCell(); }),
+                new KeyMapping(KP_RIGHT, e -> { if(isRTL()) selectLeftCell(); else selectRightCell(); }),
+
 
                 new KeyMapping(UP, e -> selectPreviousRow()),
                 new KeyMapping(KP_UP, e -> selectPreviousRow()),
@@ -185,11 +192,17 @@ public abstract class TableViewBehaviorBase<C extends Control, T, TC extends Tab
 
                 new KeyMapping(new KeyBinding(UP).shortcut(), e -> focusPreviousRow()),
                 new KeyMapping(new KeyBinding(DOWN).shortcut(), e -> focusNextRow()),
-                new KeyMapping(new KeyBinding(RIGHT).shortcut(), e -> focusRightCell()),
-                new KeyMapping(new KeyBinding(KP_RIGHT).shortcut(), e -> focusRightCell()),
-                new KeyMapping(new KeyBinding(LEFT).shortcut(), e -> focusLeftCell()),
-                new KeyMapping(new KeyBinding(KP_LEFT).shortcut(), e -> focusLeftCell()),
+//                new KeyMapping(new KeyBinding(RIGHT).shortcut(), e -> focusRightCell()),
+//                new KeyMapping(new KeyBinding(KP_RIGHT).shortcut(), e -> focusRightCell()),
+//                new KeyMapping(new KeyBinding(LEFT).shortcut(), e -> focusLeftCell()),
+//                new KeyMapping(new KeyBinding(KP_LEFT).shortcut(), e -> focusLeftCell()),
 
+                // fix from ajit: decide on callback based on current rtl
+                new KeyMapping(new KeyBinding(RIGHT).shortcut(), e -> { if(isRTL()) focusLeftCell(); else focusRightCell(); }),
+                new KeyMapping(new KeyBinding(KP_RIGHT).shortcut(), e -> { if(isRTL()) focusLeftCell(); else focusRightCell(); }),
+                new KeyMapping(new KeyBinding(LEFT).shortcut(), e -> { if(isRTL()) focusRightCell(); else focusLeftCell(); }),
+                new KeyMapping(new KeyBinding(KP_LEFT).shortcut(), e -> { if(isRTL()) focusRightCell(); else focusLeftCell(); }),
+                
                 new KeyMapping(new KeyBinding(A).shortcut(), e -> selectAll()),
                 new KeyMapping(new KeyBinding(HOME).shortcut(), e -> focusFirstRow()),
                 new KeyMapping(new KeyBinding(END).shortcut(), e -> focusLastRow()),
