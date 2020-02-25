@@ -38,10 +38,14 @@ import javafx.scene.layout.HBox;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.sun.javafx.PlatformUtil;
 import com.sun.javafx.util.Utils;
+
+import static org.junit.Assert.*;
+
 import test.com.sun.javafx.scene.control.behavior.TableViewAnchorRetriever;
 import test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
@@ -67,23 +71,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import static org.junit.Assert.fail;
-
 @RunWith(Parameterized.class)
 public class TableViewKeyInputTest {
     @Parameterized.Parameters public static Collection implementations() {
         return Arrays.asList(new Object[][]{
-                {NodeOrientation.LEFT_TO_RIGHT},
+                {NodeOrientation.LEFT_TO_RIGHT, },
                 {NodeOrientation.RIGHT_TO_LEFT}
         });
     }
 
+    
     private TableView<String> tableView;
 //    private TableSelectionModel<String> sm;
     private TableView.TableViewSelectionModel<String> sm;
@@ -100,7 +97,9 @@ public class TableViewKeyInputTest {
     private TableColumn<String, String> col4;
 
     private NodeOrientation orientation;
-
+    Consumer<KeyModifier> forward;
+    Consumer<KeyModifier> backward;
+    
     public TableViewKeyInputTest(NodeOrientation val) {
         orientation = val;
     }
@@ -125,6 +124,12 @@ public class TableViewKeyInputTest {
 
         keyboard = new KeyEventFirer(tableView);
 
+        forward = orientation == NodeOrientation.LEFT_TO_RIGHT ?
+                keys -> keyboard.doRightArrowPress(keys) : keys -> keyboard.doLeftArrowPress(keys);
+                
+        backward = orientation == NodeOrientation.LEFT_TO_RIGHT ?
+                keys -> keyboard.doLeftArrowPress(keys) : keys -> keyboard.doRightArrowPress(keys);
+                
         stageLoader = new StageLoader(tableView);
         stageLoader.getStage().show();
     }
@@ -1121,7 +1126,54 @@ public class TableViewKeyInputTest {
         assertTrue(fm.isFocused(0));
     }
 
-
+//------------ test left/right cell selection
+    
+    @Test
+    public void testForwardCellSelection() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col0);
+        forward.accept(null);
+//        keyboard.doRightArrowPress();
+        assertTrue(sm.isSelected(0, col1));
+        assertFalse(sm.isSelected(0, col0));
+        
+    }
+    
+    @Test
+    public void testForwardFocus() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col0);
+        // current
+        //if (orientation == NodeOrientation.LEFT_TO_RIGHT) {
+        //    keyboard.doRightArrowPress(KeyModifier.getShortcutKey());
+        //} else {
+        //    keyboard.doLeftArrowPress(KeyModifier.getShortcutKey());
+        //}
+        // extracted
+        forward(KeyModifier.getShortcutKey());
+        assertTrue("selected cell must still be selected", sm.isSelected(0, col0));
+        assertFalse("next cell must not be selected", sm.isSelected(0, col1));
+        TablePosition focusedCell = fm.getFocusedCell();
+        assertEquals("focused cell must moved to next", col1, focusedCell.getTableColumn());
+    }
+    
+    /**
+     * Orientation-aware horizontal navigation with arrow keys.
+     * @param modifiers the modifiers to use on keyboard
+     */
+    protected void forward(KeyModifier... modifiers) {
+        if (orientation == NodeOrientation.LEFT_TO_RIGHT) {
+            keyboard.doRightArrowPress(modifiers);
+        } else {
+            keyboard.doLeftArrowPress(modifiers);
+        }
+    }
+    
+    @Test
+    public void testOrientationInitialzed() {
+        
+    }
+    
     /***************************************************************************
      * Tests for discontinuous multiple cell selection (RT-18951)
      **************************************************************************/
