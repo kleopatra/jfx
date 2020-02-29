@@ -71,7 +71,6 @@ public class TableViewHorizontalArrowsTest {
     }
 
     private TableView<String> tableView;
-//  private TableSelectionModel<String> sm;
     private TableView.TableViewSelectionModel<String> sm;
     private TableView.TableViewFocusModel<String> fm;
     
@@ -139,6 +138,49 @@ public class TableViewHorizontalArrowsTest {
         assertFalse("next cell must not be selected", sm.isSelected(0, col1));
         TablePosition<?, ?> focusedCell = fm.getFocusedCell();
         assertEquals("focused cell must moved to next", col1, focusedCell.getTableColumn());
+    }
+    
+//-------------- test change orientation
+    
+    @Test
+    public void testChangeOrientationSimpleForwardSelect() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col0);
+        forward();
+        assertTrue(sm.isSelected(0, col1));
+        assertFalse(sm.isSelected(0, col0));
+        changeNodeOrientation();
+        // same arrow as initial,now should have invers effect
+        forward();
+        assertFalse(sm.isSelected(0, col1));
+        assertTrue(sm.isSelected(0, col0));
+    }
+    
+    @Test
+    public void testChangeOrientationSimpleBackwardSelect() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col4);
+        backward();
+        assertTrue(sm.isSelected(0, col3));
+        assertFalse(sm.isSelected(0, col4));
+        changeNodeOrientation();
+        // same arrow as initial,now should have invers effect
+        backward();
+        assertFalse(sm.isSelected(0, col3));
+        assertTrue(sm.isSelected(0, col4));
+    }
+    
+    // TBD: add tests for all keyMappings with modifiers
+    
+    /**
+     * Toggles the nodeOrientation of tableView.
+     * Note: the forward/backward consumers are unchanged, thus allowing to test for
+     * the effect of the same arrow key.
+     */
+    private void changeNodeOrientation() {
+        NodeOrientation oldOrientation = orientation;
+        tableView.setNodeOrientation(oldOrientation == NodeOrientation.LEFT_TO_RIGHT 
+                ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
     }
     
 //--------- test against bug reports
