@@ -38,6 +38,8 @@ import org.junit.runners.Parameterized;
 
 import static org.junit.Assert.*;
 
+import static test.com.sun.javafx.scene.control.infrastructure.KeyModifier.*;
+
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
@@ -83,17 +85,15 @@ public class TableViewHorizontalArrowsTest {
     private StageLoader stageLoader;
     private NodeOrientation orientation;
 
-    Consumer<KeyModifier> forward;
-    Consumer<KeyModifier> backward;
-
-    BiConsumer<KeyEventFirer, KeyModifier[]> biForward;
-    BiConsumer<KeyEventFirer, KeyModifier[]> biBackward;
+    // keyboard navigation representing forward/backward in selection coordinates
+    BiConsumer<KeyEventFirer, KeyModifier[]> forwardArrow;
+    BiConsumer<KeyEventFirer, KeyModifier[]> backwardArrow;
     
     public TableViewHorizontalArrowsTest(NodeOrientation val, 
             BiConsumer<KeyEventFirer, KeyModifier[]> forward, BiConsumer<KeyEventFirer, KeyModifier[]> backward) {
         orientation = val;
-        biForward = forward;
-        biBackward = backward;
+        forwardArrow = forward;
+        backwardArrow = backward;
     }
 
     @Before
@@ -118,14 +118,6 @@ public class TableViewHorizontalArrowsTest {
 
         keyboard = new KeyEventFirer(tableView);
 
-        forward = orientation == NodeOrientation.LEFT_TO_RIGHT
-                ? keys -> keyboard.doRightArrowPress(keys)
-                : keys -> keyboard.doLeftArrowPress(keys);
-
-        backward = orientation == NodeOrientation.LEFT_TO_RIGHT
-                ? keys -> keyboard.doLeftArrowPress(keys)
-                : keys -> keyboard.doRightArrowPress(keys);
-
         stageLoader = new StageLoader(tableView);
         stageLoader.getStage().show();
     }
@@ -136,25 +128,74 @@ public class TableViewHorizontalArrowsTest {
         stageLoader.dispose();
     }
 
-//---------- tests
+//---------- test plain navigation
     
     @Test
     public void testForwardFocus() {
         sm.setCellSelectionEnabled(true);
         sm.select(0, col0);
-        forward(KeyModifier.getShortcutKey());
+        forward(getShortcutKey());
         assertTrue("selected cell must still be selected", sm.isSelected(0, col0));
         assertFalse("next cell must not be selected", sm.isSelected(0, col1));
-        TablePosition focusedCell = fm.getFocusedCell();
+        TablePosition<?, ?> focusedCell = fm.getFocusedCell();
         assertEquals("focused cell must moved to next", col1, focusedCell.getTableColumn());
     }
+    
+//--------- test against bug reports
+    
+    /**
+     * Expand selection from last backwards, then forward once 
+     * - must select all between starter and backward moves (sanity)
+     * - forward move must deselect the last selected (was bug)
+     */
+    @Test 
+    public void test_rt18488_selectToLeft() {
+        sm.setCellSelectionEnabled(true);
+        int lastCol = tableView.getColumns().size() -1;
+        assertSame("sanity", tableView.getColumns().get(lastCol), col4);
+        // select last
+        sm.clearAndSelect(1, col4);
+        
+        // expand selection backwards
+        int extendSteps = 2;
+        for (int i = 0; i < extendSteps; i++) {
+            backward(SHIFT);
+        }
+        
+        int firstSelected = lastCol - extendSteps;
+        for (int i = firstSelected; i <= lastCol; i++) {
+            assertTrue("sanity: extended selection backward " + i, 
+                    sm.isSelected(1, tableView.getColumns().get(i)));
+        }
+        
+        // shrink selection one forward
+        forward(SHIFT);
+        assertFalse("column must not be selected " + firstSelected, 
+                sm.isSelected(1, tableView.getColumns().get(firstSelected)));
+        
+        for (int i = firstSelected + 1; i <= lastCol; i++ ) {
+            assertTrue("column must not be selected " + i, 
+                    sm.isSelected(1, tableView.getColumns().get(i)));
+        }
+        
+    }
+    
+//--------- navigation helpers
     
     /**
      * Orientation-aware horizontal navigation with arrow keys.
      * @param modifiers the modifiers to use on keyboard
      */
     protected void forward(KeyModifier... modifiers) {
-        biForward.accept(keyboard, modifiers);
+        forwardArrow.accept(keyboard, modifiers);
+    }
+    
+    /**
+     * Orientation-aware horizontal navigation with arrow keys.
+     * @param modifiers the modifiers to use on keyboard
+     */
+    protected void backward(KeyModifier... modifiers) {
+        backwardArrow.accept(keyboard, modifiers);
     }
     
 
