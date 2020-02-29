@@ -189,6 +189,8 @@ public class TableViewHorizontalArrowsTest {
      * Expand selection from last backwards, then forward once 
      * - must select all between starter and backward moves (sanity)
      * - forward move must deselect the last selected (was bug)
+     * 
+     * JDK-8120174
      */
     @Test 
     public void test_rt18488_selectToLeft() {
