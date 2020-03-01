@@ -28,7 +28,6 @@ package test.javafx.scene.control;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +36,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static org.junit.Assert.*;
-
 import static test.com.sun.javafx.scene.control.infrastructure.KeyModifier.*;
 
 import javafx.geometry.NodeOrientation;
@@ -50,14 +48,17 @@ import test.com.sun.javafx.scene.control.infrastructure.KeyModifier;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
- *
+ * Test for basic horizontal navigation mappings. It's parametrized on
+ * 
+ *  - NodeOrientation
+ *  - forward/backward (in coordinates of selectionModel) keyMapping
  */
 @RunWith(Parameterized.class)
 public class TableViewHorizontalArrowsTest {
     @Parameterized.Parameters
-    public static Collection implementations() {
+    public static Collection<?> implementations() {
         return Arrays.asList(new Object[][] { 
-            // orientation, forward, backward
+            // orientation, forward arrow, backward arrow
                   { NodeOrientation.LEFT_TO_RIGHT, 
                       (BiConsumer<KeyEventFirer, KeyModifier[]>) ((keyboard, modifiers) -> keyboard.doRightArrowPress(modifiers)),
                       (BiConsumer<KeyEventFirer, KeyModifier[]>) ((keyboard, modifiers) -> keyboard.doLeftArrowPress(modifiers)),
@@ -130,6 +131,24 @@ public class TableViewHorizontalArrowsTest {
 //---------- test plain navigation
     
     @Test
+    public void testForwardSelect() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col0);
+        forward();
+        assertTrue("next cell must be selected", sm.isSelected(0, col1));
+        assertFalse("old cell not be selected", sm.isSelected(0, col0));
+    }
+    
+    @Test
+    public void testBackwardSelect() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col4);
+        backward();
+        assertTrue("next cell must be selected", sm.isSelected(0, col3));
+        assertFalse("old cell not be selected", sm.isSelected(0, col4));
+    }
+    
+    @Test
     public void testForwardFocus() {
         sm.setCellSelectionEnabled(true);
         sm.select(0, col0);
@@ -140,7 +159,38 @@ public class TableViewHorizontalArrowsTest {
         assertEquals("focused cell must moved to next", col1, focusedCell.getTableColumn());
     }
     
-//-------------- test change orientation
+    @Test
+    public void testBackwardFocus() {
+        sm.setCellSelectionEnabled(true);
+        sm.select(0, col4);
+        backward(getShortcutKey());
+        assertTrue("selected cell must still be selected", sm.isSelected(0, col4));
+        assertFalse("previous cell must not be selected", sm.isSelected(0, col3));
+        TablePosition<?, ?> focusedCell = fm.getFocusedCell();
+        assertEquals("focused cell must moved to prev", col3, focusedCell.getTableColumn());
+    }
+    
+    // TBD: add tests for all basic navigation mappings
+    
+    //--------- navigation helpers
+    
+    /**
+     * Orientation-aware horizontal navigation with arrow keys.
+     * @param modifiers the modifiers to use on keyboard
+     */
+    protected void forward(KeyModifier... modifiers) {
+        forwardArrow.accept(keyboard, modifiers);
+    }
+
+    /**
+     * Orientation-aware horizontal navigation with arrow keys.
+     * @param modifiers the modifiers to use on keyboard
+     */
+    protected void backward(KeyModifier... modifiers) {
+        backwardArrow.accept(keyboard, modifiers);
+    }
+
+  //-------------- test change orientation
     
     @Test
     public void testChangeOrientationSimpleForwardSelect() {
@@ -191,6 +241,12 @@ public class TableViewHorizontalArrowsTest {
      * - forward move must deselect the last selected (was bug)
      * 
      * JDK-8120174
+     * 
+     * This is just for playing a bit. Actually, I think that 
+     * we don't really need to reformulate all tests to include rtl: once
+     * the actual change (that is include orientation in the base
+     * navigational mappings) is thoroughly tested, anything tested
+     * for ltr should work for rtl as well. 
      */
     @Test 
     public void test_rt18488_selectToLeft() {
@@ -222,24 +278,6 @@ public class TableViewHorizontalArrowsTest {
                     sm.isSelected(1, tableView.getColumns().get(i)));
         }
         
-    }
-    
-//--------- navigation helpers
-    
-    /**
-     * Orientation-aware horizontal navigation with arrow keys.
-     * @param modifiers the modifiers to use on keyboard
-     */
-    protected void forward(KeyModifier... modifiers) {
-        forwardArrow.accept(keyboard, modifiers);
-    }
-    
-    /**
-     * Orientation-aware horizontal navigation with arrow keys.
-     * @param modifiers the modifiers to use on keyboard
-     */
-    protected void backward(KeyModifier... modifiers) {
-        backwardArrow.accept(keyboard, modifiers);
     }
     
 
