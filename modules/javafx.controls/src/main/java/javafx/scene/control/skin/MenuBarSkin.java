@@ -304,13 +304,24 @@ public class MenuBarSkin extends SkinBase<MenuBar> {
                 // RT-23147 when MenuBar's focusTraversable is true the first
                 // menu will visually indicate focus
                 unSelectMenus();
-                menuModeStart(0);
-                openMenuButton = ((MenuBarButton)container.getChildren().get(0));
-                setFocusedMenuIndex(0);
-                openMenuButton.setHover();
+                // orig: JDK-8244418
+//                menuModeStart(0);
+//                openMenuButton = ((MenuBarButton)container.getChildren().get(0));
+//                setFocusedMenuIndex(0);
+//                openMenuButton.setHover();
+                // fix by Ajit
+                if (!container.getChildren().isEmpty()) {
+                    menuModeStart(0);
+                    openMenuButton = ((MenuBarButton)container.getChildren().get(0));
+                    setFocusedMenuIndex(0);
+                    openMenuButton.setHover();
+                }
+
             } else {
                 unSelectMenus();
              }
+            
+            
          };
         weakSceneKeyEventHandler = new WeakEventHandler<KeyEvent>(keyEventHandler);
         Utils.executeOnceWhenPropertyIsNonNull(control.sceneProperty(), (Scene scene) -> {
@@ -475,12 +486,19 @@ public class MenuBarSkin extends SkinBase<MenuBar> {
 
     private void setFocusedMenuIndex(int index) {
         this.focusedMenuIndex = index;
+        // orig
         focusedMenu = index == -1 ? null : getSkinnable().getMenus().get(index);
 
         if (focusedMenu != null && focusedMenuIndex != -1) {
             openMenuButton = (MenuBarButton)container.getChildren().get(focusedMenuIndex);
             openMenuButton.setHover();
         }
+        // Ajit's fix
+//        focusedMenu = null;
+//
+//        if (index != -1 && !(getSkinnable().getMenus().isEmpty())) {
+//            focusedMenu = getSkinnable().getMenus().get(index);
+//        }
     }
 
 

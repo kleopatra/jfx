@@ -79,19 +79,25 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
 
 /**
- * Test for https://bugs.openjdk.java.net/browse/JDK-8244112:
+ * Root issue for https://bugs.openjdk.java.net/browse/JDK-8243940
  * skin must not blow if dispose is called more than once.
+ *
+ * <p>
+ *
+ * The basic test sequence is: set the default skin, call dispose twice.
+ * This is a single test method run for all controls.
+ *
  * <p>
  * This test is parameterized in the type of control.
  */
 @RunWith(Parameterized.class)
-public class SkinDisposeContractTest {
+public class SkinDisposeTest {
 
     private Control control;
     private Class<Control> controlClass;
 
     /**
-     * Skin must support multiple calls to dispose.
+     * Skin must not violate contract of dispose.
      * <p>
      * default -> dispose -> dispose
      * <p>
@@ -161,7 +167,7 @@ public class SkinDisposeContractTest {
         return Arrays.asList(data);
     }
 
-    public SkinDisposeContractTest(Class<Control> controlClass) {
+    public SkinDisposeTest(Class<Control> controlClass) {
         this.controlClass = controlClass;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,39 +22,37 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package javafx.scene.control;
 
-import javafx.beans.property.StringProperty;
+package javafx.scene.control.skin;
 
-public class ControlShim extends Control {
+import java.lang.reflect.Field;
+
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
+
+import javafx.scene.control.Skin;
+
+/**
+ *
+ */
+public class ControlSkinShim {
 
     /**
-     * Installs the default skin for the given control.
-     *
-     * Note that this has no noticeable effect if the the control's
-     * skin already is set to the default skin (see skinProperty for
-     * implementations details).
-     *
-     * @param control the control the set the default skin on
+     * Reflectively accesses and returns the value of the skin's behavior field.
+     * 
+     * @param skin the skin to get the behavior from
+     * @return the value of the skin's behavior field
+     * @throws RuntimeException with the exception thrown by the reflective access 
      */
-    public static void installDefaultSkin(Control control) {
-        control.setSkin(control.createDefaultSkin());
+    public static BehaviorBase<?> getBehavior(Skin<?> skin) {
+        try {
+            Field field = skin.getClass().getDeclaredField("behavior");
+            field.setAccessible(true);
+            return (BehaviorBase<?>) field.get(skin);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException("failed access to behavior in " + skin.getClass(), e);
+        }
     }
 
-    public static StringProperty skinClassNameProperty(Control c) {
-        return c.skinClassNameProperty();
-    }
 
-    public static void layoutChildren(Control c) {
-        c.layoutChildren();
-    }
-
-    public static  double computePrefWidth(Control c, double height) {
-        return c.computePrefWidth(height);
-    }
-
-    public static  double computePrefHeight(Control c, double width) {
-        return c.computePrefHeight(width);
-    }
-
+    private ControlSkinShim() {}
 }

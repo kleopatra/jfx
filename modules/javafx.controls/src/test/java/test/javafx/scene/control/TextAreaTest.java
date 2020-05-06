@@ -484,25 +484,25 @@ public class TextAreaTest {
         dummyTxtArea.deleteText(0,6);
         assertEquals(dummyTxtArea.getParagraphs().get(0).toString(), "another");
     }
-
-    @Test @Ignore("8244418")
+    
+    @Test
     public void testDisposeSkin() {
         txtArea.setSkin(new TextAreaSkin(txtArea));
         txtArea.getSkin().dispose();
     }
-
-    @Test @Ignore("8244418")
+    
+    @Test
     public void testReplaceSkin() {
         txtArea.setSkin(new TextAreaSkin(txtArea));
         txtArea.setSkin(new TextAreaSkin1(txtArea));
     }
-
+    
     public static class TextAreaSkin1 extends TextAreaSkin {
 
         public TextAreaSkin1(TextArea control) {
             super(control);
         }
-
+        
     }
 
 }

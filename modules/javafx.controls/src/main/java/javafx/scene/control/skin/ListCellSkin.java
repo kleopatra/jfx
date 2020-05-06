@@ -54,7 +54,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 
     private double fixedCellSize;
     private boolean fixedCellSizeEnabled;
-    private final BehaviorBase<ListCell<T>> behavior;
+    private BehaviorBase<ListCell<T>> behavior;
 
 
 
@@ -114,6 +114,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 
         if (behavior != null) {
             behavior.dispose();
+//            behavior = null;
         }
     }
 

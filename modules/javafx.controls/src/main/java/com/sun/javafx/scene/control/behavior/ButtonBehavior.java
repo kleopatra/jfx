@@ -26,6 +26,8 @@ package com.sun.javafx.scene.control.behavior;
 
 import com.sun.javafx.PlatformUtil;
 import com.sun.javafx.scene.control.inputmap.KeyBinding;
+
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.scene.control.ButtonBase;
 import com.sun.javafx.scene.control.inputmap.InputMap;
@@ -63,6 +65,7 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
      * Constructors                                                            *
      *                                                                         *
      **************************************************************************/
+    InvalidationListener listener = this::focusChanged;
 
     public ButtonBehavior(C control) {
         super(control);
@@ -89,7 +92,8 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
         );
 
         // Button also cares about focus
-        control.focusedProperty().addListener(this::focusChanged);
+        control.focusedProperty().addListener(listener);
+//        getNode().focusedProperty().addListener(this::focusChanged);
     }
 
 
@@ -105,10 +109,11 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
     }
 
     @Override public void dispose() {
+        // TODO
+//        getNode().focusedProperty().removeListener(this::focusChanged);
+        getNode().focusedProperty().removeListener(listener);
         super.dispose();
 
-        // TODO
-        getNode().focusedProperty().removeListener(this::focusChanged);
     }
 
 

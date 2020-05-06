@@ -104,6 +104,8 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
         }
     };
 
+    private EventHandler<? super KeyEvent> anyKeyFilter;
+
 
 
     /***************************************************************************
@@ -134,14 +136,20 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
         }
 
         // move fake focus in to the textfield if the comboBox is editable
-        comboBoxBase.focusedProperty().addListener((ov, t, hasFocus) -> {
+//        comboBoxBase.focusedProperty().addListener((ov, t, hasFocus) -> {
+//            if (getEditor() != null) {
+//                // Fix for the regression noted in a comment in RT-29885.
+//                ((FakeFocusTextField)textField).setFakeFocus(hasFocus);
+//            }
+//        });
+
+        registerChangeListener(comboBoxBase.focusedProperty(), e -> {
             if (getEditor() != null) {
-                // Fix for the regression noted in a comment in RT-29885.
-                ((FakeFocusTextField)textField).setFakeFocus(hasFocus);
+              ((FakeFocusTextField)textField).setFakeFocus(comboBoxBase.isFocused());
+                
             }
         });
-
-        comboBoxBase.addEventFilter(KeyEvent.ANY, ke -> {
+        anyKeyFilter = ke -> {
             if (textField == null || getEditor() == null) {
                 handleKeyEvent(ke, false);
             } else {
@@ -168,7 +176,8 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
                     ke.consume();
                 }
             }
-        });
+        };
+        comboBoxBase.addEventFilter(KeyEvent.ANY, anyKeyFilter);
 
         // RT-38978: Forward input method events to TextField if editable.
         if (comboBoxBase.getOnInputMethodTextChanged() == null) {
@@ -260,6 +269,21 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
     }
 
 
+    /**
+     * {@inheritDoc} <p>
+     * 
+     * Overridden to remove eventHandlers installed in this skin.
+     */
+    @Override
+    public void dispose() {
+        if (anyKeyFilter != null) {
+            getSkinnable().removeEventFilter(KeyEvent.ANY, anyKeyFilter);
+            anyKeyFilter = null;
+        }
+        super.dispose();
+    }
+    
+    
 
     /***************************************************************************
      *                                                                         *
@@ -273,6 +297,7 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
         }
         return popup;
     }
+
 
     TextField getEditableInputNode() {
         if (textField == null && getEditor() != null) {

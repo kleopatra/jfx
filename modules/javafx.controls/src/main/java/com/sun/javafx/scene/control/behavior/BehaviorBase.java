@@ -68,10 +68,12 @@ public abstract class BehaviorBase<N extends Node> {
             r.run();
         }
 
+        // doesn't make a difference, still leaking
 //        InputMap<N> inputMap = getInputMap();
 //        if (inputMap != null) {
 //            inputMap.dispose();
 //        }
+//        node =  null;
     }
 
     protected void addDefaultMapping(List<Mapping<?>> newMapping) {
