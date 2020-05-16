@@ -94,7 +94,13 @@ import javafx.stage.Stage;
 /**
  * Test for issues when replacing skin.
  * <p>
+ * KEEP in doKeep branch! Here we have 
+ * a) the complete control list with annotations
+ * b) side-effects and configuration support
  * 
+ * DELETED SkinLeakTest - just a stepping stone.
+ * 
+ * ---------
  * Currently we concentrate on most simple context: default skin -> null skin, no
  * scene.
  * 
@@ -103,7 +109,7 @@ import javafx.stage.Stage;
  * <p>
  * This test is parameterized on control class.
  */
-@Ignore
+//@Ignore
 @RunWith(Parameterized.class)
 public class SkinReplaceTest {
 
@@ -300,28 +306,10 @@ public class SkinReplaceTest {
         sideEffect.accept(control);
     }
 
-//-------------- helper  (FIXME: replace with memoryhelper when available) 
-    
-//    private void attemptGC(WeakReference<?> weakRef) {
-//        for (int i = 0; i < 10; i++) {
-//            System.gc();
-//            System.runFinalization();
-//
-//            if (weakRef.get() == null) {
-//                break;
-//            }
-//            try {
-//                Thread.sleep(50);
-//            } catch (InterruptedException e) {
-//                fail("InterruptedException occurred during Thread.sleep()");
-//            }
-//        }
-//    }
-//
     //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Object[]> data() {
         // 0: class of control to test, 
         // 1: consumer for testing for side-effects after skin replaced
@@ -336,7 +324,12 @@ public class SkinReplaceTest {
                 (Consumer<Control>) c -> ((ChoiceBox) c).getItems().add("added"),
                 null, },
             {ColorPicker.class, null, null, }, //  @Ignore("JDK-8241364")
-            {ComboBox.class, null, null, }, // @Ignore("JDK-8241364")
+            {ComboBox.class, null, null, 
+                }, // @Ignore("JDK-8241364")
+            {ComboBox.class, null, 
+                    // editable combo
+                    (Consumer<Control>) c -> ((ComboBox) c).setEditable(true), 
+                }, // @Ignore("JDK-8241364")
             {DateCell.class, null, null, },
             {DatePicker.class, null, null, }, //  @Ignore("JDK-8241364")
             {Hyperlink.class, null, null, },
