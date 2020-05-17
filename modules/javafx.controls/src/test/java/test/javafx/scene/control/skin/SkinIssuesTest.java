@@ -47,7 +47,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -81,6 +83,16 @@ public class SkinIssuesTest {
 
     protected void fireMethodPulse() {
         if (methodPulse) Toolkit.getToolkit().firePulse();
+    }
+    
+    /**
+     * https://bugs.openjdk.java.net/browse/JDK-8245145
+     */
+    @Test
+    public void testSpinnerSkin() {
+        Spinner<?> spinner = new Spinner<>();
+        spinner.setSkin(new SpinnerSkin<>(spinner));
+        spinner.setSkin(new SpinnerSkin<>(spinner));
     }
     
     @Test
