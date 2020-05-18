@@ -27,7 +27,6 @@ package test.com.sun.javafx.scene.control.infrastructure;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,65 +34,52 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static javafx.scene.control.ControlShim.*;
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
+
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
-import javafx.scene.control.Button;
 import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.shape.Rectangle;
 
 /**
  * Example of writing a test for a streak of similar issues, 
- * adding controls instantiated by constructors with parameters.
- * 
- * Note that LabelSkin without graphic passes the test, while
- * one with graphic fails.
+ * here f.i. memory leak in behavior
  */
 @RunWith(Parameterized.class)
-public class BinchAddControlsTestExample {
+public class ControlBehaviorTestExample {
 
     private Control control;
-    
-//--------- tests
+    private Class<Control> controlClass;
     
     /**
-     * default skin -> set alternative
+     * Create behavior -> dispose behavior -> gc
      */
     @Test
-    public void testMemoryLeakAlternativeSkin() {
-        installDefaultSkin(control);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+    public void testMemoryLeakDisposeBehavior() {
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(control));
         assertNotNull(weakRef.get());
+        weakRef.get().dispose();
         attemptGC(weakRef);
-        assertEquals("Skin must be gc'ed", null, weakRef.get());
+        assertNull("behavior must be gc'ed", weakRef.get());
     }
     
 //------------ parameters
     
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters (name = "{index}: {0} ")
-    public static Collection<Control> data() {
-        List<Control> controls = getControls();
-        // add controls that are leaking in some configurations
-        List<Control> addedControls = List.of(
-                new Label("", new Rectangle())
-                , new Button("", new Rectangle())
-                );
-        controls.addAll(addedControls);
-        return controls;
+    @Parameterized.Parameters //(name = "{index}: {0} ")
+    public static Collection<Class<Control>> data() {
+        return getControlClassesWithBehavior();
     }
-
-    public BinchAddControlsTestExample(Control control) {
-        this.control = control;
+    
+    public ControlBehaviorTestExample(Class<Control> controlClass) {
+        this.controlClass = controlClass;
     }
     
 //------------ setup
     
     @Before
     public void setup() {
-        assertNotNull(control);
+        assertNotNull(controlClass);
         
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RuntimeException) {
@@ -102,6 +88,8 @@ public class BinchAddControlsTestExample {
                 Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
             }
         });
+
+        control = createControl(controlClass);
     }
     
     @After
