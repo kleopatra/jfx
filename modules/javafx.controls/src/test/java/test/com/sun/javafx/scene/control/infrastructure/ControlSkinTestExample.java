@@ -45,9 +45,9 @@ import javafx.scene.control.Label;
 import javafx.scene.shape.Rectangle;
 
 /**
- * Example of writing a test for a streak of similar issues, 
+ * Example of writing a test for a streak of similar issues,
  * adding controls instantiated by constructors with parameters.
- * 
+ *
  * Note that LabelSkin without graphic passes the test, while
  * one with graphic fails.
  */
@@ -55,9 +55,9 @@ import javafx.scene.shape.Rectangle;
 public class ControlSkinTestExample {
 
     private Control control;
-    
+
 //--------- tests
-    
+
     /**
      * default skin -> set alternative
      */
@@ -69,12 +69,12 @@ public class ControlSkinTestExample {
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
     }
-    
+
 //------------ parameters
-    
+
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters (name = "{index}: {0} ")
-    public static Collection<Control> data() {
+    @Parameterized.Parameters //(name = "{index}: {0} ")
+    public static Collection<Object[][]> data() {
         List<Control> controls = getControls();
         // add controls that are leaking in some configurations
         List<Control> addedControls = List.of(
@@ -82,19 +82,19 @@ public class ControlSkinTestExample {
                 , new Button("", new Rectangle())
                 );
         controls.addAll(addedControls);
-        return controls;
+        return asArray(controls);
     }
 
     public ControlSkinTestExample(Control control) {
         this.control = control;
     }
-    
+
 //------------ setup
-    
+
     @Before
     public void setup() {
         assertNotNull(control);
-        
+
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RuntimeException) {
                 throw (RuntimeException)throwable;
@@ -103,7 +103,7 @@ public class ControlSkinTestExample {
             }
         });
     }
-    
+
     @After
     public void cleanup() {
         Thread.currentThread().setUncaughtExceptionHandler(null);

@@ -42,15 +42,18 @@ import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactor
 import javafx.scene.control.Control;
 
 /**
- * Example of writing a test for a streak of similar issues, 
- * here f.i. memory leak in behavior
+ * Example of writing a test for a streak of similar issues,
+ * here f.i. memory leak in behavior.
+ * 
+ * Note: doesn't have postfix _Test_ to not be included in 
+ * default testing.
  */
 @RunWith(Parameterized.class)
 public class ControlBehaviorTestExample {
 
     private Control control;
     private Class<Control> controlClass;
-    
+
     /**
      * Create behavior -> dispose behavior -> gc
      */
@@ -62,25 +65,25 @@ public class ControlBehaviorTestExample {
         attemptGC(weakRef);
         assertNull("behavior must be gc'ed", weakRef.get());
     }
-    
+
 //------------ parameters
-    
+
     // Note: name property not supported before junit 4.11
     @Parameterized.Parameters //(name = "{index}: {0} ")
-    public static Collection<Class<Control>> data() {
-        return getControlClassesWithBehavior();
+    public static Collection<Object[][]> data() {
+        return asArray(getControlClassesWithBehavior());
     }
-    
+
     public ControlBehaviorTestExample(Class<Control> controlClass) {
         this.controlClass = controlClass;
     }
-    
+
 //------------ setup
-    
+
     @Before
     public void setup() {
         assertNotNull(controlClass);
-        
+
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RuntimeException) {
                 throw (RuntimeException)throwable;
@@ -91,7 +94,7 @@ public class ControlBehaviorTestExample {
 
         control = createControl(controlClass);
     }
-    
+
     @After
     public void cleanup() {
         Thread.currentThread().setUncaughtExceptionHandler(null);

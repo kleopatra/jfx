@@ -38,10 +38,10 @@ public class ControlSkinShim {
 
     /**
      * Reflectively accesses and returns the value of the skin's behavior field.
-     * 
+     *
      * @param skin the skin to get the behavior from
      * @return the value of the skin's behavior field
-     * @throws RuntimeException with the exception thrown by the reflective access 
+     * @throws RuntimeException with the exception thrown by the reflective access
      */
     public static BehaviorBase<?> getBehavior(Skin<?> skin) {
         try {

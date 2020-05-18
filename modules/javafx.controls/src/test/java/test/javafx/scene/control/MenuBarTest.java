@@ -681,20 +681,4 @@ public class MenuBarTest {
         int focusedIndex = MenuBarSkinShim.getFocusedIndex(skin);
         assertEquals(focusedIndex, 0);
     }
-    
-    @Test public void testFocusOnEmptyMenubar() {
-        menuBar.setFocusTraversable(true);
-
-        AnchorPane root = new AnchorPane();
-        root.getChildren().add(menuBar);
-        startApp(root);
-
-        MenuBarSkin skin = (MenuBarSkin)menuBar.getSkin();
-        assertTrue(skin != null);
-
-        menuBar.getScene().getWindow().requestFocus();
-
-        int focusedIndex = MenuBarSkinShim.getFocusedIndex(skin);
-        assertEquals(focusedIndex, -1);
-    }
 }

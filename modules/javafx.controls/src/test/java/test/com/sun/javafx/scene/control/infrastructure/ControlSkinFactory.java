@@ -26,20 +26,20 @@
 package test.com.sun.javafx.scene.control.infrastructure;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import static java.util.stream.Collectors.*;
 
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.ButtonBehavior;
 import com.sun.javafx.scene.control.behavior.ComboBoxListViewBehavior;
 import com.sun.javafx.scene.control.behavior.ToggleButtonBehavior;
 
+import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 import javafx.scene.control.Accordion;
@@ -133,17 +133,17 @@ import javafx.scene.control.skin.TreeViewSkin;
  * Note: the alternative skin class must be "different enough" from the default
  * to really trigger a replace (see skinProperty for details).
  * <p>
- * 
- * Naming conventions for alternative skins: ControlName + Skin + 1. 
- * 
+ *
+ * Naming conventions for alternative skins: ControlName + Skin + 1.
+ *
  */
 public class ControlSkinFactory {
 
 // ----------------- control support
-    
+
     /**
      * Returns a list of all control classes in package controls.
-     * 
+     *
      * @return a list control classes in package controls
      */
     public static List<Class<Control>> getControlClasses() {
@@ -157,7 +157,7 @@ public class ControlSkinFactory {
 
     /**
      * Returns a list of all controls in package controls.
-     * 
+     *
      * @return a list of controls in package controls
      */
     public static List<Control> getControls() {
@@ -168,7 +168,7 @@ public class ControlSkinFactory {
     }
 
     /**
-     * Creates and returns an instance of the given control class.    
+     * Creates and returns an instance of the given control class.
      * @param <T> the type of the control
      * @param controlClass the class of the control
      * @return an instance of the class
@@ -181,22 +181,22 @@ public class ControlSkinFactory {
         }
     }
 
-//----------- behavior support    
-    
+//----------- behavior support
+
     /**
      * Returns a List of controlClasses that have skins with behaviour.
-     * 
-     * @return
+     *
+     * @return list of controlClasses that have skins with behavior
      */
     public static List<Class<Control>> getControlClassesWithBehavior() {
         List<Class<Control>> controlClasses = getControlClasses();
         controlClasses.removeAll(withoutBehaviors);
         return controlClasses;
     }
-    
+
     /**
      * Returns the skin's behavior.
-     * 
+     *
      * @param skin the skin to get the behavior from
      * @return the skin's behavior
      */
@@ -206,12 +206,12 @@ public class ControlSkinFactory {
 
     /**
      * Creates and returns the default behavior for the given control.
-     * 
+     *
      * @param <T> the type of the control
      * @param control the control to create the behavior for
      * @return the default behavior for the control
      * @throws RuntimeException with the exception thrown when instantiating the behavior
-     * 
+     *
      */
     public static <T extends Control> BehaviorBase<T> createBehavior(T control) {
         Class<?> controlClass = control.getClass();
@@ -219,7 +219,7 @@ public class ControlSkinFactory {
         if (creator != null) {
             return creator.apply(control);
         }
-        
+
         String behaviorClassName = "com.sun.javafx.scene.control.behavior." + controlClass.getSimpleName() + "Behavior";
         try {
             Class<?>  behaviorClass = Class.forName(behaviorClassName);
@@ -228,11 +228,11 @@ public class ControlSkinFactory {
             throw new RuntimeException("failed to instantiate a default behavior", e);
         }
     }
-    
+
 
     // map for behaviors that don't have the standard name or are shared for several control classes
     static Map<Class<? extends Control>, Function<Control, BehaviorBase>> specialBehaviorMap = new HashMap<>();
-    
+
     static {
         specialBehaviorMap.put(Button.class, (Function<Control, BehaviorBase>) c -> new ButtonBehavior((ButtonBase) c));
         specialBehaviorMap.put(CheckBox.class, (Function<Control, BehaviorBase>) c -> new ButtonBehavior((ButtonBase) c));
@@ -241,7 +241,7 @@ public class ControlSkinFactory {
         specialBehaviorMap.put(RadioButton.class, (Function<Control, BehaviorBase>) c -> new ToggleButtonBehavior((ToggleButton) c));
         specialBehaviorMap.put(ToggleButton.class, (Function<Control, BehaviorBase>) c -> new ToggleButtonBehavior((ToggleButton) c));
     }
-    
+
     // list of control classes that have no behavior
     static List<Class<? extends Control>> withoutBehaviors = List.of(
             ButtonBar.class,
@@ -252,9 +252,9 @@ public class ControlSkinFactory {
             Separator.class,
             SplitPane.class
             );
-    
+
 ///---------------- misc
-    
+
     /**
      * Tries to let the weakRef be gc'ed.
      * @param weakRef the weakRef to be gc'ed
@@ -275,10 +275,25 @@ public class ControlSkinFactory {
         }
     }
 
-  //------------- skin support    
+    /**
+     * Nasty hack to keep JUnit pre-4.12 happy. 
+     * Before 4.12, Parameterized can only handle
+     * two-dimensional arrays as parameters.
+     * 
+     * @param data the list of data
+     * @return the content of the data as two-dimensional array
+     */
+    public static Collection asArray(List data) {
+        List result =  (List) data.stream()
+                .map(d -> new Object[] {d, })
+                .collect(toList());
+        return result; 
+    }
+    
+  //------------- skin support
     /**
      * Creates and sets an alternative skin for the given control.
-     * 
+     *
      * @param <T> the type of the control
      * @param control the control to set the alternative skin to
      * @return the old skin of the control.
@@ -288,12 +303,12 @@ public class ControlSkinFactory {
         control.setSkin(createAlternativeSkin(control));
         return old;
     }
-    
+
     /**
      * Creates and returns an alternative skin for the given control.
      * This implementation uses the alternativeSkinsMap to lookup the
      * class for the alternative skin and instantiates it.
-     * 
+     *
      * @param <T> the type of the control
      * @param control the control to create an alternative skin for
      * @return the alternative skin for the control
@@ -302,7 +317,7 @@ public class ControlSkinFactory {
     public static <T extends Control> Skin<?> createAlternativeSkin(T control) {
         Class<?> controlClass = control.getClass();
         try {
-            Class<?> skinClass = 
+            Class<?> skinClass =
                 alternativeSkinClassMap.get(controlClass);
              return  (Skin<?>) skinClass.getDeclaredConstructor(controlClass).newInstance(control);
         } catch (Exception e) {
@@ -312,8 +327,8 @@ public class ControlSkinFactory {
 
     // map for alternative skins
     static Map<Class<?>, Class<?>> alternativeSkinClassMap = new HashMap<>();
-    
-    // filling the map .. could do without and create the alternative 
+
+    // filling the map .. could do without and create the alternative
     // skin classes by naming convention
     static {
         alternativeSkinClassMap.put(Accordion.class, AccordionSkin1.class);
@@ -358,22 +373,22 @@ public class ControlSkinFactory {
         alternativeSkinClassMap.put(TreeTableView.class, TreeTableViewSkin1.class);
         alternativeSkinClassMap.put(TreeView.class, TreeViewSkin1.class);
     }
-    
-//----------------- alternative skins for all controls   
-    
+
+//----------------- alternative skins for all controls
+
     public static class AccordionSkin1 extends AccordionSkin {
 
         public AccordionSkin1(Accordion control) {
             super(control);
         }
-        
+
     }
     public static class ButtonSkin1 extends ButtonSkin {
 
         public ButtonSkin1(Button control) {
             super(control);
         }
-        
+
     }
 
     public static class ButtonBarSkin1 extends ButtonBarSkin {
@@ -381,317 +396,317 @@ public class ControlSkinFactory {
         public ButtonBarSkin1(ButtonBar control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class CheckBoxSkin1 extends CheckBoxSkin {
-        
+
         public CheckBoxSkin1(CheckBox control) {
             super(control);
         }
-        
+
     }
     public static class ChoiceBoxSkin1 extends ChoiceBoxSkin {
-        
+
         public ChoiceBoxSkin1(ChoiceBox control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ColorPickerSkin1 extends ColorPickerSkin {
-        
+
         public ColorPickerSkin1(ColorPicker control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ComboBoxSkin1 extends ComboBoxListViewSkin {
-        
+
         public ComboBoxSkin1(ComboBox control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class DateCellSkin1 extends DateCellSkin {
-        
+
         public DateCellSkin1(DateCell control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class DatePickerSkin1 extends DatePickerSkin {
-        
+
         public DatePickerSkin1(DatePicker control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class HyperlinkSkin1 extends HyperlinkSkin {
-        
+
         public HyperlinkSkin1(Hyperlink control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class LabelSkin1 extends LabelSkin {
-        
+
         public LabelSkin1(Label control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ListCellSkin1 extends ListCellSkin {
-        
+
         public ListCellSkin1(ListCell control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ListViewSkin1 extends ListViewSkin {
-        
+
         public ListViewSkin1(ListView control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class MenuBarSkin1 extends MenuBarSkin {
-        
+
         public MenuBarSkin1(MenuBar control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class MenuButtonSkin1 extends MenuButtonSkin {
-        
+
         public MenuButtonSkin1(MenuButton control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class PaginationSkin1 extends PaginationSkin {
-        
+
         public PaginationSkin1(Pagination control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class PasswordFieldSkin1 extends TextFieldSkin {
-        
+
         public PasswordFieldSkin1(PasswordField control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ProgressBarSkin1 extends ProgressBarSkin {
-        
+
         public ProgressBarSkin1(ProgressBar control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ProgressIndicatorSkin1 extends ProgressIndicatorSkin {
-        
+
         public ProgressIndicatorSkin1(ProgressIndicator control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class RadioButtonSkin1 extends RadioButtonSkin {
-        
+
         public RadioButtonSkin1(RadioButton control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ScrollBarSkin1 extends ScrollBarSkin {
-        
+
         public ScrollBarSkin1(ScrollBar control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ScrollPaneSkin1 extends ScrollPaneSkin {
-        
+
         public ScrollPaneSkin1(ScrollPane control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class SeparatorSkin1 extends SeparatorSkin {
-        
+
         public SeparatorSkin1(Separator control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class SliderSkin1 extends SliderSkin {
-        
+
         public SliderSkin1(Slider control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class SpinnerSkin1 extends SpinnerSkin {
-        
+
         public SpinnerSkin1(Spinner control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class SplitMenuButtonSkin1 extends SplitMenuButtonSkin {
-        
+
         public SplitMenuButtonSkin1(SplitMenuButton control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class SplitPaneSkin1 extends SplitPaneSkin {
-        
+
         public SplitPaneSkin1(SplitPane control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TableCellSkin1 extends TableCellSkin {
-        
+
         public TableCellSkin1(TableCell control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TableRowSkin1 extends TableRowSkin {
-        
+
         public TableRowSkin1(TableRow control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TableViewSkin1 extends TableViewSkin {
-        
+
         public TableViewSkin1(TableView control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TabPaneSkin1 extends TabPaneSkin {
-        
+
         public TabPaneSkin1(TabPane control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TextAreaSkin1 extends TextAreaSkin {
-        
+
         public TextAreaSkin1(TextArea control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TextFieldSkin1 extends TextFieldSkin {
-        
+
         public TextFieldSkin1(TextField control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TitledPaneSkin1 extends TitledPaneSkin {
-        
+
         public TitledPaneSkin1(TitledPane control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ToggleButtonSkin1 extends ToggleButtonSkin {
-        
+
         public ToggleButtonSkin1(ToggleButton control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class ToolBarSkin1 extends ToolBarSkin {
-        
+
         public ToolBarSkin1(ToolBar control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TreeCellSkin1 extends TreeCellSkin {
 
         public TreeCellSkin1(TreeCell control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TreeTableCellSkin1 extends TreeTableCellSkin {
-        
+
         public TreeTableCellSkin1(TreeTableCell control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TreeTableRowSkin1 extends TreeTableRowSkin {
-        
+
         public TreeTableRowSkin1(TreeTableRow control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TreeTableViewSkin1<T> extends TreeTableViewSkin<T> {
-        
+
         public TreeTableViewSkin1(TreeTableView<T> control) {
             super(control);
         }
-        
+
     }
-    
+
     public static class TreeViewSkin1<T> extends TreeViewSkin<T> {
-        
+
         public TreeViewSkin1(TreeView<T> control) {
             super(control);
         }
-        
+
     }
-    
+
     // all control classes in package controls
     // can be c&p'ed into parameterized test
     static Object[][] controlClasses = new Object[][] {
         {Accordion.class, },
-        {Button.class, }, 
+        {Button.class, },
         {ButtonBar.class, }, // no behavior
         {CheckBox.class, }, // ButtonBehavior
         {ChoiceBox.class, },
@@ -732,6 +747,6 @@ public class ControlSkinFactory {
         {TreeTableView.class, },
         {TreeView.class, },
         };
-        
+
     private ControlSkinFactory() {}
 }

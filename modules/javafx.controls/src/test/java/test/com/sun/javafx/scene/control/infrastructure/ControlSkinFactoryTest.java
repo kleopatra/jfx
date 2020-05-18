@@ -42,6 +42,12 @@ import javafx.scene.control.Skin;
 public class ControlSkinFactoryTest {
 
     @Test
+    public void testConvertToArray() {
+        List controls = getControlClasses();
+        asArray(controls);
+    }
+    
+    @Test
     public void testControlClassesWithBehavior() {
         List<Class<Control>> controls = getControlClassesWithBehavior();
         assertEquals(controlClasses.length - withoutBehaviors.size(), controls.size());
@@ -52,7 +58,7 @@ public class ControlSkinFactoryTest {
             createBehavior(control);
         }
     }
-    
+
     @Test
     public void testGetControls() {
         List<Control> controls = getControls();
@@ -62,7 +68,7 @@ public class ControlSkinFactoryTest {
             assertSame(controlClass, controls.get(i).getClass());
         }
     }
-    
+
     @Test
     public void testGetControlClasses() {
         List<Class<Control>> controls = getControlClasses();
@@ -72,7 +78,7 @@ public class ControlSkinFactoryTest {
             assertSame(controlClass, controls.get(i));
         }
     }
-    
+
     @Test
     public void testAlternativeSkinAssignable() {
         for (int i = 0; i < controlClasses.length; i++) {
@@ -81,7 +87,7 @@ public class ControlSkinFactoryTest {
             Skin<?> old = replaceSkin(control);
         }
     }
-    
+
     @Test
     public void testControlInstantiatable() {
         for (int i = 0; i < controlClasses.length; i++) {
@@ -90,7 +96,7 @@ public class ControlSkinFactoryTest {
             assertSame(controlClass, control.getClass());
         }
     }
-    
+
     @Test
     public void testControlsAndSkin() {
         assertEquals(alternativeSkinClassMap.size(), controlClasses.length);
@@ -99,6 +105,6 @@ public class ControlSkinFactoryTest {
             Class<Control> controlClass = (Class<Control>) controlClasses[i][0];
             assertTrue(alternativeSkinClassMap.containsKey(controlClass));
         }
-        
+
     }
 }
