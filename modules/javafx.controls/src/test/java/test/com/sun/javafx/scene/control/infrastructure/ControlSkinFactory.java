@@ -26,7 +26,6 @@
 package test.com.sun.javafx.scene.control.infrastructure;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -278,12 +277,12 @@ public class ControlSkinFactory {
     /**
      * Nasty hack to keep JUnit pre-4.12 happy. 
      * Before 4.12, Parameterized can only handle
-     * two-dimensional arrays as parameters.
+     * a collection of arrays.
      * 
      * @param data the list of data
-     * @return the content of the data as two-dimensional array
+     * @return the list of the data converted to one-dimensional arrays
      */
-    public static Collection<Object[]> asArray(List data) {
+    public static List<Object[]> asArrays(List<?> data) {
         List<Object[]> result =  (List) data.stream()
                 .map(d -> new Object[] {d, })
                 .collect(toList());

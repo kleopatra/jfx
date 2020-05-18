@@ -44,7 +44,11 @@ public class ControlSkinFactoryTest {
     @Test
     public void testConvertToArray() {
         List<Class<Control>> controls = getControlClasses();
-        asArray(controls);
+        List<Object[]> asArray = asArrays(controls);
+        for (int i = 0; i < controls.size(); i++) {
+            assertEquals(1, asArray.get(i).length);
+            assertSame(controls.get(i), asArray.get(i)[0]);
+        }
     }
     
     @Test

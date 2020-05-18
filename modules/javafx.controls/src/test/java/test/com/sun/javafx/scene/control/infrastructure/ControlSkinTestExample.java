@@ -82,7 +82,7 @@ public class ControlSkinTestExample {
                 , new Button("", new Rectangle())
                 );
         controls.addAll(addedControls);
-        return asArray(controls);
+        return asArrays(controls);
     }
 
     public ControlSkinTestExample(Control control) {

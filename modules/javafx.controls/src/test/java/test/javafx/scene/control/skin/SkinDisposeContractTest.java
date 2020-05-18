@@ -78,7 +78,7 @@ public class SkinDisposeContractTest {
         List<Class<Control>> controlClasses = getControlClasses();
         // @Ignore("8244419")
         controlClasses.remove(TextArea.class);
-        return asArray(controlClasses);
+        return asArrays(controlClasses);
     }
 
     public SkinDisposeContractTest(Class<Control> controlClass) {
