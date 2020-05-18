@@ -70,7 +70,7 @@ public class ControlBehaviorTestExample {
 
     // Note: name property not supported before junit 4.11
     @Parameterized.Parameters //(name = "{index}: {0} ")
-    public static Collection<Object[][]> data() {
+    public static Collection<Object[]> data() {
         return asArray(getControlClassesWithBehavior());
     }
 

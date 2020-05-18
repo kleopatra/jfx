@@ -283,8 +283,8 @@ public class ControlSkinFactory {
      * @param data the list of data
      * @return the content of the data as two-dimensional array
      */
-    public static Collection asArray(List data) {
-        List result =  (List) data.stream()
+    public static Collection<Object[]> asArray(List data) {
+        List<Object[]> result =  (List) data.stream()
                 .map(d -> new Object[] {d, })
                 .collect(toList());
         return result; 

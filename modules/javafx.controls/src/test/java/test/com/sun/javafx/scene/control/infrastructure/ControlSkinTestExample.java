@@ -74,7 +74,7 @@ public class ControlSkinTestExample {
 
     // Note: name property not supported before junit 4.11
     @Parameterized.Parameters //(name = "{index}: {0} ")
-    public static Collection<Object[][]> data() {
+    public static Collection<Object[]> data() {
         List<Control> controls = getControls();
         // add controls that are leaking in some configurations
         List<Control> addedControls = List.of(

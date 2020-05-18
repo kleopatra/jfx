@@ -43,7 +43,7 @@ public class ControlSkinFactoryTest {
 
     @Test
     public void testConvertToArray() {
-        List controls = getControlClasses();
+        List<Class<Control>> controls = getControlClasses();
         asArray(controls);
     }
     
