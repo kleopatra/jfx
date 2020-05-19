@@ -451,7 +451,7 @@ public class InputMap<N extends Node> implements EventHandler<Event> {
             // anywhere in the input map tree
             // JW: trying to ... again: need to remove a common instance
             // not the one created on the fly!
-            //node.removeEventHandler(et, eventHandler);
+            // node.removeEventHandler(et, eventHandler);
         }
     }
 
@@ -459,7 +459,7 @@ public class InputMap<N extends Node> implements EventHandler<Event> {
         List<EventHandler<? super Event>> eventHandlers =
                 installedEventHandlers.computeIfAbsent(et, f -> new ArrayList<>());
 
-//        final EventHandler<? super Event> eventHandler = this::handle;
+        final EventHandler<? super Event> eventHandler = this::handle;
 
         if (eventHandlers.isEmpty()) {
 //            System.out.println("Added event handler for type " + et);

@@ -32,11 +32,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
+import com.sun.javafx.scene.control.inputmap.InputMap;
+import com.sun.javafx.scene.control.inputmap.InputMap.KeyMapping;
 
+import static javafx.scene.input.KeyCode.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 
 /**
  * Test for misbehavior of individual implementations that turned
@@ -44,7 +49,32 @@ import javafx.scene.control.Button;
  */
 public class BehaviorIssuesTest {
     
+    @Test
+    public void testInputMapMemoryLeak() {
+        Label label = new Label();
+        WeakReference<InputMap> inputMap = new WeakReference<>(new InputMap(label));
+        // do-nothing mapping
+        KeyMapping mapping = new KeyMapping(SPACE, KeyEvent.KEY_PRESSED, e -> {} );
+        inputMap.get().getMappings().add(mapping);
+        assertEquals("sanity: mapping added", 1, inputMap.get().getMappings().size());
+        inputMap.get().getMappings().remove(mapping);
+        assertEquals("sanity: mapping removed", 0, inputMap.get().getMappings().size());
+        attemptGC(inputMap);
+        assertNull("inputMap must be gc'ed", inputMap.get());
+    }
     
+    @Test
+    public void testInputMapButtonBehavior() {
+        Button button = new Button();
+        WeakReference<BehaviorBase> weakRef = new WeakReference<>(createBehavior(button));
+        WeakReference<?> inputMapRef = new WeakReference(weakRef.get().getInputMap());
+        weakRef.get().dispose();
+        attemptGC(inputMapRef);
+        assertNull("inputMap must be gc'ed", inputMapRef.get());
+    }
+    
+    
+
     @Test
     public void testButtonBehaviorMemoryLeak() {
         Button control = new Button();
