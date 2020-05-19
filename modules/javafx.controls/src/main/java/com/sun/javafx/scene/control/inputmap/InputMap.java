@@ -451,7 +451,7 @@ public class InputMap<N extends Node> implements EventHandler<Event> {
             // anywhere in the input map tree
             // JW: trying to ... again: need to remove a common instance
             // not the one created on the fly!
-            // node.removeEventHandler(et, eventHandler);
+//             node.removeEventHandler(et, eventHandler);
         }
     }
 

@@ -49,10 +49,13 @@ import javafx.scene.input.KeyEvent;
  */
 public class BehaviorIssuesTest {
     
+    /**
+     * https://bugs.openjdk.java.net/browse/JDK-8245303
+     */
     @Test
     public void testInputMapMemoryLeak() {
         Label label = new Label();
-        WeakReference<InputMap> inputMap = new WeakReference<>(new InputMap(label));
+        WeakReference<InputMap<?>> inputMap = new WeakReference<>(new InputMap<Label>(label));
         // do-nothing mapping
         KeyMapping mapping = new KeyMapping(SPACE, KeyEvent.KEY_PRESSED, e -> {} );
         inputMap.get().getMappings().add(mapping);
