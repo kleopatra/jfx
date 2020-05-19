@@ -35,6 +35,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static javafx.scene.control.ControlShim.*;
+import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
+import static org.junit.Assert.*;
 
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
@@ -79,6 +81,8 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
 
 /**
+ * PENDING: outdated? 
+ * 
  * Root issue for https://bugs.openjdk.java.net/browse/JDK-8243940
  * skin must not blow if dispose is called more than once.
  *
@@ -113,10 +117,17 @@ public class SkinDisposeTest {
         control.getSkin().dispose();
     }
 
+    @Test
+    public void testChildCount() {
+        installDefaultSkin(control);
+        int childCount = control.getChildrenUnmodifiable().size();
+        replaceSkin(control);
+        assertEquals(childCount, control.getChildrenUnmodifiable().size());
+    }
   //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Object[]> data() {
         // class of control to test
         // commented controls have different issues as described in the referenced issues

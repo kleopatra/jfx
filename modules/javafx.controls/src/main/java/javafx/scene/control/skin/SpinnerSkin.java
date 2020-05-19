@@ -109,6 +109,7 @@ public class SpinnerSkin<T> extends SkinBase<Spinner<T>> {
 //        control.setInputMap(behavior.getInputMap());
 
         textField = control.getEditor();
+        if (!getChildren().contains(textField))
         getChildren().add(textField);
 
         updateStyleClass();

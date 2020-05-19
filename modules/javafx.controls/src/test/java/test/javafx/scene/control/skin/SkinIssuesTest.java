@@ -48,6 +48,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
@@ -86,6 +87,20 @@ public class SkinIssuesTest {
     }
     
     /**
+     * Table children not removed - nothing removed, so old flow with
+     * old rows/cells still floating around?
+     */
+    @Test
+    public void testTableViewSkinAccumulateChildren() {
+        TableView table = new TableView();
+        installDefaultSkin(table);
+        int childCount = table.getChildrenUnmodifiable().size();
+        System.out.println("before replace: " +table.getChildrenUnmodifiable());
+        replaceSkin(table);
+        System.out.println("after replace: " +table.getChildrenUnmodifiable());
+    }
+    
+    /**
      * https://bugs.openjdk.java.net/browse/JDK-8245145
      */
     @Test
@@ -93,6 +108,15 @@ public class SkinIssuesTest {
         Spinner<?> spinner = new Spinner<>();
         spinner.setSkin(new SpinnerSkin<>(spinner));
         spinner.setSkin(new SpinnerSkin<>(spinner));
+    }
+    
+    @Test
+    public void testSpinnerChildren() {
+        Spinner<?> spinner = new Spinner<>();
+        spinner.setSkin(new SpinnerSkin<>(spinner));
+        int childCount = spinner.getChildrenUnmodifiable().size();
+        spinner.setSkin(new SpinnerSkin<>(spinner));
+        assertEquals(childCount, spinner.getChildrenUnmodifiable().size());
     }
     
     @Test
