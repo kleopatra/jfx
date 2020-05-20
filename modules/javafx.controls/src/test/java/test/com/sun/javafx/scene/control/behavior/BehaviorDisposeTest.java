@@ -160,11 +160,13 @@ public class BehaviorDisposeTest {
                 // @Ignore("8245282")
 //                Hyperlink.class,
                 ListView.class,
-                MenuButton.class,
+                // @Ignore("8245282")
+//                MenuButton.class,
                 PasswordField.class,
                 // @Ignore("8245282")
 //                RadioButton.class,
-                SplitMenuButton.class,
+                // @Ignore("8245282")
+//                SplitMenuButton.class,
                 TableView.class,
                 TextArea.class,
                 TextField.class,
