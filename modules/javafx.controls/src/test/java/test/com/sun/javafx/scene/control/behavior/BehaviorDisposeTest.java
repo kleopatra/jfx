@@ -28,6 +28,7 @@ package test.com.sun.javafx.scene.control.behavior;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -87,10 +88,13 @@ import javafx.scene.control.TreeView;
  * 
  * For some, the behavior can be gc'ed in the second case but not in the first - why?
  * 
+ * Currently: here focus on simple behavior (no skin) to detect leaks specific to 
+ *    behavior. Interaction with skin might have more complex issues. So first fix
+ *    the behavior, then the interaction.
  * <p>
  * This test is parameterized on control class.
  */
-@Ignore
+//@Ignore
 @RunWith(Parameterized.class)
 public class BehaviorDisposeTest {
 
@@ -142,9 +146,36 @@ public class BehaviorDisposeTest {
     //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Class<Control>> data() {
-        return getControlClassesWithBehavior();
+        List<Class<Control>> controlClasses = getControlClassesWithBehavior();
+        List<Class<? extends Control>> failing = List.of(
+                // @Ignore("8245282")
+//                Button.class,
+                // @Ignore("8245282")
+//                CheckBox.class,
+                ColorPicker.class,
+                ComboBox.class,
+                DatePicker.class,
+                // @Ignore("8245282")
+//                Hyperlink.class,
+                ListView.class,
+                MenuButton.class,
+                PasswordField.class,
+                // @Ignore("8245282")
+//                RadioButton.class,
+                SplitMenuButton.class,
+                TableView.class,
+                TextArea.class,
+                TextField.class,
+                // @Ignore("8245282")
+//                ToggleButton.class,
+                TreeTableView.class,
+                TreeView.class
+                
+                );
+//        controlClasses.removeAll(failing);
+        return controlClasses;
     }
 
     public BehaviorDisposeTest(Class<Control> controlClass) { 

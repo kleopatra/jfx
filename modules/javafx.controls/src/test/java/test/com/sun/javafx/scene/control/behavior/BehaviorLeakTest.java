@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
@@ -101,7 +102,7 @@ import javafx.stage.Stage;
  * <p>
  * This test is parameterized on control class.
  */
-@Ignore
+//@Ignore
 @RunWith(Parameterized.class)
 public class BehaviorLeakTest {
 
@@ -115,24 +116,63 @@ public class BehaviorLeakTest {
    
 //--------------- no scene
     
+//    /**
+//     * default skin -> set alternative
+//     */
+//    @Test
+//    public void testMemoryLeakAlternativeSkin() {
+//        installDefaultSkin(control);
+//        WeakReference<?> weakRef = new WeakReference<>(getBehavior(control.getSkin()));
+//        replaceSkin(control);
+//        attemptGC(weakRef);
+//        assertNull("behavior must be gc'ed", weakRef.get());
+//    }
+//    
     /**
-     * default skin -> set alternative
+     * Test gc of behavior
+     * default skin -> set null skin
+     * 
+     * Note: this will pass only if the skin is not leaking elsewhere?
      */
     @Test
-    public void testMemoryLeakAlternativeSkin() {
+    public void testMemoryLeakBehaviorNullSkin() {
         installDefaultSkin(control);
         WeakReference<?> weakRef = new WeakReference<>(getBehavior(control.getSkin()));
-        replaceSkin(control);
+        control.setSkin(null);
         attemptGC(weakRef);
         assertNull("behavior must be gc'ed", weakRef.get());
     }
     
-
+    /**
+     * Test gc of skin
+     * default skin -> set alternative
+     */
+    @Test
+    public void testMemoryLeakSkinNullSkin() {
+        installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(control.getSkin());
+        control.setSkin(null);
+        attemptGC(weakRef);
+        assertNull("behavior must be gc'ed", weakRef.get());
+    }
     
+    
+//    /**
+//     * Create behavior -> dispose behavior -> gc
+//     */
+//    @Test
+//    public void testMemoryLeakDisposeBehavior() {
+//        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(control));
+//        assertNotNull(weakRef.get());
+//        weakRef.get().dispose();
+//        attemptGC(weakRef);
+//        assertNull("behavior must be gc'ed", weakRef.get());
+//    }
+//    
     //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Class<Control>> data() {
         return getControlClassesWithBehavior();
     }
