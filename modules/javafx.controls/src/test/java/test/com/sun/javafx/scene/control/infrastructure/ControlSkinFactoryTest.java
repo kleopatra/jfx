@@ -50,7 +50,7 @@ public class ControlSkinFactoryTest {
             assertSame(controls.get(i), asArray.get(i)[0]);
         }
     }
-    
+
     @Test
     public void testControlClassesWithBehavior() {
         List<Class<Control>> controls = getControlClassesWithBehavior();
@@ -89,6 +89,8 @@ public class ControlSkinFactoryTest {
             Class<Control> controlClass = (Class<Control>) controlClasses[i][0];
             Control control = createControl(controlClass);
             Skin<?> old = replaceSkin(control);
+            assertNotNull(control.getSkin());
+            assertNotSame(old, control.getSkin());
         }
     }
 

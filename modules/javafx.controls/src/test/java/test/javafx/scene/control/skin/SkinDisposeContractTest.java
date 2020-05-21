@@ -72,7 +72,7 @@ public class SkinDisposeContractTest {
   //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    // Note: collection of single values supported since 4.12 
+    // Note: collection of single values supported since 4.12
     @Parameterized.Parameters //(name = "{index}: {0} ")
     public static Collection<Object[]> data() {
         List<Class<Control>> controlClasses = getControlClasses();

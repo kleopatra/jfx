@@ -23,7 +23,7 @@
  * questions.
  */
 
-package test.javafx.scene.control.skin;
+package test.com.sun.javafx.scene.control.behavior;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -36,108 +36,92 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static javafx.scene.control.ControlShim.*;
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
+
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
-import javafx.scene.control.Accordion;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.Pagination;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Spinner;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SplitMenuButton;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
 import test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory;
 
 /**
- * Test memory leaks in Skin implementations.
+ * Test for memory leaks in Behavior implementations.
  * <p>
  * This test is parameterized on control type.
  */
 @RunWith(Parameterized.class)
-public class SkinMemoryLeakTest {
+public class BehaviorMemoryLeakTest {
 
     private Control control;
 
-//--------- tests
-
     /**
-     * default skin -> set alternative
+     * Create behavior -> dispose behavior -> gc
      */
     @Test
-    public void testMemoryLeakAlternativeSkin() {
-        installDefaultSkin(control);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+    public void testMemoryLeakDisposeBehavior() {
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(control));
         assertNotNull(weakRef.get());
+        weakRef.get().dispose();
         attemptGC(weakRef);
-        assertEquals("Skin must be gc'ed", null, weakRef.get());
+        assertNull("behavior must be gc'ed", weakRef.get());
     }
 
-//------------ parameters
+    //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
     @Parameterized.Parameters //(name = "{index}: {0} ")
     public static Collection<Object[]> data() {
-        List<Class<Control>> controlClasses = getControlClasses();
+        List<Class<Control>> controlClasses = getControlClassesWithBehavior();
         // FIXME as part of JDK-8241364
-        // The default skins of these controls are leaking
+        // The behaviors of these controls are leaking
         // step 1: file issues (where not yet done), add informal ignore to entry
         // step 2: fix and remove from list
         List<Class<? extends Control>> leakingClasses = List.of(
-                Accordion.class,
-                ButtonBar.class,
-                // @Ignore("8244657")
-                ChoiceBox.class,
+                // @Ignore("8245282")
+                Button.class,
+                // @Ignore("8245282")
+                CheckBox.class,
+                // @Ignore("8245282")
                 ColorPicker.class,
+                // @Ignore("8245282")
                 ComboBox.class,
+                // @Ignore("8245282")
                 DatePicker.class,
-                ListCell.class,
+                // @Ignore("8245282")
+                Hyperlink.class,
                 ListView.class,
-                MenuBar.class,
+                // @Ignore("8245282")
                 MenuButton.class,
-                Pagination.class,
                 PasswordField.class,
-                ScrollBar.class,
-                ScrollPane.class,
-                // @Ignore("8245145")
-                Spinner.class,
+                // @Ignore("8245282")
+                RadioButton.class,
+                // @Ignore("8245282")
                 SplitMenuButton.class,
-                SplitPane.class,
-                TableRow.class,
                 TableView.class,
-                // @Ignore("8242621")
-                TabPane.class,
-                // @Ignore("8244419")
                 TextArea.class,
-                // @Ignore("8240506")
                 TextField.class,
-                ToolBar.class,
-                TreeCell.class,
-                TreeTableRow.class,
+                // @Ignore("8245282")
+                ToggleButton.class,
                 TreeTableView.class,
                 TreeView.class
-        );
+         );
         // remove the known issues to make the test pass
         controlClasses.removeAll(leakingClasses);
         // instantiate controls
@@ -147,11 +131,16 @@ public class SkinMemoryLeakTest {
         return asArrays(controls);
     }
 
-    public SkinMemoryLeakTest(Control control) {
+    public BehaviorMemoryLeakTest(Control control) {
         this.control = control;
     }
 
-//------------ setup
+//------------------- setup
+
+    @After
+    public void cleanup() {
+        Thread.currentThread().setUncaughtExceptionHandler(null);
+    }
 
     @Before
     public void setup() {
@@ -163,11 +152,6 @@ public class SkinMemoryLeakTest {
             }
         });
         assertNotNull(control);
-    }
-
-    @After
-    public void cleanup() {
-        Thread.currentThread().setUncaughtExceptionHandler(null);
     }
 
 }

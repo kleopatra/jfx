@@ -275,10 +275,10 @@ public class ControlSkinFactory {
     }
 
     /**
-     * Nasty hack to keep JUnit pre-4.12 happy. 
+     * Nasty hack to keep JUnit pre-4.12 happy.
      * Before 4.12, Parameterized can only handle
      * a collection of arrays.
-     * 
+     *
      * @param data the list of data
      * @return the list of the data converted to one-dimensional arrays
      */
@@ -286,9 +286,9 @@ public class ControlSkinFactory {
         List<Object[]> result =  (List) data.stream()
                 .map(d -> new Object[] {d, })
                 .collect(toList());
-        return result; 
+        return result;
     }
-    
+
   //------------- skin support
     /**
      * Creates and sets an alternative skin for the given control.

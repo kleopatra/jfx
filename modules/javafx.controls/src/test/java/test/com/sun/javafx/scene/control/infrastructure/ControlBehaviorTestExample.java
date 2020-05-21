@@ -44,8 +44,8 @@ import javafx.scene.control.Control;
 /**
  * Example of writing a test for a streak of similar issues,
  * here f.i. memory leak in behavior.
- * 
- * Note: doesn't have postfix _Test_ to not be included in 
+ *
+ * Note: doesn't have postfix _Test_ to not be included in
  * default testing.
  */
 @RunWith(Parameterized.class)
