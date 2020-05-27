@@ -213,10 +213,20 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
         ListView<T> control = getNode();
 
         ListCellBehavior.removeAnchor(control);
+//        control.selectionModelProperty().removeListener(weakSelectionModelListener);
+//        if (control.getSelectionModel() != null) {
+//            control.getSelectionModel().getSelectedIndices().removeListener(weakSelectedIndicesListener);
+//        }
+//        if (control.getItems() != null) {
+//            control.getItems().removeListener(weakItemsListListener);
+//        }
+        // not needed?
+//        disposeFunctions();
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
 
-        control.removeEventHandler(KeyEvent.ANY, keyEventListener);
+        // was leaking: added as filter, removed as handler
+        control.removeEventFilter(KeyEvent.ANY, keyEventListener);
     }
 
 
@@ -248,6 +258,17 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
     public void setOnMoveToFirstCell(Runnable r) { onMoveToFirstCell = r; }
     public void setOnMoveToLastCell(Runnable r) { onMoveToLastCell = r; }
 
+    private void disposeFunctions() {
+        // not fully implemented - not set in behavior memory test, so should not block anyway
+        setOnScrollPageUp(null);
+        setOnScrollPageDown(null);
+        setOnFocusPreviousRow(null);
+        setOnFocusNextRow(null);
+        setOnSelectPreviousRow(null);
+        setOnSelectNextRow(null);
+        setOnMoveToFirstCell(null);
+        setOnMoveToLastCell(null);
+    }
     private boolean selectionChanging = false;
 
     private final ListChangeListener<Integer> selectedIndicesListener = c -> {

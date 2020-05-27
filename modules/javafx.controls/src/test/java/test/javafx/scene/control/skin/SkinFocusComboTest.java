@@ -86,17 +86,18 @@ public class SkinFocusComboTest {
     /**
      * Issue: skin dispose doesn't cleanup listeners - focusListener still active.
      * 
-     * Here we dispose, then hide the containing stage.
+     * Here we dispose, then hide the containing stage. Dispose while in
+     * active scenegraph is .. fishy?
      */
-//    @Test
-//    public void testDisposeSkinFocus() {
-//        showControl(control, true);
-//        control.getSkin().dispose();
-//        fireMethodPulse();
-//        Button other = new Button("dummy");
-//        showControl(other, false);
-//        other.requestFocus();
-//    }
+    @Test
+    public void testDisposeSkinFocus() {
+        showControl(control, true);
+        control.getSkin().dispose();
+        fireMethodPulse();
+        Button other = new Button("dummy");
+        showControl(other, false);
+        other.requestFocus();
+    }
 
     protected void fireMethodPulse() {
         if (methodPulse) Toolkit.getToolkit().firePulse();

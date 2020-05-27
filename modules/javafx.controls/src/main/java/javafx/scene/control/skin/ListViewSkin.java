@@ -37,6 +37,7 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.WeakListChangeListener;
+import javafx.collections.WeakMapChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.AccessibleAction;
@@ -93,7 +94,7 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
     // Locale may change between instances.
     private static final String EMPTY_LIST_TEXT = ControlResources.getString("ListView.noContent");
 
-    private final VirtualFlow<ListCell<T>> flow;
+    private VirtualFlow<ListCell<T>> flow;
 
     /**
      * Region placed over the top of the flow (and possibly the header row) if
@@ -104,7 +105,6 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
     private Node placeholderNode;
 
     private ObservableList<T> listViewItems;
-    private final InvalidationListener itemsChangeListener = observable -> updateListViewItems();
 
     private boolean needCellsRebuilt = true;
     private boolean needCellsReconfigured = false;
@@ -129,6 +129,9 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
         }
     };
 
+    private WeakMapChangeListener<Object, Object> weakPropertiesMapListener =
+            new WeakMapChangeListener<>(propertiesMapListener);
+    
     private final ListChangeListener<T> listViewItemsListener = new ListChangeListener<T>() {
         @Override public void onChanged(Change<? extends T> c) {
             while (c.next()) {
@@ -164,6 +167,16 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
 
     private final WeakListChangeListener<T> weakListViewItemsListener =
             new WeakListChangeListener<T>(listViewItemsListener);
+
+
+    private final InvalidationListener itemsChangeListener = observable -> updateListViewItems();
+
+    private WeakInvalidationListener 
+                weakItemsChangeListener = new WeakInvalidationListener(itemsChangeListener);
+
+
+
+    private EventHandler<MouseEvent> ml;
 
 
 
@@ -208,7 +221,7 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
         flow.setFixedCellSize(control.getFixedCellSize());
         getChildren().add(flow);
 
-        EventHandler<MouseEvent> ml = event -> {
+        ml = event -> {
             // RT-15127: cancel editing on scroll. This is a bit extreme
             // (we are cancelling editing on touching the scrollbars).
             // This can be improved at a later date.
@@ -230,11 +243,11 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
 
         updateItemCount();
 
-        control.itemsProperty().addListener(new WeakInvalidationListener(itemsChangeListener));
+        control.itemsProperty().addListener(weakItemsChangeListener);
 
         final ObservableMap<Object, Object> properties = control.getProperties();
         properties.remove(Properties.RECREATE);
-        properties.addListener(propertiesMapListener);
+        properties.addListener(weakPropertiesMapListener);
 
         // Register listeners
         registerChangeListener(control.itemsProperty(), o -> updateListViewItems());
@@ -263,10 +276,31 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
 
     /** {@inheritDoc} */
     @Override public void dispose() {
+        if (getSkinnable() == null) return;
+        // listener cleanup fixes side-effects
+        getSkinnable().itemsProperty().removeListener(weakItemsChangeListener);
+        if (listViewItems != null) {
+            listViewItems.removeListener(weakListViewItemsListener);
+            listViewItems = null;
+        }
+        getSkinnable().getProperties().removeListener(weakPropertiesMapListener);
+        // flow related cleanup
+        // remove mouse handlers not needed 
+//        flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
+//        flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
+        // leaking without nulling factory
+        flow.setCellFactory(null);
+        // no effect on leakage (but should be done to not accumulate children)
+//        getChildren().clear();
+        // not possible: flow is final
+//        flow = null;
+        // beware: super doesn't cleanup its handler to onScollEvent!
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
+            // no effect (and not really possible, is final)
+//            behavior = null;
         }
     }
 

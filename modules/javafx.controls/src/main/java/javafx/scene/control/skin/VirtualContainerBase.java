@@ -25,6 +25,7 @@
 
 package javafx.scene.control.skin;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.ScrollToEvent;
@@ -53,6 +54,8 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
      */
     private final VirtualFlow<I> flow;
 
+    private EventHandler<? super ScrollToEvent<Integer>> scrollToEventHandler;
+
 
 
     /***************************************************************************
@@ -69,7 +72,7 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
         super(control);
         flow = createVirtualFlow();
 
-        control.addEventHandler(ScrollToEvent.scrollToTopIndex(), event -> {
+        scrollToEventHandler = event -> {
             // Fix for RT-24630: The row count in VirtualFlow was incorrect
             // (normally zero), so the scrollTo call was misbehaving.
             if (itemCountDirty) {
@@ -78,7 +81,8 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
                 itemCountDirty = false;
             }
             flow.scrollToTop(event.getScrollTarget());
-        });
+        };
+        control.addEventHandler(ScrollToEvent.scrollToTopIndex(), scrollToEventHandler);
     }
 
 
@@ -111,6 +115,7 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
      *                                                                         *
      **************************************************************************/
 
+    
     /**
      * Create the virtualized container that handles the layout and scrolling of
      * all the cells. This enables skin subclasses to provide
@@ -122,6 +127,15 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
     protected VirtualFlow<I> createVirtualFlow() {
         return new VirtualFlow<>();
     }
+
+    @Override
+    public void dispose() {
+        if (getSkinnable() == null) return;
+        getSkinnable().removeEventHandler(ScrollToEvent.scrollToTopIndex(), scrollToEventHandler);
+        super.dispose();
+    }
+
+
 
     /**
      * Get the virtualized container.

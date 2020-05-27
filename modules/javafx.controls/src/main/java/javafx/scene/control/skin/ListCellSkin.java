@@ -114,6 +114,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 
         if (behavior != null) {
             behavior.dispose();
+            // nulling makes no difference for memory leak of skin
 //            behavior = null;
         }
     }

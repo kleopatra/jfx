@@ -41,11 +41,13 @@ import static javafx.scene.control.ControlShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
@@ -81,15 +83,71 @@ public class SkinIssuesTest {
     private static final boolean showPulse = false; 
     private static final boolean methodPulse = true; 
     
-
-    protected void fireMethodPulse() {
-        if (methodPulse) Toolkit.getToolkit().firePulse();
+    /**
+     * Sanity: isolated list is gc'ed
+     */
+    @Test
+    public void testListViewGC() {
+        WeakReference<ListView<?>> ref = new WeakReference<>(new ListView<>());
+        assertNotNull(ref.get());
+        attemptGC(ref);
+        assertNull("listView must be gc'ed", ref.get());
     }
     
+    /**
+     * Sanity: isolated list with skin is gc'ed
+     */
+    @Test
+    public void testListViewWithSkinGC() {
+        WeakReference<ListView<?>> ref = new WeakReference<>(new ListView<>());
+        assertNotNull(ref.get());
+        installDefaultSkin(ref.get());
+        assertNotNull(ref.get().getSkin());
+        attemptGC(ref);
+        assertNull("listView must be gc'ed", ref.get());
+    }
+    
+    /**
+     * isolated test for memory leak in listViewSkin - keep it short
+     */
+    @Test
+    public void testListViewSkinLeak() {
+        ListView<?> listView = new ListView<>();
+        installDefaultSkin(listView);
+        WeakReference<?> ref = new WeakReference<>(replaceSkin(listView));
+        assertNotNull(ref.get());
+        attemptGC(ref);
+        assertNull("listViewSkin must be gc'ed", ref.get());
+    }
+    @Test
+    public void testListViewAddItems() {
+        ListView<String> listView = new ListView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.getItems().add("addded");
+    }
+    
+    @Test
+    public void testListViewRefresh() {
+        ListView<String> listView = new ListView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.refresh();
+    }
+    
+    @Test
+    public void testListViewSetItems() {
+        ListView<String> listView = new ListView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.setItems(FXCollections.observableArrayList());
+    }
+
     /**
      * Table children not removed - nothing removed, so old flow with
      * old rows/cells still floating around?
      */
+    @Ignore("tableskin children")
     @Test
     public void testTableViewSkinAccumulateChildren() {
         TableView table = new TableView();
@@ -103,6 +161,7 @@ public class SkinIssuesTest {
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8245145
      */
+    @Ignore("8245145")
     @Test
     public void testSpinnerSkin() {
         Spinner<?> spinner = new Spinner<>();
@@ -110,6 +169,7 @@ public class SkinIssuesTest {
         spinner.setSkin(new SpinnerSkin<>(spinner));
     }
     
+    @Ignore("8245145")
     @Test
     public void testSpinnerChildren() {
         Spinner<?> spinner = new Spinner<>();
@@ -119,13 +179,7 @@ public class SkinIssuesTest {
         assertEquals(childCount, spinner.getChildrenUnmodifiable().size());
     }
     
-    @Test
-    public void testButtonBehaviorCreate() {
-        Button button = new Button();
-        BehaviorBase behavior = createBehavior(button);
-        
-    }
-    
+    @Ignore("Accordion")
     @Test
     public void testAccordionBehavior() {
         Accordion button = new Accordion();
@@ -164,6 +218,7 @@ public class SkinIssuesTest {
         assertNull("behavior must be gc'ed", behaviorRef.get());
     }
     
+    @Ignore("InputMap")
     @Test
     public void testInputMapButtonBehavior() {
         Button button = new Button();
@@ -221,6 +276,10 @@ public class SkinIssuesTest {
     
 //---------------- setup and initial
     
+    protected void fireMethodPulse() {
+        if (methodPulse) Toolkit.getToolkit().firePulse();
+    }
+
     protected void showControl(Control box, boolean focus) {
         if (!root.getChildren().contains(box)) {
             root.getChildren().add(box);
