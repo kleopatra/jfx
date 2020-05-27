@@ -29,6 +29,7 @@ import java.lang.ref.WeakReference;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
@@ -39,8 +40,11 @@ import static javafx.scene.input.KeyCode.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
 
 /**
@@ -49,10 +53,27 @@ import javafx.scene.input.KeyEvent;
  */
 public class BehaviorIssuesTest {
     
+    @Test
+    public void testListViewSelect() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        int last = 1;
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        listView.getSelectionModel().select(last);
+        assertEquals(last, listView.getProperties().get("anchor"));
+
+        weakRef.get().dispose();
+        assertNull("anchor cleared", listView.getProperties().get("anchor"));
+        
+        listView.getSelectionModel().select(0);
+        assertNull("anchor cleared", listView.getProperties().get("anchor"));
+//        listView.getItems().add("dummy");
+    }
+    
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8245303
      */
-    @Test
+    @Test @Ignore("inputmap")
     public void testInputMapMemoryLeak() {
         Label label = new Label();
         WeakReference<InputMap<?>> inputMap = new WeakReference<>(new InputMap<Label>(label));
@@ -66,7 +87,7 @@ public class BehaviorIssuesTest {
         assertNull("inputMap must be gc'ed", inputMap.get());
     }
     
-    @Test
+    @Test @Ignore("inputmap")
     public void testInputMapButtonBehavior() {
         Button button = new Button();
         WeakReference<BehaviorBase> weakRef = new WeakReference<>(createBehavior(button));

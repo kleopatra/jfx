@@ -42,6 +42,7 @@ import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
@@ -56,6 +57,7 @@ import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 
 /**
  * Contains tests for issues that turned up in SkinDisposeTest (and
@@ -83,6 +85,47 @@ public class SkinIssuesTest {
     private static final boolean showPulse = false; 
     private static final boolean methodPulse = true; 
     
+    
+    @Test
+    public void testListViewSelectUp() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two", "three", "four");
+        ListView<String> listView = new ListView<>(data);
+        int last = data.size() -1;
+        showControl(listView, true);
+        listView.getSelectionModel().select(last);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(getBehavior(listView.getSkin()));
+        
+        replaceSkin(listView);
+        // no skin, no behavior: not moved
+//        listView.setSkin(null);
+        KeyEventFirer keyboard = new KeyEventFirer(listView);
+        // working as expected: the handlers installed by the behavior are cleaned
+        // no call from handler, no call of functions
+        keyboard.doUpArrowPress();
+        assertEquals(last - 1, listView.getSelectionModel().getSelectedIndex());
+        assertEquals(last -1, listView.getProperties().get("anchor"));
+    }
+    
+    
+    @Test
+    public void testListViewSelectNoSkin() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two", "three", "four");
+        ListView<String> listView = new ListView<>(data);
+        int last = data.size() -1;
+        showControl(listView, true);
+        listView.getSelectionModel().select(last);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(getBehavior(listView.getSkin()));
+
+//        replaceSkin(listView);
+        // no skin, no behavior: not moved
+        listView.setSkin(null);
+        assertNull(listView.getProperties().get("anchor"));
+        listView.getSelectionModel().select(last -1);
+        assertEquals(last - 1, listView.getSelectionModel().getSelectedIndex());
+        assertEquals(last -1, listView.getProperties().get("anchor"));
+    }
+    
+
     /**
      * Sanity: isolated list is gc'ed
      */

@@ -213,6 +213,10 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
         ListView<T> control = getNode();
 
         ListCellBehavior.removeAnchor(control);
+        // here no need to manually remove - why not? in skins getting leaks if not doing ..
+        // actually no: in skins, we remove them to fix side-effects
+        // the question here is: are/what are the side-effects in behavior?
+        // still setting the anchor, if disposed (or skin set to null)!
 //        control.selectionModelProperty().removeListener(weakSelectionModelListener);
 //        if (control.getSelectionModel() != null) {
 //            control.getSelectionModel().getSelectedIndices().removeListener(weakSelectedIndicesListener);
@@ -220,7 +224,8 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
 //        if (control.getItems() != null) {
 //            control.getItems().removeListener(weakItemsListListener);
 //        }
-        // not needed?
+        // not needed - functions are called only from methods triggered by
+        // event handler, which all are removed on dispose
 //        disposeFunctions();
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
@@ -258,17 +263,6 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
     public void setOnMoveToFirstCell(Runnable r) { onMoveToFirstCell = r; }
     public void setOnMoveToLastCell(Runnable r) { onMoveToLastCell = r; }
 
-    private void disposeFunctions() {
-        // not fully implemented - not set in behavior memory test, so should not block anyway
-        setOnScrollPageUp(null);
-        setOnScrollPageDown(null);
-        setOnFocusPreviousRow(null);
-        setOnFocusNextRow(null);
-        setOnSelectPreviousRow(null);
-        setOnSelectNextRow(null);
-        setOnMoveToFirstCell(null);
-        setOnMoveToLastCell(null);
-    }
     private boolean selectionChanging = false;
 
     private final ListChangeListener<Integer> selectedIndicesListener = c -> {
