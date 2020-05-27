@@ -81,6 +81,8 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
 
 /**
+ * Outdated and ignored - kept for experiments only!
+ * 
  * Test for Behavior on dispose. There are two variants to create/check for gc of behaviour:
  * 
  * - install the default skin, get behavior, replace skin
@@ -94,7 +96,7 @@ import javafx.scene.control.TreeView;
  * <p>
  * This test is parameterized on control class.
  */
-//@Ignore
+@Ignore
 @RunWith(Parameterized.class)
 public class BehaviorDisposeTest {
 
@@ -146,7 +148,7 @@ public class BehaviorDisposeTest {
     //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters (name = "{index}: {0} ")
+    @Parameterized.Parameters //(name = "{index}: {0} ")
     public static Collection<Class<Control>> data() {
         List<Class<Control>> controlClasses = getControlClassesWithBehavior();
         List<Class<? extends Control>> failing = List.of(

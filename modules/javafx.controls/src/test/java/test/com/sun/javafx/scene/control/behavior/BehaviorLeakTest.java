@@ -93,6 +93,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /**
+ * Outdated and ignored - kept for experiments only!
  * Test for issues when replacing skin.
  * <p>
  * 
@@ -102,7 +103,7 @@ import javafx.stage.Stage;
  * <p>
  * This test is parameterized on control class.
  */
-//@Ignore
+@Ignore
 @RunWith(Parameterized.class)
 public class BehaviorLeakTest {
 
@@ -172,7 +173,7 @@ public class BehaviorLeakTest {
     //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters (name = "{index}: {0} ")
+    @Parameterized.Parameters //(name = "{index}: {0} ")
     public static Collection<Class<Control>> data() {
         return getControlClassesWithBehavior();
     }

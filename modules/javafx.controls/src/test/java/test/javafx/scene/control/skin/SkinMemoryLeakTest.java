@@ -97,7 +97,7 @@ public class SkinMemoryLeakTest {
 //------------ parameters
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters (name = "{index}: {0} ")
+    @Parameterized.Parameters //(name = "{index}: {0} ")
     public static Collection<Object[]> data() {
         List<Class<Control>> controlClasses = getControlClasses();
         // FIXME as part of JDK-8241364
