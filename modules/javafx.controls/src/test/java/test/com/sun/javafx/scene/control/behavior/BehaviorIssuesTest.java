@@ -33,6 +33,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
+import com.sun.javafx.scene.control.behavior.ListCellBehavior;
 import com.sun.javafx.scene.control.inputmap.InputMap;
 import com.sun.javafx.scene.control.inputmap.InputMap.KeyMapping;
 
@@ -46,29 +47,153 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
-
+import static javafx.scene.control.ControlShim.*;
 /**
  * Test for misbehavior of individual implementations that turned
  * up in binch testing.
  */
 public class BehaviorIssuesTest {
     
+    /**
+     * Test cleanup of item listener in ListViewBehavior.
+     * 
+     * Using anchor as marker: it must not change on selection change after behavior is
+     * disposed
+     * 
+     * select -> behavior sets anchor 
+     * dispose -> anchor cleared
+     * force anchor to selection
+     * remove item -> anchor must be unchanged (if not, side-effect of listener cleanup in 
+     * behavior)
+     */
     @Test
-    public void testListViewSelect() {
+    public void testListViewBehaviorRemoveItem() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        weakRef.get().dispose();
+        int last = 1;
+        ListCellBehavior.setAnchor(listView, last, false);
+        listView.getItems().remove(0);
+        assertEquals("anchor must not be changed on removing item", 
+                last,
+                listView.getProperties().get("anchor"));
+    }
+ 
+    /**
+     * for comparison: anchor unchanged on removing item without behavior
+     */
+    @Test
+    public void testListViewAnchorRemoveItem() {
         ObservableList<String> data = FXCollections.observableArrayList("one", "two");
         ListView<String> listView = new ListView<>(data);
         int last = 1;
-        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
         listView.getSelectionModel().select(last);
+        ListCellBehavior.setAnchor(listView, last, false);
         assertEquals(last, listView.getProperties().get("anchor"));
+        listView.getItems().remove(0);
+        assertEquals(last, listView.getProperties().get("anchor"));
+    }
+    
 
+    /**
+     * Test cleanup of selection listeners in ListViewBehavior.
+     * 
+     * anchor update with behavior
+     * select -> behavior sets anchor 
+     * dispose -> anchor cleared
+     * select -> anchor must remain cleared (if not, side-effect of listener cleanup in 
+     * behavior)
+     */
+    @Test
+    public void testListViewBehaviorSelect() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        int last = 1;
+        listView.getSelectionModel().select(last);
         weakRef.get().dispose();
-        assertNull("anchor cleared", listView.getProperties().get("anchor"));
         
         listView.getSelectionModel().select(0);
-        assertNull("anchor cleared", listView.getProperties().get("anchor"));
-//        listView.getItems().add("dummy");
+        assertNull("anchor must remain cleared when selecting without behavior", listView.getProperties().get("anchor"));
     }
+
+    @Test
+    public void testListViewBehaviorCleanupAnchor() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        listView.getSelectionModel().select(1);
+        weakRef.get().dispose();
+        assertNull("anchor must be cleared after dispose", listView.getProperties().get("anchor"));
+    }
+    
+    /**
+     * Anchor set with behavior.
+     */
+    @Test
+    public void testListViewBehaviorSelectAnchor() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        int last = 1;
+        listView.getSelectionModel().select(last);
+        assertEquals("anchor must be set with behavior", last, listView.getProperties().get("anchor"));
+    }
+    /**
+     * for comparison: anchor not set without behavior
+     * (which may or may not be the correct behavior - missing anchor semantics in model!)
+     */
+    @Test
+    public void testListViewSelectAnchor() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        int last = 1;
+        listView.getSelectionModel().select(last);
+        assertEquals("selectionModel does not set anchor", null, listView.getProperties().get("anchor"));
+    }
+    
+    /**
+     * Bug: inconsistent behavior - clearAndSelect sets anchor, select doesn't
+     * which might be correct (modulo missing anchor semantics) for multiple selection
+     * but not for single selection (which is default)
+     */
+    @Test
+    public void testListViewClearAndSelectAnchor() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        int last = 1;
+        listView.getSelectionModel().clearAndSelect(last);
+        assertEquals(null, listView.getProperties().get("anchor"));
+    }
+    
+    /**
+     * Bug: anchor not set if behavior installed after selection
+     */
+    @Test
+    public void testListViewBehaviorAnchorInitialSelect() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        int last = 1;
+        listView.getSelectionModel().select(last);
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        assertEquals("anchor must be set when creating behavior", last, listView.getProperties().get("anchor"));
+    }
+    
+    /**
+     * Bug: anchor not set if skin installed after selection
+     */
+    @Test
+    public void testListViewSkinAnchorInitialSelect() {
+        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>(data);
+        int last = 1;
+        listView.getSelectionModel().select(last);
+        installDefaultSkin(listView);
+        assertEquals("anchor must be set when creating skin", last, listView.getProperties().get("anchor"));
+    }
+    
+    
     
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8245303

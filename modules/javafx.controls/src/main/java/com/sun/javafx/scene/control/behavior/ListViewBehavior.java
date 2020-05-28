@@ -217,16 +217,13 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
         // actually no: in skins, we remove them to fix side-effects
         // the question here is: are/what are the side-effects in behavior?
         // still setting the anchor, if disposed (or skin set to null)!
-//        control.selectionModelProperty().removeListener(weakSelectionModelListener);
-//        if (control.getSelectionModel() != null) {
-//            control.getSelectionModel().getSelectedIndices().removeListener(weakSelectedIndicesListener);
-//        }
-//        if (control.getItems() != null) {
-//            control.getItems().removeListener(weakItemsListListener);
-//        }
-        // not needed - functions are called only from methods triggered by
-        // event handler, which all are removed on dispose
-//        disposeFunctions();
+        control.selectionModelProperty().removeListener(weakSelectionModelListener);
+        if (control.getSelectionModel() != null) {
+            control.getSelectionModel().getSelectedIndices().removeListener(weakSelectedIndicesListener);
+        }
+        if (control.getItems() != null) {
+            control.getItems().removeListener(weakItemsListListener);
+        }
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
 
