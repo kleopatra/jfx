@@ -122,7 +122,7 @@ public class SkinIssuesTest {
         assertNull(listView.getProperties().get("anchor"));
         listView.getSelectionModel().select(last -1);
         assertEquals(last - 1, listView.getSelectionModel().getSelectedIndex());
-        assertEquals(last -1, listView.getProperties().get("anchor"));
+        assertEquals(null, listView.getProperties().get("anchor"));
     }
     
 

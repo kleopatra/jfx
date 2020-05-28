@@ -277,13 +277,13 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
     /** {@inheritDoc} */
     @Override public void dispose() {
         if (getSkinnable() == null) return;
-        // listener cleanup fixes side-effects
+        // listener cleanup fixes side-effects (NPE on refresh, setItems, modifyItems)
+        getSkinnable().getProperties().removeListener(weakPropertiesMapListener);
         getSkinnable().itemsProperty().removeListener(weakItemsChangeListener);
         if (listViewItems != null) {
             listViewItems.removeListener(weakListViewItemsListener);
             listViewItems = null;
         }
-        getSkinnable().getProperties().removeListener(weakPropertiesMapListener);
         // flow related cleanup
         // remove mouse handlers not needed 
 //        flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);

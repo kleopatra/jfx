@@ -193,7 +193,19 @@ public class BehaviorIssuesTest {
         assertEquals("anchor must be set when creating skin", last, listView.getProperties().get("anchor"));
     }
     
-    
+    /**
+     * just for shortening test time during fixing, remove!!
+     */
+    @Test
+    public void testListViewBehaviorLeak() {
+//        ObservableList<String> data = FXCollections.observableArrayList("one", "two");
+        ListView<String> listView = new ListView<>();
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
+        assertNotNull(weakRef.get());
+        weakRef.get().dispose();
+        attemptGC(weakRef);
+        assertNull("behavior must be gc'ed", weakRef.get());
+    }
     
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8245303
