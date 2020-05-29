@@ -512,7 +512,7 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
             getSkinnable().notifyAccessibleAttributeChanged(AccessibleAttribute.FOCUS_NODE);
         });
 
-        // Fix for RT-21207
+//        // Fix for RT-21207
         InvalidationListener layoutPosListener = o -> {
             popupNeedsReconfiguring = true;
             reconfigurePopup();

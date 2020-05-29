@@ -89,15 +89,15 @@ public class SkinFocusComboTest {
      * Here we dispose, then hide the containing stage. Dispose while in
      * active scenegraph is .. fishy?
      */
-    @Test
-    public void testDisposeSkinFocus() {
-        showControl(control, true);
-        control.getSkin().dispose();
-        fireMethodPulse();
-        Button other = new Button("dummy");
-        showControl(other, false);
-        other.requestFocus();
-    }
+//    @Test
+//    public void testDisposeSkinFocus() {
+//        showControl(control, true);
+//        control.getSkin().dispose();
+//        fireMethodPulse();
+//        Button other = new Button("dummy");
+//        showControl(other, false);
+//        other.requestFocus();
+//    }
 
     protected void fireMethodPulse() {
         if (methodPulse) Toolkit.getToolkit().firePulse();
@@ -142,10 +142,10 @@ public class SkinFocusComboTest {
             {ComboBox.class, false, true }, 
             {ComboBox.class, false, false }, 
             {ComboBox.class, true, false }, 
-//            {DatePicker.class, true, true, }, 
-//            {DatePicker.class, false, true, }, 
-//            {DatePicker.class, false, false, }, 
-//            {DatePicker.class, true, false, }, 
+            {DatePicker.class, true, true, }, 
+            {DatePicker.class, false, true, }, 
+            {DatePicker.class, false, false, }, 
+            {DatePicker.class, true, false, }, 
         };
         return Arrays.asList(data);
     }

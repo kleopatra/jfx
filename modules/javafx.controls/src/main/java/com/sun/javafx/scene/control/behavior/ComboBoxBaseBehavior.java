@@ -49,6 +49,7 @@ import static com.sun.javafx.scene.control.inputmap.InputMap.MouseMapping;
 public class ComboBoxBaseBehavior<T> extends BehaviorBase<ComboBoxBase<T>> {
 
     private final InputMap<ComboBoxBase<T>> inputMap;
+    private InvalidationListener focusListener = this::focusChanged;
 
     /***************************************************************************
      *                                                                         *
@@ -58,8 +59,6 @@ public class ComboBoxBaseBehavior<T> extends BehaviorBase<ComboBoxBase<T>> {
 
     private TwoLevelFocusComboBehavior tlFocus;
 
-    private InvalidationListener focusListener = this::focusChanged;
-    
     /**
      *
      */

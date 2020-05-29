@@ -146,6 +146,7 @@ public abstract class ComboBoxBaseSkin<T> extends SkinBase<ComboBoxBase<T>> {
      *                                                                         *
      **************************************************************************/
 
+    
     /**
      * This method should return a Node that will be positioned within the
      * ComboBox 'button' area.
@@ -153,6 +154,17 @@ public abstract class ComboBoxBaseSkin<T> extends SkinBase<ComboBoxBase<T>> {
      */
     public abstract Node getDisplayNode();
 
+    @Override
+    public void dispose() {
+        if (arrowButton != null) {
+            arrowButton.removeEventHandler(MouseEvent.MOUSE_ENTERED,  mouseEnteredEventHandler);
+            arrowButton.removeEventHandler(MouseEvent.MOUSE_PRESSED,  mousePressedEventHandler);
+            arrowButton.removeEventHandler(MouseEvent.MOUSE_RELEASED, mouseReleasedEventHandler);
+            arrowButton.removeEventHandler(MouseEvent.MOUSE_EXITED,   mouseExitedEventHandler);
+            arrowButton = null;
+        }
+        super.dispose();
+    }
     /**
      * This method will be called when the ComboBox popup should be displayed.
      * It is up to specific skin implementations to determine how this is handled.

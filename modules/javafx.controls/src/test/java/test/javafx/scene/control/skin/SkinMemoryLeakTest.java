@@ -109,9 +109,9 @@ public class SkinMemoryLeakTest {
                 ButtonBar.class,
                 // @Ignore("8244657")
                 ChoiceBox.class,
-                ColorPicker.class,
-                ComboBox.class,
-                DatePicker.class,
+//                ColorPicker.class,
+//                ComboBox.class,
+//                DatePicker.class,
                 ListCell.class,
 //                ListView.class,
                 MenuBar.class,

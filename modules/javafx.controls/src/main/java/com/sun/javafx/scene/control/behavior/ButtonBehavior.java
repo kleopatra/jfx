@@ -58,6 +58,7 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
      */
     private boolean keyDown;
 
+    private InvalidationListener focusListener = this::focusChanged;
 
 
     /***************************************************************************
@@ -65,7 +66,6 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
      * Constructors                                                            *
      *                                                                         *
      **************************************************************************/
-    InvalidationListener focusListener = this::focusChanged;
 
     public ButtonBehavior(C control) {
         super(control);
@@ -93,7 +93,6 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
 
         // Button also cares about focus
         control.focusedProperty().addListener(focusListener);
-//        getNode().focusedProperty().addListener(this::focusChanged);
     }
 
 
@@ -109,11 +108,9 @@ public class ButtonBehavior<C extends ButtonBase> extends BehaviorBase<C> {
     }
 
     @Override public void dispose() {
-        // TODO
-//        getNode().focusedProperty().removeListener(this::focusChanged);
+        // TODO specify contract of dispose and post-condition for getNode()
         getNode().focusedProperty().removeListener(focusListener);
         super.dispose();
-
     }
 
 

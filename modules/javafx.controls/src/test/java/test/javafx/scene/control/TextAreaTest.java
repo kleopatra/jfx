@@ -485,24 +485,4 @@ public class TextAreaTest {
         assertEquals(dummyTxtArea.getParagraphs().get(0).toString(), "another");
     }
     
-    @Test
-    public void testDisposeSkin() {
-        txtArea.setSkin(new TextAreaSkin(txtArea));
-        txtArea.getSkin().dispose();
-    }
-    
-    @Test
-    public void testReplaceSkin() {
-        txtArea.setSkin(new TextAreaSkin(txtArea));
-        txtArea.setSkin(new TextAreaSkin1(txtArea));
-    }
-    
-    public static class TextAreaSkin1 extends TextAreaSkin {
-
-        public TextAreaSkin1(TextArea control) {
-            super(control);
-        }
-        
-    }
-
 }

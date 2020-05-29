@@ -43,10 +43,13 @@ import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactor
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
@@ -85,7 +88,47 @@ public class SkinIssuesTest {
     private static final boolean showPulse = false; 
     private static final boolean methodPulse = true; 
     
+// ------------ combos
     
+    /**
+     * ComboPopupControl registers layout listener to combo that's
+     * never removed -  might produce leak and NPE? No, happens in itemsListener
+     */
+    @Test
+    public void testComboBoxLayoutListener() {
+        final ComboBox<String> cb = new ComboBox<>();
+//        cb.getItems().add("" + System.currentTimeMillis()+ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+//        cb.setMaxWidth(100);
+//        cb.setMinWidth(100);
+        cb.setOnShowing(e -> 
+                cb.getItems().setAll("" + System.currentTimeMillis()+ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+            
+        );
+        
+//        cb.setEditable(true);
+//
+//        cb.setPromptText("X");
+        showControl(cb, true);
+        replaceSkin(cb);
+        cb.show();
+        
+    }
+    
+    /**
+     * Test for memory leak, just during evaluation - remove!
+     */
+    @Test
+    public void testComboBoxMemoryLeak() {
+        ComboBox<?> control =  new ComboBox<>();
+        installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+    
+//-------------- listView    
     @Test
     public void testListViewSelectUp() {
         ObservableList<String> data = FXCollections.observableArrayList("one", "two", "three", "four");
