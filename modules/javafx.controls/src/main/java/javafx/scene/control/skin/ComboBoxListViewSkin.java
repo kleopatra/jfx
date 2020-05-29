@@ -568,7 +568,10 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
             comboBox.notifyAccessibleAttributeChanged(AccessibleAttribute.TEXT);
         });
 
-        comboBox.getSelectionModel().selectedItemProperty().addListener(o -> {
+        //comboBox.getSelectionModel().selectedItemProperty().addListener(o -> {
+         // FIXME: really needed? couldn't find any misbehavior when commenting
+         // FIXME: this is a bad as before in not coping with change of selectionModel   
+        registerChangeListener(comboBox.getSelectionModel().selectedItemProperty(), e -> {    
             listViewSelectionDirty = true;
         });
 

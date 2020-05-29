@@ -38,13 +38,12 @@ import com.sun.javafx.scene.control.behavior.ButtonBehavior;
 import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
+import static javafx.scene.control.skin.ComboSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
@@ -53,6 +52,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.PopupControl;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -61,7 +61,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
-import static javafx.scene.control.skin.ComboSkinShim.*;
 /**
  * Contains tests for issues that turned up in SkinDisposeTest (and
  * are unrelated contract violation of dispose).
@@ -125,12 +124,33 @@ public class SkinIssuesTest {
         ComboBox<String> box = new ComboBox<>();
         box.setItems(FXCollections.observableArrayList("one", "other"));
         showControl(box, true);
-        box.show();
-        replaceSkin(box);
-        assertTrue(box.isShowing());
-        box.hide();
-        box.getSelectionModel().select(box.getItems().get(1));
+        int index = 1;
+        box.getSelectionModel().select(box.getItems().get(index));
+        ListView<?> listView = getListView(box);
+        assertEquals(index, listView.getSelectionModel().getSelectedIndex());
     }
+    
+    /**
+     * Borderline test:  switch skin while popup is open -> NPE on hiding the old popup
+     * It's a marker: ComboBoxPopupControl registers an eventHandler to its windows
+     * onHidden .. 
+     * 
+     * Think, though: explicit hide in dispose? here seems to be okay, but not 
+     * in visual test
+     */
+    @Test
+    public void testComboBoxSwitchSkinOpenPopup() {
+        ComboBox<String> box = new ComboBox<>();
+        box.setItems(FXCollections.observableArrayList("one", "other"));
+        showControl(box, true);
+        box.show();
+        PopupControl oldPopup = getPopup(box);
+        replaceSkin(box);
+        fireMethodPulse();
+        assertFalse("old popup must be hidden", oldPopup.isShowing());
+        assertTrue("replaced popup must be showing ", getPopup(box).isShowing());
+    }
+    
     /**
      * rewired listener to listView's selectedIndex
      */

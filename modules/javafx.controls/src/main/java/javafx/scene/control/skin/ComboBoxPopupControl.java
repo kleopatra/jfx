@@ -25,6 +25,8 @@
 
 package javafx.scene.control.skin;
 
+import java.util.function.Consumer;
+
 import com.sun.javafx.scene.ParentHelper;
 import com.sun.javafx.scene.control.FakeFocusTextField;
 import com.sun.javafx.scene.control.Properties;
@@ -34,7 +36,7 @@ import com.sun.javafx.scene.traversal.Algorithm;
 import com.sun.javafx.scene.traversal.Direction;
 import com.sun.javafx.scene.traversal.ParentTraversalEngine;
 import com.sun.javafx.scene.traversal.TraversalContext;
-import javafx.beans.InvalidationListener;
+
 import javafx.beans.value.ObservableValue;
 import javafx.css.Styleable;
 import javafx.event.EventHandler;
@@ -105,6 +107,10 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
     };
 
     private EventHandler<? super KeyEvent> anyKeyFilter;
+
+    private EventHandler<? super WindowEvent> popupHiddenHandler;
+
+    private EventHandler<? super MouseEvent> popupMouseHandler;
 
 
 
@@ -280,6 +286,11 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
             getSkinnable().removeEventFilter(KeyEvent.ANY, anyKeyFilter);
             anyKeyFilter = null;
         }
+        disposePopup();
+        // hide popup - don't touch combo's showing!
+        // unit test looks good, but in visual test on replacing skin the new popup
+        // is not showing 
+//        hide();
         super.dispose();
     }
     
@@ -498,33 +509,50 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
         popup.setAutoHide(true);
         popup.setAutoFix(true);
         popup.setHideOnEscape(true);
+        
+        // register popup eventHandlers that must be removed in dispose!
         popup.setOnAutoHide(e -> getBehavior().onAutoHide(popup));
-        popup.addEventHandler(MouseEvent.MOUSE_CLICKED, t -> {
+        popupMouseHandler = t -> {
             // RT-18529: We listen to mouse input that is received by the popup
             // but that is not consumed, and assume that this is due to the mouse
             // clicking outside of the node, but in areas such as the
             // dropshadow.
             getBehavior().onAutoHide(popup);
-        });
-        popup.addEventHandler(WindowEvent.WINDOW_HIDDEN, t -> {
+        };
+        popup.addEventHandler(MouseEvent.MOUSE_CLICKED, popupMouseHandler);
+        popupHiddenHandler = t -> {
             // Make sure the accessibility focus returns to the combo box
             // after the window closes.
             getSkinnable().notifyAccessibleAttributeChanged(AccessibleAttribute.FOCUS_NODE);
-        });
+        };
+        popup.addEventHandler(WindowEvent.WINDOW_HIDDEN, popupHiddenHandler);
 
 //        // Fix for RT-21207
-        InvalidationListener layoutPosListener = o -> {
+//        InvalidationListener layoutPosListener = o -> {
+//            popupNeedsReconfiguring = true;
+//            reconfigurePopup();
+//        };
+//        getSkinnable().layoutXProperty().addListener(layoutPosListener);
+//        getSkinnable().layoutYProperty().addListener(layoutPosListener);
+//        getSkinnable().widthProperty().addListener(layoutPosListener);
+//        getSkinnable().heightProperty().addListener(layoutPosListener);
+
+        Consumer reconfigure = e -> {
+            
             popupNeedsReconfiguring = true;
             reconfigurePopup();
         };
-        getSkinnable().layoutXProperty().addListener(layoutPosListener);
-        getSkinnable().layoutYProperty().addListener(layoutPosListener);
-        getSkinnable().widthProperty().addListener(layoutPosListener);
-        getSkinnable().heightProperty().addListener(layoutPosListener);
-
+        
+        registerChangeListener(getSkinnable().layoutXProperty(), reconfigure);
+        registerChangeListener(getSkinnable().layoutYProperty(), reconfigure);
+        registerChangeListener(getSkinnable().widthProperty(), reconfigure);
+        registerChangeListener(getSkinnable().heightProperty(), reconfigure);
+        
         // RT-36966 - if skinnable's scene becomes null, ensure popup is closed
-        getSkinnable().sceneProperty().addListener(o -> {
-            if (((ObservableValue)o).getValue() == null) {
+//        getSkinnable().sceneProperty().addListener(o -> {
+        registerChangeListener(getSkinnable().sceneProperty(), e -> {
+//            if (((ObservableValue)o).getValue() == null) {
+            if (getSkinnable().getScene() == null) {
                 hide();
             } else if (getSkinnable().isShowing()) {
                 show();
@@ -533,6 +561,14 @@ public abstract class ComboBoxPopupControl<T> extends ComboBoxBaseSkin<T> {
 
     }
 
+    void disposePopup() {
+        if (popup == null) return;
+        popup.setOnAutoHide(null);
+        popup.removeEventHandler(MouseEvent.MOUSE_CLICKED, popupMouseHandler);
+        popup.removeEventHandler(WindowEvent.WINDOW_HIDDEN, popupHiddenHandler);
+        popup.hide();
+    }
+    
     void reconfigurePopup() {
         // RT-26861. Don't call getPopup() here because it may cause the popup
         // to be created too early, which leads to memory leaks like those noted
