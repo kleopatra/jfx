@@ -216,7 +216,7 @@ public class ChoiceBoxSkin<T> extends SkinBase<ChoiceBox<T>> {
             selectionModel.selectedIndexProperty().removeListener(selectionChangeListener);
             selectionModel = null;
         }
-        
+
         super.dispose();
 
         if (behavior != null) {

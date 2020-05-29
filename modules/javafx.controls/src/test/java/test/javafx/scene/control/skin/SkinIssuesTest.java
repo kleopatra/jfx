@@ -90,6 +90,11 @@ public class SkinIssuesTest {
     
 // ------------ combos
     
+    @Test
+    public void testComboBoxAddItems() {
+        
+    }
+    
     /**
      * ComboPopupControl registers layout listener to combo that's
      * never removed -  might produce leak and NPE? No, happens in itemsListener
