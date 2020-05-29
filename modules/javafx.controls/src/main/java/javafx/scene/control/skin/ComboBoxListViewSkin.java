@@ -148,7 +148,7 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
             updateComboBoxItems();
             updateListViewItems();
         };
-        control.itemsProperty().addListener(new WeakInvalidationListener(itemsObserver));
+        control.itemsProperty().addListener(itemsObserver);
 
         // listview for popup
         this.listView = createListView();
@@ -191,10 +191,13 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
         if (comboBox.isShowing()) {
             show();
         }
-        comboBox.sceneProperty().addListener(o -> {
-            if (((ObservableValue)o).getValue() == null) {
-                comboBox.hide();
-            }
+//        comboBox.sceneProperty().addListener(o -> {
+//            if (((ObservableValue)o).getValue() == null) {
+//                comboBox.hide();
+//            }
+//        });
+        registerChangeListener(control.sceneProperty(), e -> { 
+            if (control.getScene() == null) control.hide(); 
         });
     }
 
@@ -234,6 +237,13 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
 
     /** {@inheritDoc} */
     @Override public void dispose() {
+        if (getSkinnable() == null) return;
+        if (listViewItems != null) {
+            listViewItems.removeListener(weakListViewItemsListener);
+            listViewItems = null;
+            // todo: remove from listView?
+        }
+        comboBox.itemsProperty().removeListener(itemsObserver);
         super.dispose();
 
         if (behavior != null) {
@@ -548,7 +558,9 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
         _listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         _listView.setFocusTraversable(false);
 
-        _listView.getSelectionModel().selectedIndexProperty().addListener(o -> {
+//        _listView.getSelectionModel().selectedIndexProperty().addListener(o -> {
+         // FIXME: this is a bad as before in not coping with change of selectionModel   
+         registerChangeListener(_listView.getSelectionModel().selectedIndexProperty(), e -> {
             if (listSelectionLock) return;
             int index = listView.getSelectionModel().getSelectedIndex();
             comboBox.getSelectionModel().select(index);

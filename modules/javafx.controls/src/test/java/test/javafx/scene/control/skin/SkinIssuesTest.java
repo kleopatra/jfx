@@ -61,7 +61,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
-
+import static javafx.scene.control.skin.ComboSkinShim.*;
 /**
  * Contains tests for issues that turned up in SkinDisposeTest (and
  * are unrelated contract violation of dispose).
@@ -92,22 +92,72 @@ public class SkinIssuesTest {
     
     @Test
     public void testComboBoxAddItems() {
-        
+        ComboBox<String> box = new ComboBox<>();
+        installDefaultSkin(box);
+        replaceSkin(box);
+        box.getItems().add("added");
+    }
+    
+    @Test
+    public void testComboBoxSetItems() {
+        ComboBox<String> box = new ComboBox<>();
+        installDefaultSkin(box);
+        replaceSkin(box);
+        box.setItems(FXCollections.observableArrayList("one", "other"));
+    }
+    
+    /**
+     * guard against inconsistent state when nulling scene
+     */
+    @Test
+    public void testComboBoxHideOnRemove() {
+        ComboBox<String> box = new ComboBox<>();
+        box.setItems(FXCollections.observableArrayList("one", "other"));
+        showControl(box, true);
+        box.show();
+        assertTrue(box.isShowing());
+        root.getChildren().remove(box);
+        assertFalse(box.isShowing());
+    }
+    
+    @Test
+    public void testComboBoxSelectedItemListener() {
+        ComboBox<String> box = new ComboBox<>();
+        box.setItems(FXCollections.observableArrayList("one", "other"));
+        showControl(box, true);
+        box.show();
+        replaceSkin(box);
+        assertTrue(box.isShowing());
+        box.hide();
+        box.getSelectionModel().select(box.getItems().get(1));
+    }
+    /**
+     * rewired listener to listView's selectedIndex
+     */
+    @Test
+    public void testComboBoxValueOnListSelection() {
+        ComboBox<String> box = new ComboBox<>();
+        box.setItems(FXCollections.observableArrayList("one", "other"));
+        installDefaultSkin(box);
+        ListView<?> listView = getListView(box);
+        listView.getSelectionModel().select(1);
+        assertEquals(box.getItems().get(1), box.getValue());
     }
     
     /**
      * ComboPopupControl registers layout listener to combo that's
      * never removed -  might produce leak and NPE? No, happens in itemsListener
+     * this is example from 
+     * https://bugs.openjdk.java.net/browse/JDK-8115587 (was: RT-21207)
      */
     @Test
     public void testComboBoxLayoutListener() {
-        final ComboBox<String> cb = new ComboBox<>();
+        ComboBox<String> cb = new ComboBox<>();
 //        cb.getItems().add("" + System.currentTimeMillis()+ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 //        cb.setMaxWidth(100);
 //        cb.setMinWidth(100);
         cb.setOnShowing(e -> 
                 cb.getItems().setAll("" + System.currentTimeMillis()+ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-            
         );
         
 //        cb.setEditable(true);
