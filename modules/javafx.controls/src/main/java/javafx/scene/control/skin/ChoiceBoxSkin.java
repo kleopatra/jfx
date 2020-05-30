@@ -206,7 +206,7 @@ public class ChoiceBoxSkin<T> extends SkinBase<ChoiceBox<T>> {
 
     /** {@inheritDoc} */
     @Override public void dispose() {
-        // removing the content listener fixes NPE from listener
+         // removing the content listener fixes NPE from listener
         if (choiceBoxItems != null) {
             choiceBoxItems.removeListener(weakChoiceBoxItemsListener);
             choiceBoxItems = null;
