@@ -34,8 +34,6 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControlShim;
-import javafx.scene.control.skin.TextAreaSkin;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -484,5 +482,4 @@ public class TextAreaTest {
         dummyTxtArea.deleteText(0,6);
         assertEquals(dummyTxtArea.getParagraphs().get(0).toString(), "another");
     }
-    
 }
