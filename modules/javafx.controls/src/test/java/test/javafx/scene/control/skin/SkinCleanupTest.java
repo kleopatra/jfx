@@ -31,14 +31,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.javafx.scene.control.behavior.BehaviorBase;
-
+import static javafx.collections.FXCollections.*;
 import static javafx.scene.control.ControlShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -49,7 +46,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 
 /**
  * Tests around the cleanup task JDK-8241364.
@@ -96,11 +92,24 @@ public class SkinCleanupTest {
         ListView<String> listView = new ListView<>();
         installDefaultSkin(listView);
         replaceSkin(listView);
-        listView.setItems(FXCollections.observableArrayList());
+        listView.setItems(observableArrayList());
     }
 
-    
 //-------- choiceBox, toolBar    
+    
+    /**
+     * FIXME: Left-over from ChoiceBox fix.
+     * NPE on sequence setItems -> modify items after skin is replaced.
+     */
+    @Test
+    public void testChoiceBoxSetItems() {
+        ChoiceBox<String> box = new ChoiceBox<>();
+        installDefaultSkin(box);
+        replaceSkin(box);
+        box.setItems(observableArrayList("one"));
+        box.getItems().add("added");
+    }
+    
     /**
      * NPE when adding items after skin is replaced
      */
