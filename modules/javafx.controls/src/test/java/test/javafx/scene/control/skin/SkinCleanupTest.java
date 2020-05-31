@@ -25,23 +25,31 @@
 
 package test.javafx.scene.control.skin;
 
+import java.lang.ref.WeakReference;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
 
 import static javafx.scene.control.ControlShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 
 /**
  * Tests around the cleanup task JDK-8241364.
@@ -52,6 +60,47 @@ public class SkinCleanupTest {
     private Stage stage;
     private Pane root;
 
+  //-------------- listView    
+    
+    /**
+     * FIXME - remove in pr, isolated test for memory leak in listViewSkin keep test time short
+     */
+    @Test
+    public void testListViewSkinLeak() {
+        ListView<?> listView = new ListView<>();
+        installDefaultSkin(listView);
+        WeakReference<?> ref = new WeakReference<>(replaceSkin(listView));
+        assertNotNull(ref.get());
+        attemptGC(ref);
+        assertNull("listViewSkin must be gc'ed", ref.get());
+    }
+    
+    @Test
+    public void testListViewAddItems() {
+        ListView<String> listView = new ListView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.getItems().add("addded");
+    }
+    
+    @Test
+    public void testListViewRefresh() {
+        ListView<String> listView = new ListView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.refresh();
+    }
+    
+    @Test
+    public void testListViewSetItems() {
+        ListView<String> listView = new ListView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.setItems(FXCollections.observableArrayList());
+    }
+
+    
+//-------- choiceBox, toolBar    
     /**
      * NPE when adding items after skin is replaced
      */
