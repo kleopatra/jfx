@@ -221,6 +221,7 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
         if (control.getSelectionModel() != null) {
             control.getSelectionModel().getSelectedIndices().removeListener(weakSelectedIndicesListener);
         }
+        control.itemsProperty().removeListener(weakItemsListener);
         if (control.getItems() != null) {
             control.getItems().removeListener(weakItemsListListener);
         }
