@@ -32,6 +32,7 @@ import java.util.*;
 
 import com.sun.javafx.PlatformUtil;
 import javafx.animation.FadeTransition;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ListChangeListener;
@@ -166,9 +167,8 @@ public abstract class TableRowSkinBase<T,
         // --- end init bindings
 
 
-        // use invalidation listener here to update even when item equality is true
-        // (e.g. see RT-22463)
-        control.itemProperty().addListener(o -> requestCellUpdate());
+        itemListener = o -> requestCellUpdate();
+        control.itemProperty().addListener(itemListener);
         registerChangeListener(control.indexProperty(), e -> {
             // Fix for RT-36661, where empty table cells were showing content, as they
             // had incorrect table cell indices (but the table row index was correct).
@@ -195,6 +195,8 @@ public abstract class TableRowSkinBase<T,
 
     private WeakListChangeListener<TableColumnBase> weakVisibleLeafColumnsListener =
             new WeakListChangeListener<>(visibleLeafColumnsListener);
+
+    private InvalidationListener itemListener;
 
 
 
@@ -240,6 +242,15 @@ public abstract class TableRowSkinBase<T,
      *                                                                         *
      **************************************************************************/
 
+    
+    @Override
+    public void dispose() {
+        if (getSkinnable() == null) return;
+        getVisibleLeafColumns().removeListener(weakVisibleLeafColumnsListener);
+        getSkinnable().itemProperty().removeListener(itemListener);
+        super.dispose();
+    }
+    
     /**
      * Returns the graphic to draw on the inside of the disclosure node. Null
      * is acceptable when no graphic should be shown. Commonly this is the

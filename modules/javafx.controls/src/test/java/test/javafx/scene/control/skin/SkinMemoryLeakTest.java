@@ -132,7 +132,7 @@ public class SkinMemoryLeakTest {
                 TextField.class,
                 ToolBar.class,
 //                TreeCell.class,
-                TreeTableRow.class,
+//                TreeTableRow.class,
                 TreeTableView.class,
                 TreeView.class
         );
