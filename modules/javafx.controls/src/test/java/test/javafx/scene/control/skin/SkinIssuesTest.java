@@ -38,6 +38,7 @@ import com.sun.javafx.scene.control.behavior.ButtonBehavior;
 import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
+import static javafx.scene.control.skin.CellSkinShim.*;
 import static javafx.scene.control.skin.ComboSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
@@ -50,17 +51,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.PopupControl;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.skin.ListCellSkin;
 import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
+
 /**
  * Contains tests for issues that turned up in SkinDisposeTest (and
  * are unrelated contract violation of dispose).
@@ -86,6 +90,91 @@ public class SkinIssuesTest {
 
     private static final boolean showPulse = false; 
     private static final boolean methodPulse = true; 
+    
+//------------- cells
+    
+    /**
+     * Here we null the listView in the cell -> fixedSizeListener throws NPE
+     * because listView is null (in cells skin)
+     */
+    @Test
+    public void testListCellFixedSizeListenerNull() {
+        ListCell<Object> cell =  new ListCell<>();
+        installDefaultSkin(cell);
+        ListView<Object> first = new ListView<>();
+        cell.updateListView(first);
+        int firstFixed = 100;
+        first.setFixedCellSize(firstFixed);
+        assertEquals(firstFixed, getFixedCellSize(cell), 1);
+        cell.updateListView(null);
+        double replacedFixed = 200;
+        first.setFixedCellSize(replacedFixed);
+        assertEquals(firstFixed, getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * here we replace the skin: the fixedSizeListener is removed in dispose.
+     */
+    @Test
+    public void testListCellFixedSizeListenerReplaceSkin() {
+        ListCell<Object> cell =  new ListCell<>();
+        installDefaultSkin(cell);
+        ListView<Object> first = new ListView<>();
+        cell.updateListView(first);
+        int firstFixed = 100;
+        first.setFixedCellSize(firstFixed);
+        assertEquals(firstFixed, getFixedCellSize(cell), 1);
+        ListCellSkin oldSkin = (ListCellSkin) replaceSkin(cell);
+        double replacedFixed = 200;
+        first.setFixedCellSize(replacedFixed);
+        assertEquals(firstFixed, getFixedCellSize(oldSkin), 1);
+    }
+    
+    /**
+     * Cell leaking only if not attached to listView.
+     */
+    @Test 
+    public void testListCellMemoryLeakWithListViewNullAgain() {
+        ListCell<Object> cell =  new ListCell<>();
+        installDefaultSkin(cell);
+        ListView<Object> first = new ListView<>();
+        cell.updateListView(first);
+        cell.updateListView(null);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+    
+    /**
+     * Cell leaking only if not attached to listView.
+     */
+    @Test 
+    public void testListCellMemoryLeakWithListView() {
+        ListCell<Object> cell =  new ListCell<>();
+        installDefaultSkin(cell);
+        ListView<Object> lv = new ListView<>();
+        cell.updateListView(lv);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+    
+    /**
+     * Test for memory leak, just during evaluation - remove!
+     */
+    @Test 
+    public void testListCellMemoryLeak() {
+        ListCell<?> cell =  new ListCell<>();
+        installDefaultSkin(cell);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+
     
 // ------------ combos
     
@@ -192,7 +281,7 @@ public class SkinIssuesTest {
     /**
      * Test for memory leak, just during evaluation - remove!
      */
-    @Test
+    @Test @Ignore("combobox memory leak")
     public void testComboBoxMemoryLeak() {
         ComboBox<?> control =  new ComboBox<>();
         installDefaultSkin(control);

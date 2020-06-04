@@ -84,6 +84,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
     private void setupListeners() {
         ListView listView = getSkinnable().getListView();
         if (listView == null) {
+            // this listener hangs around if cell never attached to listView
             getSkinnable().listViewProperty().addListener(new InvalidationListener() {
                 @Override public void invalidated(Observable observable) {
                     getSkinnable().listViewProperty().removeListener(this);
@@ -93,7 +94,11 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
         } else {
             this.fixedCellSize = listView.getFixedCellSize();
             this.fixedCellSizeEnabled = fixedCellSize > 0;
+            // this listener is not removed from the old listView
+            // if listView reset to null
+            // its
             registerChangeListener(listView.fixedCellSizeProperty(), e -> {
+                // this throws npe because getListView == null
                 this.fixedCellSize = getSkinnable().getListView().getFixedCellSize();
                 this.fixedCellSizeEnabled = fixedCellSize > 0;
             });
@@ -156,5 +161,10 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
         }
 
         return super.computeMaxHeight(width, topInset, rightInset, bottomInset, leftInset);
+    }
+    
+    // test only
+    double getFixedCellSize() {
+        return fixedCellSize;
     }
 }
