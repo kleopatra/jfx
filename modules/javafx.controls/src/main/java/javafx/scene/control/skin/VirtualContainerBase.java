@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -55,7 +55,6 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
     private final VirtualFlow<I> flow;
 
     private EventHandler<? super ScrollToEvent<Integer>> scrollToEventHandler;
-
 
 
     /***************************************************************************
@@ -115,7 +114,6 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
      *                                                                         *
      **************************************************************************/
 
-    
     /**
      * Create the virtualized container that handles the layout and scrolling of
      * all the cells. This enables skin subclasses to provide
@@ -128,14 +126,16 @@ public abstract class VirtualContainerBase<C extends Control, I extends IndexedC
         return new VirtualFlow<>();
     }
 
+    /**
+     * {@inheritDoc} <p>
+     * Overridden to remove EventHandler.
+     */
     @Override
     public void dispose() {
         if (getSkinnable() == null) return;
         getSkinnable().removeEventHandler(ScrollToEvent.scrollToTopIndex(), scrollToEventHandler);
         super.dispose();
     }
-
-
 
     /**
      * Get the virtualized container.

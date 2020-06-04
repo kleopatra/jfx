@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -94,7 +94,7 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
     // Locale may change between instances.
     private static final String EMPTY_LIST_TEXT = ControlResources.getString("ListView.noContent");
 
-    private VirtualFlow<ListCell<T>> flow;
+    private final VirtualFlow<ListCell<T>> flow;
 
     /**
      * Region placed over the top of the flow (and possibly the header row) if
@@ -131,7 +131,7 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
 
     private WeakMapChangeListener<Object, Object> weakPropertiesMapListener =
             new WeakMapChangeListener<>(propertiesMapListener);
-    
+
     private final ListChangeListener<T> listViewItemsListener = new ListChangeListener<T>() {
         @Override public void onChanged(Change<? extends T> c) {
             while (c.next()) {
@@ -171,14 +171,10 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
 
     private final InvalidationListener itemsChangeListener = observable -> updateListViewItems();
 
-    private WeakInvalidationListener 
+    private WeakInvalidationListener
                 weakItemsChangeListener = new WeakInvalidationListener(itemsChangeListener);
 
-
-
     private EventHandler<MouseEvent> ml;
-
-
 
     /***************************************************************************
      *                                                                         *
@@ -285,22 +281,15 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
             listViewItems = null;
         }
         // flow related cleanup
-        // remove mouse handlers not needed 
-//        flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
-//        flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
         // leaking without nulling factory
         flow.setCellFactory(null);
-        // no effect on leakage (but should be done to not accumulate children)
-//        getChildren().clear();
-        // not possible: flow is final
-//        flow = null;
-        // beware: super doesn't cleanup its handler to onScollEvent!
+        // for completeness - but no effect with/out?
+        flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
+        flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
-            // no effect (and not really possible, is final)
-//            behavior = null;
         }
     }
 

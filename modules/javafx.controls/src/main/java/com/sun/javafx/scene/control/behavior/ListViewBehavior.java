@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -213,10 +213,6 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
         ListView<T> control = getNode();
 
         ListCellBehavior.removeAnchor(control);
-        // here no need to manually remove - why not? in skins getting leaks if not doing ..
-        // actually no: in skins, we remove them to fix side-effects
-        // the question here is: are/what are the side-effects in behavior?
-        // still setting the anchor, if disposed (or skin set to null)!
         control.selectionModelProperty().removeListener(weakSelectionModelListener);
         if (control.getSelectionModel() != null) {
             control.getSelectionModel().getSelectedIndices().removeListener(weakSelectedIndicesListener);
@@ -225,16 +221,11 @@ public class ListViewBehavior<T> extends BehaviorBase<ListView<T>> {
         if (control.getItems() != null) {
             control.getItems().removeListener(weakItemsListListener);
         }
+
         if (tlFocus != null) tlFocus.dispose();
-        super.dispose();
-
-        // was leaking: added as filter, removed as handler
         control.removeEventFilter(KeyEvent.ANY, keyEventListener);
+        super.dispose();
     }
-
-
-
-
 
     /**************************************************************************
      *                         State and Functions                            *

@@ -34,11 +34,10 @@ import org.junit.Test;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.ListCellBehavior;
 
+import static javafx.collections.FXCollections.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
-import static javafx.collections.FXCollections.*;
-import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 
 /**
@@ -49,7 +48,7 @@ import javafx.scene.control.ListView;
 public class BehaviorCleanupTest {
 
 // ---------- ListView
-    
+
     /**
      * Test cleanup of listener to itemsProperty.
      */
@@ -63,10 +62,10 @@ public class BehaviorCleanupTest {
         listView.setItems(observableArrayList("other", "again"));
         assertEquals("sanity: anchor unchanged", last, listView.getProperties().get("anchor"));
         listView.getItems().remove(0);
-        assertEquals("anchor must not be updated on items modification when disposed", 
+        assertEquals("anchor must not be updated on items modification when disposed",
                 last, listView.getProperties().get("anchor"));
     }
-    
+
     @Test
     public void testListViewBehaviorSetItems() {
         ListView<String> listView = new ListView<>(observableArrayList("one", "two"));
@@ -76,10 +75,10 @@ public class BehaviorCleanupTest {
         listView.setItems(observableArrayList("other", "again"));
         assertEquals("sanity: anchor unchanged", last, listView.getProperties().get("anchor"));
         listView.getItems().remove(0);
-        assertEquals("anchor must be updated on items modification", 
+        assertEquals("anchor must be updated on items modification",
                 last -1, listView.getProperties().get("anchor"));
    }
-    
+
     /**
      * Test cleanup of itemsList listener in ListViewBehavior.
      */
@@ -91,11 +90,11 @@ public class BehaviorCleanupTest {
         int last = 1;
         ListCellBehavior.setAnchor(listView, last, false);
         listView.getItems().remove(0);
-        assertEquals("anchor must not be updated on items modification when disposed", 
+        assertEquals("anchor must not be updated on items modification when disposed",
                 last,
                 listView.getProperties().get("anchor"));
     }
-    
+
     @Test
     public void testListViewBehaviorRemoveItem() {
         ListView<String> listView = new ListView<>(observableArrayList("one", "two"));
@@ -104,10 +103,10 @@ public class BehaviorCleanupTest {
         ListCellBehavior.setAnchor(listView, last, false);
         assertEquals("behavior must set anchor on select", last, listView.getProperties().get("anchor"));
         listView.getItems().remove(0);
-        assertEquals("anchor must be updated on items modification", 
+        assertEquals("anchor must be updated on items modification",
                 last -1, listView.getProperties().get("anchor"));
     }
- 
+
     /**
      * Test cleanup of selection listeners in ListViewBehavior.
      */
@@ -118,7 +117,7 @@ public class BehaviorCleanupTest {
         listView.getSelectionModel().select(1);
         weakRef.get().dispose();
         listView.getSelectionModel().select(0);
-        assertNull("anchor must remain cleared on selecting when disposed", 
+        assertNull("anchor must remain cleared on selecting when disposed",
                 listView.getProperties().get("anchor"));
     }
 
@@ -130,7 +129,7 @@ public class BehaviorCleanupTest {
         listView.getSelectionModel().select(last);
         assertEquals("anchor must be set", last, listView.getProperties().get("anchor"));
     }
- 
+
     @Test
     public void testListViewBehaviorDispose() {
         ListView<String> listView = new ListView<>(observableArrayList("one", "two"));
@@ -139,22 +138,9 @@ public class BehaviorCleanupTest {
         weakRef.get().dispose();
         assertNull("anchor must be cleared after dispose", listView.getProperties().get("anchor"));
     }
-    
-    /**
-     * FIXME: included here to avoid merge conflicts with 8245282 - remove with next fix.
-     */
-    @Test
-    public void testListViewBehaviorLeak() {
-        ListView<String> listView = new ListView<>();
-        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
-        assertNotNull(weakRef.get());
-        weakRef.get().dispose();
-        attemptGC(weakRef);
-        assertNull("behavior must be gc'ed", weakRef.get());
-    }
-    
-  //------------------ setup/cleanup    
-    
+
+  //------------------ setup/cleanup
+
     @After
     public void cleanup() {
         Thread.currentThread().setUncaughtExceptionHandler(null);
@@ -162,7 +148,6 @@ public class BehaviorCleanupTest {
 
     @Before
     public void setup() {
-        
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RuntimeException) {
                 throw (RuntimeException)throwable;
@@ -170,8 +155,6 @@ public class BehaviorCleanupTest {
                 Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
             }
         });
-
-        
     }
 
 }

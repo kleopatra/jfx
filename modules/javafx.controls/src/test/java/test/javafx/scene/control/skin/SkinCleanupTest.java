@@ -25,10 +25,9 @@
 
 package test.javafx.scene.control.skin;
 
-import java.lang.ref.WeakReference;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static javafx.collections.FXCollections.*;
@@ -56,21 +55,8 @@ public class SkinCleanupTest {
     private Stage stage;
     private Pane root;
 
-  //-------------- listView    
-    
-    /**
-     * FIXME - remove in pr, isolated test for memory leak in listViewSkin keep test time short
-     */
-    @Test
-    public void testListViewSkinLeak() {
-        ListView<?> listView = new ListView<>();
-        installDefaultSkin(listView);
-        WeakReference<?> ref = new WeakReference<>(replaceSkin(listView));
-        assertNotNull(ref.get());
-        attemptGC(ref);
-        assertNull("listViewSkin must be gc'ed", ref.get());
-    }
-    
+  //-------------- listView
+
     @Test
     public void testListViewAddItems() {
         ListView<String> listView = new ListView<>();
@@ -78,7 +64,7 @@ public class SkinCleanupTest {
         replaceSkin(listView);
         listView.getItems().add("addded");
     }
-    
+
     @Test
     public void testListViewRefresh() {
         ListView<String> listView = new ListView<>();
@@ -86,7 +72,7 @@ public class SkinCleanupTest {
         replaceSkin(listView);
         listView.refresh();
     }
-    
+
     @Test
     public void testListViewSetItems() {
         ListView<String> listView = new ListView<>();
@@ -95,13 +81,13 @@ public class SkinCleanupTest {
         listView.setItems(observableArrayList());
     }
 
-//-------- choiceBox, toolBar    
-    
+//-------- choiceBox, toolBar
+
     /**
      * FIXME: Left-over from ChoiceBox fix.
      * NPE on sequence setItems -> modify items after skin is replaced.
      */
-    @Test
+    @Test @Ignore("8246202")
     public void testChoiceBoxSetItems() {
         ChoiceBox<String> box = new ChoiceBox<>();
         installDefaultSkin(box);
@@ -109,7 +95,7 @@ public class SkinCleanupTest {
         box.setItems(observableArrayList("one"));
         box.getItems().add("added");
     }
-    
+
     /**
      * NPE when adding items after skin is replaced
      */
