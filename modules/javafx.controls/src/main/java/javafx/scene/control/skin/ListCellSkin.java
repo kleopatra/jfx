@@ -28,6 +28,7 @@ package javafx.scene.control.skin;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
@@ -78,9 +79,117 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
         behavior = new ListCellBehavior<>(control);
 //        control.setInputMap(behavior.getInputMap());
 
-        setupListeners();
+//        fixedCellSizeListener = o -> updateFixedCellSize();
+        // pattern: manually managed invalidationListeners to parent and child property
+        // requires storing value of parentProperty for removal of child listener
+//        listViewListener = o -> updateListView();
+//        control.listViewProperty().addListener(listViewListener);
+//        updateListView();
+        
+        // pattern: skin api for parent property
+//        registerChangeListener(control.listViewProperty(), o -> updateListView());
+//        updateListView();
+        
+        // pattern: manual ChangeListener, no reference to listView
+        fixedCellSizeListener = o -> updateFixedCellSize();
+        listViewChangeListener = (src, ov, nv) -> updateListView(ov);
+        control.listViewProperty().addListener(listViewChangeListener);
+        updateListView(null);
+        
+        // original
+//        setupListeners();
     }
 
+// manual changeListener, updateListView with oldValue   
+    
+//    private ListView<T> listView;
+    private InvalidationListener fixedCellSizeListener;
+    
+    private ChangeListener<ListView<T>> listViewChangeListener;
+    
+    private void updateListView(ListView<T> oldListView) {
+        if (oldListView != null) {
+            oldListView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+        }
+        ListView<T> listView = getSkinnable().getListView();
+        if (listView != null) {
+            listView.fixedCellSizeProperty().addListener(fixedCellSizeListener);
+        }
+        updateFixedCellSize();
+    }
+    /**
+     * Callback from listener to the cell's listView
+     */
+//    private void updateListView() {
+//        if (listView != null) {
+//            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+//        }
+//        listView = getSkinnable().getListView();
+//        if (listView != null) {
+//            listView.fixedCellSizeProperty().addListener(fixedCellSizeListener);
+//        }
+//        updateFixedCellSize();
+//    }
+//
+    /**
+     * Callback from listener to the listView's fixedCellSize.
+     * think: require listView != null or not? 
+     * if yes -> size if of last listView, if not -> size is reset to -1 if null listView
+     * if cleaning up on changing listView, should we cleanup in dispose?
+     */
+    private void updateFixedCellSize() {
+        ListView<T> listView = getSkinnable().getListView();
+        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
+        this.fixedCellSizeEnabled = fixedCellSize > 0;
+    }
+    
+    private void updateFixedCellSize(ListView<T> listView) {
+//        ListView<T> listView = getSkinnable().getListView();
+        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
+        this.fixedCellSizeEnabled = fixedCellSize > 0;
+    }
+
+    /** {@inheritDoc} */
+    @Override public void dispose() {
+        if (getSkinnable() == null) return;
+//        getSkinnable().listViewProperty().removeListener(listViewListener);
+        getSkinnable().listViewProperty().removeListener(listViewChangeListener);
+        ListView<T> listView = getSkinnable().getListView();
+        if (listView != null) {
+            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+            listView = null;
+        }
+        super.dispose();
+
+        if (behavior != null) {
+            behavior.dispose();
+            // nulling makes no difference for memory leak of skin
+//            behavior = null;
+        }
+    }
+    
+ //------------------- old listener wiring
+    
+
+    /***************************************************************************
+     *                                                                         *
+     * Public API                                                              *
+     *                                                                         *
+     **************************************************************************/
+
+
+//    @Override public void dispose() {
+//        super.dispose();
+//
+//        if (behavior != null) {
+//            behavior.dispose();
+//        }
+//        
+//    }
+    // this is basically setting up a listener to a path property that's
+    // not updated on updating the listView
+    // doesn't happen (?) in current useage, but is brittle
+    // replace with usual pattern: listen to parent property, rewire listeners to child property
     private void setupListeners() {
         ListView listView = getSkinnable().getListView();
         if (listView == null) {
@@ -96,7 +205,8 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
             this.fixedCellSizeEnabled = fixedCellSize > 0;
             // this listener is not removed from the old listView
             // if listView reset to null
-            // its
+            // skin api is not suited for repeated add/remove: removes all (on a given property)
+            // with no possibility to access just the one we added into the chain
             registerChangeListener(listView.fixedCellSizeProperty(), e -> {
                 // this throws npe because getListView == null
                 this.fixedCellSize = getSkinnable().getListView().getFixedCellSize();
@@ -106,23 +216,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
     }
 
 
-
-    /***************************************************************************
-     *                                                                         *
-     * Public API                                                              *
-     *                                                                         *
-     **************************************************************************/
-
-    /** {@inheritDoc} */
-    @Override public void dispose() {
-        super.dispose();
-
-        if (behavior != null) {
-            behavior.dispose();
-            // nulling makes no difference for memory leak of skin
-//            behavior = null;
-        }
-    }
+//----------- end old listener wiring
 
     /** {@inheritDoc} */
     @Override protected double computePrefWidth(double height, double topInset, double rightInset, double bottomInset, double leftInset) {
