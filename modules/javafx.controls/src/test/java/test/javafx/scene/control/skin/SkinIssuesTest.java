@@ -173,7 +173,8 @@ public class SkinIssuesTest {
         ListCellSkin oldSkin = (ListCellSkin) replaceSkin(cell);
         double replacedFixed = 200;
         first.setFixedCellSize(replacedFixed);
-        assertEquals("fixedCellSize in oldSkin must be unchanged", firstFixed, getFixedCellSize(oldSkin), 1);
+        // think: really needed to cleanup?
+        assertEquals("fixedCellSize in oldSkin must be default", -1, getFixedCellSize(oldSkin), 1);
     }
     
     /**
