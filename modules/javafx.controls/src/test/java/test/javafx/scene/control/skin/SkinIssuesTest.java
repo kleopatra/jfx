@@ -106,7 +106,8 @@ public class SkinIssuesTest {
         assertEquals(firstFixed, getFixedCellSize(cell), 1);
         ListCellSkin oldSkin = (ListCellSkin) cell.getSkin();
         cell.setSkin(null);
-        assertEquals(-1, getFixedCellSize(oldSkin), 1);
+        // no internal skin cleanup needed, it's done after dispose
+        assertEquals(firstFixed, getFixedCellSize(oldSkin), 1);
     }
     @Test
     public void testListCellInitialFixedSize() {
@@ -173,8 +174,8 @@ public class SkinIssuesTest {
         ListCellSkin oldSkin = (ListCellSkin) replaceSkin(cell);
         double replacedFixed = 200;
         first.setFixedCellSize(replacedFixed);
-        // think: really needed to cleanup?
-        assertEquals("fixedCellSize in oldSkin must be default", -1, getFixedCellSize(oldSkin), 1);
+        // no internal skin cleanup needed, it's done after dispose
+        assertEquals("fixedCellSize in oldSkin must be default", firstFixed, getFixedCellSize(oldSkin), 1);
     }
     
     /**

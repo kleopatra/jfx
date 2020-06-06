@@ -79,20 +79,23 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
         behavior = new ListCellBehavior<>(control);
 //        control.setInputMap(behavior.getInputMap());
 
+        // ---------- AAAAAAAAAAAAAAAA
         // pattern: manually managed invalidationListeners to parent and child property
         // requires storing value of parentProperty for removal of child listener
         // might be required if we need an InvalidationListener on the parent property
         // (not here, but just for the complete picture)
-        fixedCellSizeListener = o -> updateFixedCellSize();
-        listViewListener = o -> updateListView();
-        control.listViewProperty().addListener(listViewListener);
-        updateListView();
+//        fixedCellSizeListener = o -> updateFixedCellSize();
+//        listViewListener = o -> updateListView();
+//        control.listViewProperty().addListener(listViewListener);
+//        updateListView();
         
+        //--------- BBBBBBBBBBBBB
         // pattern: skin api for parent property
 //        fixedCellSizeListener = o -> updateFixedCellSize();
 //        registerChangeListener(control.listViewProperty(), o -> updateListView());
 //        updateListView();
         
+        //--------- CCCCCCCCCCCC
         // pattern manual changeListener, no reference to listView
         // updateListView carrying both old/new value
 //        fixedCellSizeListener = o -> updateFixedCellSize(getSkinnable().getListView());
@@ -100,68 +103,69 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //        control.listViewProperty().addListener(listViewChangeListener);
 //        updateListView(null, control.getListView());
         
-        
+        //--------- DDDDDDD
         // pattern: manual ChangeListener, no reference to listView, 
         // updateListView carrying oldListView 
         // issue: cleanup of internal state in dispose requires code duplication
         // or additional method
-//        fixedCellSizeListener = o -> updateFixedCellSize();
-//        listViewChangeListener = (src, ov, nv) -> updateListView(ov);
-//        control.listViewProperty().addListener(listViewChangeListener);
-//        updateListView(null);
+        fixedCellSizeListener = o -> updateFixedCellSize();
+        listViewChangeListener = (src, ov, nv) -> updateListView(ov);
+        control.listViewProperty().addListener(listViewChangeListener);
+        updateListView(null);
         
         // pattern
         // original
 //        setupListeners();
     }
 
-//------------- scenario: invalidation listener on parent property
+//-------------AAAAA scenario: invalidation listener on parent property
     
-    private InvalidationListener fixedCellSizeListener;
-    private InvalidationListener listViewListener;
-    private ListView<T> listView;
+//    private InvalidationListener fixedCellSizeListener;
+//    private InvalidationListener listViewListener;
+//    private ListView<T> listView;
+//    
+//    private void updateListView() {
+//        if (listView != null) {
+//            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+//        }
+//        listView = getSkinnable().getListView();
+//        if (listView != null) {
+//            listView.fixedCellSizeProperty().addListener(fixedCellSizeListener);
+//        }
+//        updateFixedCellSize();
+//    }
+//
+//    /**
+//     * Callback from listener to the listView's fixedCellSize. think: require
+//     * listView != null or not? if yes -> size if of last listView, if not ->
+//     * size is reset to -1 if null listView if cleaning up on changing listView,
+//     * should we cleanup in dispose?
+//     */
+//    private void updateFixedCellSize() {
+//        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
+//        this.fixedCellSizeEnabled = fixedCellSize > 0;
+//    }
+//    
+//    /** {@inheritDoc} */
+//    @Override
+//    public void dispose() {
+//        if (getSkinnable() == null) return;
+//        getSkinnable().listViewProperty().removeListener(listViewListener);
+//        if (listView != null) {
+//            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+//            listView = null;
+//        }
+//        // no need to update our own state, we are dead after this!
+////        updateFixedCellSize();
+//        super.dispose();
+//
+//        if (behavior != null) {
+//            behavior.dispose();
+//        }
+//    }
+//
     
-    private void updateListView() {
-        if (listView != null) {
-            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
-        }
-        listView = getSkinnable().getListView();
-        if (listView != null) {
-            listView.fixedCellSizeProperty().addListener(fixedCellSizeListener);
-        }
-        updateFixedCellSize();
-    }
-
-    /**
-     * Callback from listener to the listView's fixedCellSize. think: require
-     * listView != null or not? if yes -> size if of last listView, if not ->
-     * size is reset to -1 if null listView if cleaning up on changing listView,
-     * should we cleanup in dispose?
-     */
-    private void updateFixedCellSize() {
-        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
-        this.fixedCellSizeEnabled = fixedCellSize > 0;
-    }
-    
-    /** {@inheritDoc} */
-    @Override
-    public void dispose() {
-        if (getSkinnable() == null) return;
-        getSkinnable().listViewProperty().removeListener(listViewListener);
-        if (listView != null) {
-            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
-            listView = null;
-        }
-        updateFixedCellSize();
-        super.dispose();
-
-        if (behavior != null) {
-            behavior.dispose();
-        }
-    }
-
-    
-// ---------scenario: skin api for listViewListener
+// --------- BBBBBB scenario: skin api for listViewListener
 //    private InvalidationListener fixedCellSizeListener;
 //    private ListView<T> listView;
 //    private void updateListView() {
@@ -183,8 +187,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //     * should we cleanup in dispose?
 //     */
 //    private void updateFixedCellSize() {
-//        this.fixedCellSize = listView == null ? -1
-//                : listView.getFixedCellSize();
+//        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
 //        this.fixedCellSizeEnabled = fixedCellSize > 0;
 //    }
 //    
@@ -196,7 +199,6 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
 //            listView = null;
 //        }
-//        updateFixedCellSize();
 //        super.dispose();
 //
 //        if (behavior != null) {
@@ -205,7 +207,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //    }
 //
 
-// scenario: manual changeListener, updateListView with both old/newValue   
+// -------CCCCCC scenario: manual changeListener, updateListView with both old/newValue   
     
 //    private InvalidationListener fixedCellSizeListener;
 //    private ChangeListener<ListView<T>> listViewChangeListener;
@@ -230,6 +232,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //    @Override public void dispose() {
 //        if (getSkinnable() == null) return;
 //        getSkinnable().listViewProperty().removeListener(listViewChangeListener);
+//        // implicit cleanup ...
 //        updateListView(getSkinnable().getListView(), null);
 //        super.dispose();
 //
@@ -238,52 +241,49 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //        }
 //    }
 
-// scenario: manual changeListener, updateListView with oldValue   
+// ------- DDDDDDDDDDDDDDDDdd scenario: manual changeListener, updateListView with oldValue   
     
-//    private InvalidationListener fixedCellSizeListener;
-//    private ChangeListener<ListView<T>> listViewChangeListener;
-//    
-//    private void updateListView(ListView<T> oldListView) {
-//        if (oldListView != null) {
-//            oldListView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
-//        }
-//        ListView<T> listView = getSkinnable().getListView();
-//        if (listView != null) {
-//            listView.fixedCellSizeProperty().addListener(fixedCellSizeListener);
-//        }
-//        updateFixedCellSize();
-//    }
-//    /**
-//     * Callback from listener to the listView's fixedCellSize.
-//     * think: require listView != null or not? 
-//     * if yes -> size if of last listView, if not -> size is reset to -1 if null listView
-//     * if cleaning up on changing listView, should we cleanup in dispose?
-//     */
-//    private void updateFixedCellSize() {
-//        ListView<T> listView = getSkinnable().getListView();
-//        updateFixedCellSize(listView);
-//    }
-//    protected void updateFixedCellSize(ListView<T> listView) {
-//        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
-//        this.fixedCellSizeEnabled = fixedCellSize > 0;
-//    }
-//    
-//    /** {@inheritDoc} */
-//    @Override public void dispose() {
-//        if (getSkinnable() == null) return;
-//        getSkinnable().listViewProperty().removeListener(listViewChangeListener);
-//        ListView<T> listView = getSkinnable().getListView();
-//        if (listView != null) {
-//            // tbd: cleanup internal state
-//            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
-//        }
-//        updateFixedCellSize(null);
-//        super.dispose();
-//
-//        if (behavior != null) {
-//            behavior.dispose();
-//        }
-//    }
+    private InvalidationListener fixedCellSizeListener;
+    private ChangeListener<ListView<T>> listViewChangeListener;
+    
+    private void updateListView(ListView<T> oldListView) {
+        if (oldListView != null) {
+            oldListView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+        }
+        ListView<T> listView = getSkinnable().getListView();
+        if (listView != null) {
+            listView.fixedCellSizeProperty().addListener(fixedCellSizeListener);
+        }
+        updateFixedCellSize();
+    }
+    /**
+     * Callback from listener to the listView's fixedCellSize.
+     * think: require listView != null or not? 
+     * if yes -> size if of last listView, if not -> size is reset to -1 if null listView
+     * if cleaning up on changing listView, should we cleanup in dispose?
+     */
+    private void updateFixedCellSize() {
+        ListView<T> listView = getSkinnable().getListView();
+        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
+        this.fixedCellSizeEnabled = fixedCellSize > 0;
+    }
+
+    /** {@inheritDoc} */
+    @Override public void dispose() {
+        if (getSkinnable() == null) return;
+        getSkinnable().listViewProperty().removeListener(listViewChangeListener);
+        ListView<T> listView = getSkinnable().getListView();
+        if (listView != null) {
+            // decided: cleanup internal state - no, we are dead after this
+            // cleanup of externals only (not applicable here)
+            listView.fixedCellSizeProperty().removeListener(fixedCellSizeListener);
+        }
+        super.dispose();
+
+        if (behavior != null) {
+            behavior.dispose();
+        }
+    }
     
 //------------------------- manually managed ??
     
