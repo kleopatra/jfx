@@ -142,6 +142,10 @@ public class SkinMemoryLeakTest {
         List<Control> controls = controlClasses.stream()
                 .map(ControlSkinFactory::createControl)
                 .collect(Collectors.toList());
+        // controls with configuration
+        ListCell<?> listCell = new ListCell<>();
+        listCell.updateListView(new ListView<>());
+        controls.addAll(List.of(listCell));
         return asArrays(controls);
     }
 

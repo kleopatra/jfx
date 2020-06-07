@@ -61,6 +61,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.skin.ListCellSkin;
 import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
@@ -92,93 +93,194 @@ public class SkinIssuesTest {
     private static final boolean methodPulse = true; 
     
 //------------- cells
+// note: core ListCellSkin doesn't re-wire path property on changing listView
+// for max failures make sure to install the listView before skin    
     
     @Test
     public void testListCellFixedSizeNullSkin() {
         ListCell<Object> cell =  new ListCell<>();
-        ListView<Object> first = new ListView<>();
-        assertEquals("sanity: default fixed cell size", -1, first.getFixedCellSize(), 1);
-        cell.updateListView(first);
-        int firstFixed = 100;
-        first.setFixedCellSize(firstFixed);
-        assertEquals("sanity", firstFixed, first.getFixedCellSize(), 1);
+        ListView<Object> listView = new ListView<>();
+        cell.updateListView(listView);
+        double fixed = 100;
+        listView.setFixedCellSize(fixed);
         installDefaultSkin(cell);
-        assertEquals(firstFixed, getFixedCellSize(cell), 1);
+        assertEquals(fixed, getFixedCellSize(cell), 1);
         ListCellSkin oldSkin = (ListCellSkin) cell.getSkin();
         cell.setSkin(null);
         // no internal skin cleanup needed, it's done after dispose
-        assertEquals(firstFixed, getFixedCellSize(oldSkin), 1);
-    }
-    @Test
-    public void testListCellInitialFixedSize() {
-        ListCell<Object> cell =  new ListCell<>();
-        ListView<Object> first = new ListView<>();
-        assertEquals("sanity: default fixed cell size", -1, first.getFixedCellSize(), 1);
-        cell.updateListView(first);
-        int firstFixed = 100;
-        first.setFixedCellSize(firstFixed);
-        assertEquals("sanity", firstFixed, first.getFixedCellSize(), 1);
-        installDefaultSkin(cell);
-        assertEquals(firstFixed, getFixedCellSize(cell), 1);
+        assertEquals(fixed, getFixedCellSize(oldSkin), 1);
     }
     
-    @Test
-    public void testListCellInitialFixedSizeDefault() {
-        ListCell<Object> cell =  new ListCell<>();
-        ListView<Object> first = new ListView<>();
-        assertEquals("sanity: default fixed cell size", -1, first.getFixedCellSize(), 1);
-        cell.updateListView(first);
-        installDefaultSkin(cell);
-        assertEquals("initial default fixed cell size in skin", -1, getFixedCellSize(cell), 1);
-    }
     /**
      * Here we null the listView in the cell -> fixedSizeListener throws NPE
      * because listView is null (in cells skin)
      * 
      * skin -> updateListView -> modify fixedSize > null listView -> modify fixedSize 
+     * 
+     * Note: this and the plain memory leak are the only one failing with original 
+     * setup. Rethink tests?
      */
     @Test
     public void testListCellFixedSizeListenerNull() {
         ListCell<Object> cell =  new ListCell<>();
         installDefaultSkin(cell);
-        ListView<Object> first = new ListView<>();
-        cell.updateListView(first);
-        int firstFixed = 100;
-        first.setFixedCellSize(firstFixed);
-        assertEquals(firstFixed, getFixedCellSize(cell), 1);
+        ListView<Object> listView = new ListView<>();
+        cell.updateListView(listView);
+        int fixed = 100;
+        listView.setFixedCellSize(fixed);
+        assertEquals("skin must update fixed cell size", fixed, getFixedCellSize(cell), 1);
         cell.updateListView(null);
         double replacedFixed = 200;
-        // NPE because listener not removed (and code not guarded against null listView)
-        first.setFixedCellSize(replacedFixed);
+        // was: NPE because listener not removed (and code not guarded against null listView)
+        listView.setFixedCellSize(replacedFixed);
         // was: incorrect test assumption - skin cleans up internal state 
-        // think: cleanup or not? does it matter?
-        assertEquals(-1, getFixedCellSize(cell), 1);
+        // think: cleanup or not? 
+        // yes if the skin still lives (here), no if the skin is dead (after dispose)
+        assertEquals("skin must cleanup size on null listView", -1, getFixedCellSize(cell), 1);
     }
     
     /**
-     * Test listener to fixedCellSize.
-     * here we replace the skin: the fixedSizeListener is removed in dispose.
+     * Test replaced skin not listening to fixedCellSize after dispose.
      * 
-     * skin -> updateListView -> modify fixedSize > replaceSkin -> modify fixedSize 
+     * replaceSkin -> modify fixedSize 
      * 
      */
     @Test
-    public void testListCellFixedSizeListenerReplaceSkin() {
+    public void testListCellNotUpdatedFixedSizeReplaceSkin() {
         ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> listView = new ListView<>();
+        cell.updateListView(listView);
         installDefaultSkin(cell);
-        ListView<Object> first = new ListView<>();
-        cell.updateListView(first);
-        int firstFixed = 100;
-        first.setFixedCellSize(firstFixed);
-        assertEquals(firstFixed, getFixedCellSize(cell), 1);
-        ListCellSkin oldSkin = (ListCellSkin) replaceSkin(cell);
-        double replacedFixed = 200;
-        first.setFixedCellSize(replacedFixed);
-        // no internal skin cleanup needed, it's done after dispose
-        assertEquals("fixedCellSize in oldSkin must be default", firstFixed, getFixedCellSize(oldSkin), 1);
+        ListCellSkin<?> oldSkin = (ListCellSkin<?>) replaceSkin(cell);
+        double replaced = 200;
+        listView.setFixedCellSize(replaced);
+        // the skin might cleanup itself on dispose, important is that 
+        // it does not longer change along with source property in listView
+        assertNotEquals("fixed cell size not updated in old skin", replaced, getFixedCellSize(oldSkin), 1);
     }
     
     /**
+     * Test that listener is re-wired on replacing listView.
+     */
+    @Test
+    public void testListCellUpdatedFixedSizeReplaceListView() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> initialLV = new ListView<>();
+        initialLV.setFixedCellSize(100);
+        cell.updateListView(initialLV);
+        installDefaultSkin(cell);
+        cell.updateListView(new ListView<>());
+        assertEquals("fixed cell size not changed after change in old", 
+                cell.getListView().getFixedCellSize(), 
+                getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * Test that listener is re-wired on replacing listView.
+     */
+    @Test
+    public void testListCellUpdatedFixedSizeToNewListViewReplaceListView() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> initialLV = new ListView<>();
+        cell.updateListView(initialLV);
+        installDefaultSkin(cell);
+        cell.updateListView(new ListView<>());
+        cell.getListView().setFixedCellSize(300);
+        assertEquals("fixed cell updated in new", 
+                cell.getListView().getFixedCellSize(), 
+                getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * Test that listener is re-wired on replacing listView.
+     */
+    @Test
+    public void testListCellNotUpdatedFixedSizeToNewListViewReplaceListView() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> initialLV = new ListView<>();
+        cell.updateListView(initialLV);
+        installDefaultSkin(cell);
+        cell.updateListView(new ListView<>());
+        initialLV.setFixedCellSize(300);
+        assertEquals("fixed cell updated in new", 
+                10, //cell.getListView().getFixedCellSize(), 
+                getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * Test skin not listening to old listView after nulling.
+     */
+    @Test
+    public void testListCellNotUpdatedFixedSizeNullListView() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> listView = new ListView<>();
+        cell.updateListView(listView);
+        installDefaultSkin(cell);
+        cell.updateListView(null);
+        // throws NPE in original
+        listView.setFixedCellSize(100);
+        assertEquals("fixed cell size not updated skin", Region.USE_COMPUTED_SIZE, getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * Test skin listening to fixed size.
+     */
+    @Test
+    public void testListCellUpdatedFixedSize() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> listView = new ListView<>();
+        cell.updateListView(listView);
+        installDefaultSkin(cell);
+        double fixed = 100;
+        listView.setFixedCellSize(fixed);
+        assertEquals("fixed cell size updated in skin", fixed, getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * Test initial non-default fixed size.
+     */
+    @Test
+    public void testListCellInitialFixedSize() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> listView = new ListView<>();
+        double fixed = 100;
+        listView.setFixedCellSize(fixed);
+        cell.updateListView(listView);
+        installDefaultSkin(cell);
+        assertEquals("initial not-default cell size in skin", fixed, getFixedCellSize(cell), 1);
+    }
+    
+    /**
+     * REMOVE - we know that both are region.computesize
+     * updateControl -> skin -> initial size
+     */
+    @Test
+    public void testListCellInitialFixedSizeDefault() {
+        ListCell<Object> cell =  new ListCell<>();
+        ListView<Object> listView = new ListView<>();
+        double fixed = listView.getFixedCellSize();
+        cell.updateListView(listView);
+        installDefaultSkin(cell);
+        assertEquals("initial default fixed cell size in skin", fixed, getFixedCellSize(cell), 1);
+    }
+    
+    
+    @Test
+    public void testListCellDefaultFixedSize() {
+        ListCell<Object> cell =  new ListCell<>();
+        installDefaultSkin(cell);
+        assertEquals(Region.USE_COMPUTED_SIZE, getFixedCellSize(cell), 1);
+    }
+    
+    @Test
+    public void testListViewDefaultFixedSize() {
+        ListView<?> listView = new ListView<>();
+        assertEquals(Region.USE_COMPUTED_SIZE, listView.getFixedCellSize(), 1);
+    }
+    
+    /**
+     * FIXME -- not really needed for core misbehavior (not memory leak at least,
+     * but still listening to old fixedSize!)
      * Cell not leaking if had listView and replace skin.
      * 
      * skin -> update listView -> null listView -> replaceSkin
@@ -197,6 +299,9 @@ public class SkinIssuesTest {
     }
     
     /**
+     * do we expect a difference if listView added before/after skin?
+     * core skin listener to listView only registered if null initially!
+     * 
      * Cell not leaking if had listView and replace skin.
      * 
      * skin -> update listView -> replaceSkin
@@ -214,16 +319,18 @@ public class SkinIssuesTest {
     }
     
     /**
+     * This can be added to skinMemoryLeakTest. Done.
+     * 
      * FIXME: don't add to final push - here just to understand and reducing test time
-     * Cell not leaking if had listView and replace skin.
+     * Cell not leaking if had listView and replace skin. That's because the listener
+     * is a once-only, then removed
      * 
      * (cell with lv) skin -> replaceSkin
      */
     @Test 
     public void testListCellMemoryLeakInitialListView() {
         ListCell<Object> cell =  new ListCell<>();
-        ListView<Object> lv = new ListView<>();
-        cell.updateListView(lv);
+        cell.updateListView(new ListView<>());
         installDefaultSkin(cell);
         WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
         assertNotNull(weakRef.get());
@@ -233,8 +340,10 @@ public class SkinIssuesTest {
     
     
     /**
+     * This here is the default test, default constructor.
+     * 
      * FIXME: don't add to final push - here just to understand and reducing test time
-     * Cell not leaking if had listView and replace skin.
+     * Cell skin is leaking if has listView
      * 
      * (cell without lv) skin -> replaceSkin
      */
