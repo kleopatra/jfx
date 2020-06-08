@@ -272,6 +272,7 @@ public abstract class LabeledSkinBase<C extends Labeled> extends SkinBase<C> {
                 getChildren().setAll(text);
             }
         } else {
+            // FIXME: this listener must be removed in dispose!
             graphic.layoutBoundsProperty().addListener(graphicPropertyChangedListener);
             if (isIgnoreText()) {
                 getChildren().setAll(graphic);
