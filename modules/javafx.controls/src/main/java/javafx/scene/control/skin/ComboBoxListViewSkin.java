@@ -558,9 +558,9 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
         _listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         _listView.setFocusTraversable(false);
 
-//        _listView.getSelectionModel().selectedIndexProperty().addListener(o -> {
+        _listView.getSelectionModel().selectedIndexProperty().addListener(o -> {
          // FIXME: this is a bad as before in not coping with change of selectionModel   
-         registerChangeListener(_listView.getSelectionModel().selectedIndexProperty(), e -> {
+//         registerChangeListener(_listView.getSelectionModel().selectedIndexProperty(), e -> {
             if (listSelectionLock) return;
             int index = listView.getSelectionModel().getSelectedIndex();
             comboBox.getSelectionModel().select(index);
@@ -568,10 +568,11 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
             comboBox.notifyAccessibleAttributeChanged(AccessibleAttribute.TEXT);
         });
 
-        //comboBox.getSelectionModel().selectedItemProperty().addListener(o -> {
+        comboBox.getSelectionModel().selectedItemProperty().addListener(o -> {
          // FIXME: really needed? couldn't find any misbehavior when commenting
          // FIXME: this is a bad as before in not coping with change of selectionModel   
-        registerChangeListener(comboBox.getSelectionModel().selectedItemProperty(), e -> {    
+         // FIXME: this change introduces a failing test in SelectionFocusModelTest - why? 
+//        registerChangeListener(comboBox.getSelectionModel().selectedItemProperty(), e -> {    
             listViewSelectionDirty = true;
         });
 
