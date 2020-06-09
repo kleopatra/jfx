@@ -352,14 +352,15 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
     }
 
     /** {@inheritDoc} */
-    @Override protected double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
+    @Override 
+    protected double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
 
 //        if (fixedCellSizeEnabled) {
 //            return fixedCellSize;
 //        }
         
-        double fixedCellSize; // = getFixedCellSize();
-        if ((fixedCellSize = getFixedCellSize()) > 0) {
+        double fixedCellSize = getFixedCellSize();
+        if (fixedCellSize > 0) {
             return fixedCellSize;
         }    
         // Added the comparison between the default cell size and the requested
@@ -374,8 +375,8 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //        if (fixedCellSizeEnabled) {
 //            return fixedCellSize;
 //        }
-        double fixedCellSize; // = getFixedCellSize();
-        if ((fixedCellSize = getFixedCellSize()) > 0) {
+        double fixedCellSize = getFixedCellSize();
+        if (fixedCellSize > 0) {
             return fixedCellSize;
         }    
 
@@ -384,8 +385,8 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 
     /** {@inheritDoc} */
     @Override protected double computeMaxHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-        double fixedCellSize; // = getFixedCellSize();
-        if ((fixedCellSize = getFixedCellSize()) > 0) {
+        double fixedCellSize = getFixedCellSize();
+        if (fixedCellSize > 0) {
             return fixedCellSize;
         }    
 //        if (fixedCellSizeEnabled) {
@@ -399,8 +400,8 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
     double getFixedCellSize() {
         // FIXME - test must not call any method on a disposed skin
 //        if (getSkinnable() == null) return Region.USE_COMPUTED_SIZE;
+//        return fixedCellSize;
         ListView<?> listView = getSkinnable().getListView();
         return listView != null ? listView.getFixedCellSize() : Region.USE_COMPUTED_SIZE;
-//        return fixedCellSize;
     }
 }
