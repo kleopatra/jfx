@@ -93,7 +93,9 @@ public class SkinCellIssuesTest {
         ListCellSkin oldSkin = (ListCellSkin) cell.getSkin();
         cell.setSkin(null);
         // no internal skin cleanup needed, it's done after dispose
-        assertEquals(fixed, getFixedCellSize(oldSkin), 1);
+        // without listener, this test doesn't make sense and is wrong
+        // must not access disposed skin!
+        assertEquals("test error: must not access state of disposed skin", -1, getFixedCellSize(oldSkin), 1);
     }
     
     /**
@@ -141,6 +143,7 @@ public class SkinCellIssuesTest {
         // the skin might cleanup itself on dispose, important is that 
         // it does not longer change along with source property in listView
         // okay before fix, because the child listener is registered with skin api
+        assertNotEquals("test error - test must not access state of disposed skin", replaced, getFixedCellSize(oldSkin), 1);
         assertNotEquals("fixed cell size not updated in old skin", replaced, getFixedCellSize(oldSkin), 1);
     }
     

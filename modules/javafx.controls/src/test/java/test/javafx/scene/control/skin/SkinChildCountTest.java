@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,6 +44,7 @@ import javafx.scene.control.Control;
 /**
  * Quick check: cleanup of children on replacing skin
  */
+@Ignore("child count")
 @RunWith(Parameterized.class)
 public class SkinChildCountTest {
     private Control control;
