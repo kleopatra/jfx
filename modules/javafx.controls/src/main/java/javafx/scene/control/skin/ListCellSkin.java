@@ -357,6 +357,7 @@ public class ListCellSkin<T> extends CellSkinBase<ListCell<T>> {
 //        if (fixedCellSizeEnabled) {
 //            return fixedCellSize;
 //        }
+        
         double fixedCellSize; // = getFixedCellSize();
         if ((fixedCellSize = getFixedCellSize()) > 0) {
             return fixedCellSize;
