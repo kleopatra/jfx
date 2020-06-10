@@ -42,6 +42,7 @@ import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactor
 
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
@@ -108,8 +109,6 @@ public class SkinMemoryLeakTest {
                 ColorPicker.class,
                 ComboBox.class,
                 DatePicker.class,
-//                ListCell.class,
-//                ListView.class,
                 MenuBar.class,
                 MenuButton.class,
                 Pagination.class,
