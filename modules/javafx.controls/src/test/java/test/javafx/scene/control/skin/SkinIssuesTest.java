@@ -93,8 +93,9 @@ public class SkinIssuesTest {
     
 //-------- label with graphics
     
-    @Test
-    public void testTitledPaneGraphicDispose() {
+    @Test @Ignore("incorrect test setup")
+    public void testTitledPaneGraphicInConstructorDispose() {
+        // incorrect test setup: the node in constructor is content, not graphic!
         TitledPane labeled = new TitledPane("", new Rectangle());
         Rectangle graphic = (Rectangle) labeled.getGraphic();
         assertNotNull("sanity", graphic);
@@ -104,7 +105,7 @@ public class SkinIssuesTest {
     }
     
     @Test
-    public void testTitledPaneGraphic2Dispose() {
+    public void testTitledPaneGraphicDispose() {
         Rectangle graphic = new Rectangle();
         TitledPane labeled = new TitledPane();
         labeled.setGraphic(graphic);

@@ -383,6 +383,8 @@ public class PaginationSkin extends SkinBase<Pagination> {
 
     /** {@inheritDoc} */
     @Override public void dispose() {
+        // FIXME: navigation control has buttons which register listeners on skinnable
+        // Check: might leak and throw NPE
         super.dispose();
 
         if (behavior != null) {
