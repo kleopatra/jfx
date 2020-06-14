@@ -118,7 +118,9 @@ public abstract class LabeledSkinBase<C extends Labeled> extends SkinBase<C> {
      */
     final InvalidationListener graphicPropertyChangedListener = valueModel -> {
         invalidText = true;
-        if (getSkinnable() != null) getSkinnable().requestLayout();
+        // fixme: this must not be called if the skinnable is null!
+        /*if (getSkinnable() != null)*/ 
+            getSkinnable().requestLayout();
     };
 
     private Rectangle textClip;
@@ -234,12 +236,24 @@ public abstract class LabeledSkinBase<C extends Labeled> extends SkinBase<C> {
 
 
 
+
     /***************************************************************************
      *                                                                         *
      * Public API                                                              *
      *                                                                         *
      **************************************************************************/
 
+    @Override
+    public void dispose() {
+        if (graphic != null) {
+            graphic.layoutBoundsProperty().removeListener(graphicPropertyChangedListener);
+            graphic = null;
+        }
+        super.dispose();
+    }
+    
+    
+    
     /**
      * Updates the children managed by LabeledSkinBase, which can be the Labeled
      * graphic and/or a Text node. Only those nodes which actually must

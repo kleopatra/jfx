@@ -38,7 +38,6 @@ import com.sun.javafx.scene.control.behavior.ButtonBehavior;
 import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
-import static javafx.scene.control.skin.CellSkinShim.*;
 import static javafx.scene.control.skin.ComboSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
@@ -51,18 +50,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.PopupControl;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.skin.ListCellSkin;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 
@@ -92,7 +91,56 @@ public class SkinIssuesTest {
     private static final boolean showPulse = false; 
     private static final boolean methodPulse = true; 
     
-//-------- moved cell tests to SkinCellIssuesTest
+//-------- label with graphics
+    
+    @Test
+    public void testTitledPaneGraphicDispose() {
+        TitledPane labeled = new TitledPane("", new Rectangle());
+        Rectangle graphic = (Rectangle) labeled.getGraphic();
+        assertNotNull("sanity", graphic);
+        installDefaultSkin(labeled);
+        labeled.getSkin().dispose();
+        graphic.setWidth(500);
+    }
+    
+    @Test
+    public void testTitledPaneGraphic2Dispose() {
+        Rectangle graphic = new Rectangle();
+        TitledPane labeled = new TitledPane();
+        labeled.setGraphic(graphic);
+        installDefaultSkin(labeled);
+        labeled.getSkin().dispose();
+        graphic.setWidth(500);
+    }
+    
+    /**
+     * Cleanup graphic listener -
+     */
+    @Test
+    public void testLabelGraphicDispose() {
+        Label labeled = new Label();
+        Rectangle graphic = new Rectangle();
+        labeled.setGraphic(graphic);
+        installDefaultSkin(labeled);
+        labeled.getSkin().dispose();
+        graphic.setWidth(500);
+    }
+    
+    /**
+     * FIXME: remove again - temporary extracted to here for reducing test time!
+     */
+    @Test
+    public void testMemoryLeakAlternativeSkin() {
+        Label control = new Label();
+        control.setGraphic(new Rectangle());
+        installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+    
     
 // ------------ combos
     
