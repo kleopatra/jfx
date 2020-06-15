@@ -236,12 +236,25 @@ public abstract class TableViewBehaviorBase<C extends Control, T, TC extends Tab
     }
 
 
-
+    
     /**************************************************************************
      *                                                                        *
      * Abstract API                                                           *
      *                                                                        *
      *************************************************************************/
+
+    /**
+     * {@inheritDoc} <p>
+     * 
+     * Overridden to remove keyEvent filter for ANY.
+     */
+    @Override
+    public void dispose() {
+        getNode().removeEventFilter(KeyEvent.ANY, keyEventListener);
+        super.dispose();
+    }
+
+
 
     /** {@inheritDoc} */
     @Override public InputMap<C> getInputMap() {

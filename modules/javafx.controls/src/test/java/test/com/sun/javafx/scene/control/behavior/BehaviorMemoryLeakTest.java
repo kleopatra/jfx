@@ -85,7 +85,7 @@ public class BehaviorMemoryLeakTest {
         // step 2: fix and remove from list
         List<Class<? extends Control>> leakingClasses = List.of(
                 PasswordField.class,
-                TableView.class,
+//                TableView.class,
                 TextArea.class,
                 TextField.class,
                 TreeTableView.class,

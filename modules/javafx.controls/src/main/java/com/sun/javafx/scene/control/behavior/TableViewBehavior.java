@@ -86,7 +86,18 @@ public class TableViewBehavior<T> extends TableViewBehaviorBase<TableView<T>, T,
         }
     }
 
+    /**
+     * {@inheritDoc} <p>
+     * 
+     * Overridden to remove listener to selectionModel/selectedIndices.
+     */
     @Override public void dispose() {
+        getNode().selectionModelProperty().removeListener(weakSelectionModelListener);
+        TableViewSelectionModel<T> sm = getNode().getSelectionModel();
+        if (sm != null) {
+            sm.getSelectedCells().removeListener(selectedCellsListener);
+        }
+        
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
     }

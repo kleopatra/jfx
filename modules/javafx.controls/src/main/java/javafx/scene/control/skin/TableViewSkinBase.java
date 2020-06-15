@@ -224,8 +224,9 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
         // using 'needCellsReconfigured' here rather than 'needCellsRebuilt'
         // as otherwise performance suffers massively (RT-27831)
         needCellsReconfigured = true;
-        if (getSkinnable() != null) {
             getSkinnable().requestLayout();
+        // must not access any method of skin if disposed!    
+            if (getSkinnable() != null) {
         }
     };
 
