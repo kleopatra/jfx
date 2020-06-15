@@ -42,8 +42,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -63,24 +64,34 @@ public class SkinTableIssuesTest {
     /**
      * how to trigger width change of table?
      * TableHeaderRow has listeners that must be removed, how to test without change?
+     * 
+     * doesn't throw but old is still listening?
      */
     @Test
     public void testTableWidth() {
         TableView<Locale> control =  new TableView<>();
+        control.setMaxWidth(Region.USE_PREF_SIZE);
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
-        BorderPane root = new BorderPane(control);
-        scene.setRoot(root);
-        stage.show();
-//        showControl(control, true);
-        control.widthProperty().addListener(e -> System.out.println("getting width change"));
+//        BorderPane root = new BorderPane(control);
+//        HBox root = new HBox(control);
+//        scene.setRoot(root);
+//        stage.show();
+        showControl(control, true);
+        control.widthProperty().addListener((e, ov, nv) -> System.out.println("getting width change"));
         root.widthProperty().addListener(e -> 
             System.out.println("getting width change from root: " + root.getWidth() + " table: " + control.getWidth()));
 //        replaceSkin(control);
-        column.setPrefWidth(500);
-        control.setPrefWidth(500);
         stage.setWidth(1000);
+        System.out.println("stage width set, before pulse");
         fireMethodPulse();
+        System.out.println("stage width set, after pulse");
+//        column.setPrefWidth(500);
+        control.setPrefWidth(500);
+        control.requestLayout();
+        System.out.println("control width set, before pulse");
+        fireMethodPulse();
+        System.out.println("control width set, after pulse " + control.getWidth());
     }
     
     @Test

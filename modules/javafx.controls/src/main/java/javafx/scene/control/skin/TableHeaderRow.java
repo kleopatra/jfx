@@ -134,7 +134,9 @@ public class TableHeaderRow extends StackPane {
      *                                                                         *
      **************************************************************************/
 
-    private InvalidationListener tableWidthListener = o -> updateTableWidth();
+    private InvalidationListener tableWidthListener = o -> {
+        updateTableWidth();
+    };
 
     private InvalidationListener tablePaddingListener = o -> updateTableWidth();
 
@@ -444,6 +446,8 @@ public class TableHeaderRow extends StackPane {
     protected void updateTableWidth() {
         // snapping added for RT-19428
         final Control c = tableSkin.getSkinnable();
+        // FIXME: this must not be called after skin is disposed!
+        // need to guard is an indication of still listening, which introduces a memory leak
         if (c == null) {
             this.tableWidth = 0;
         } else {
@@ -451,6 +455,7 @@ public class TableHeaderRow extends StackPane {
             double padding = snapSizeX(insets.getLeft()) + snapSizeX(insets.getRight());
             this.tableWidth = snapSizeX(c.getWidth()) - padding;
         }
+        System.out.println("in header width listener: " + tableWidth);
 
         clip.setWidth(tableWidth);
     }
