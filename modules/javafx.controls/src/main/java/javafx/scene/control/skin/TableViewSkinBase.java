@@ -43,6 +43,8 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 import javafx.collections.WeakListChangeListener;
+import javafx.event.EventHandler;
+
 import com.sun.javafx.scene.control.skin.resources.ControlResources;
 
 import java.lang.ref.WeakReference;
@@ -240,6 +242,8 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
             new WeakInvalidationListener(widthListener);
     private WeakInvalidationListener weakItemsChangeListener;
 
+    private EventHandler<? super ScrollToEvent<TC>> scrollToColumnHandler;
+
 
 
     /***************************************************************************
@@ -314,9 +318,10 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
         properties.remove(Properties.RECREATE);
         properties.addListener(propertiesMapListener);
 
-        control.addEventHandler(ScrollToEvent.<TC>scrollToColumn(), event -> {
+        scrollToColumnHandler = event -> {
             scrollHorizontally(event.getScrollTarget());
-        });
+        };
+        control.addEventHandler(ScrollToEvent.<TC>scrollToColumn(), scrollToColumnHandler);
 
         // flow and flow.vbar width observer
         InvalidationListener widthObserver = valueModel -> {
@@ -359,13 +364,19 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
     /** {@inheritDoc} */
     @Override public void dispose() {
         if (getSkinnable() == null) return;
-        final ObjectProperty<ObservableList<S>> itemsProperty = TableSkinUtils.itemsProperty(this);
-
-        getVisibleLeafColumns().removeListener(weakVisibleLeafColumnsListener);
-        itemsProperty.removeListener(weakItemsChangeListener);
+        
+        tableHeaderRow.dispose();
+        
         getSkinnable().getProperties().removeListener(propertiesMapListener);
+        
+        final ObjectProperty<ObservableList<S>> itemsProperty = TableSkinUtils.itemsProperty(this);
+        itemsProperty.removeListener(weakItemsChangeListener);
         updateTableItems(itemsProperty.get(), null);
+        
+        getVisibleLeafColumns().removeListener(weakVisibleLeafColumnsListener);
+        updateVisibleLeafColumnWidthListeners(FXCollections.emptyObservableList(), getVisibleLeafColumns());
 
+        getSkinnable().removeEventHandler(ScrollToEvent.<TC>scrollToColumn(), scrollToColumnHandler);
         super.dispose();
     }
 

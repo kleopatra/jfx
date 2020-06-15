@@ -270,6 +270,9 @@ public class TableHeaderRow extends StackPane {
     }
 
 
+    public void dispose() {
+        
+    }
 
     /***************************************************************************
      *                                                                         *

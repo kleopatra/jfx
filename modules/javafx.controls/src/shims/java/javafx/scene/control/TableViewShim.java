@@ -33,5 +33,9 @@ public class TableViewShim {
     public static <S> TableView.TableViewSelectionModel<S> get_TableViewArrayListSelectionModel(TableView table) {
         return new TableView.TableViewArrayListSelectionModel<>(table);
     }
+    
+//    public static <S> void setWidth(TableView<S> table, double width) {
+//        table.setWidth(width)
+//    }
 
 }
