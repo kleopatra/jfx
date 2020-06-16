@@ -374,6 +374,7 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
         updateTableItems(itemsProperty.get(), null);
         
         getVisibleLeafColumns().removeListener(weakVisibleLeafColumnsListener);
+        // was: missing cleanup of listeners to leaf column widths -> NPE if done right
         updateVisibleLeafColumnWidthListeners(FXCollections.emptyObservableList(), getVisibleLeafColumns());
 
         getSkinnable().removeEventHandler(ScrollToEvent.<TC>scrollToColumn(), scrollToColumnHandler);

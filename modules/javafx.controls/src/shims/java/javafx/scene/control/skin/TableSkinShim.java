@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,21 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
 package javafx.scene.control.skin;
 
-import javafx.scene.control.TableColumnBase;
+import javafx.scene.control.TableView;
 
 /**
- * Utility methods to access package-private api in TableHeaderRow.
+ * Utility methods to access package-private api in Table-related skins.
  */
-public class TableHeaderRowShim {
+public class TableSkinShim {
 
-    public static TableColumnHeader getColumnHeaderFor(TableHeaderRow tr, final TableColumnBase<?,?> col) {
-        return tr.getColumnHeaderFor(col);
+    public static <T> TableHeaderRow getTableHeaderRow(TableView<T> table) {
+        if (table.getSkin() instanceof TableViewSkinBase) {
+            return ((TableViewSkinBase) table.getSkin()).getTableHeaderRow();
+        }
+        return null;
     }
-    
-    public static void dispose(TableHeaderRow header) {
-        header.dispose();
-    }
-
 }

@@ -254,6 +254,8 @@ public class TableHeaderRow extends StackPane {
         cornerRegion.getChildren().addAll(image);
 
         BooleanProperty tableMenuButtonVisibleProperty = TableSkinUtils.tableMenuButtonVisibleProperty(skin);
+        // FIXME: why would this ever be null? 
+        // FIXME: remove the binding in dispose?
         if (tableMenuButtonVisibleProperty != null) {
             cornerRegion.visibleProperty().bind(tableMenuButtonVisibleProperty);
         };
@@ -271,8 +273,25 @@ public class TableHeaderRow extends StackPane {
         getChildren().addAll(filler, rootHeader, cornerRegion, dragHeader);
     }
 
-
-    public void dispose() {
+    /**
+     * Package until CSR for API change ..
+     * There's a rfe for using LambdaXX api for listener and adding dispose
+     * to all skin-alike classes. Find!
+     * 
+     * This here should have the same semantics as skin.dispose, in particular,
+     * guard itself against repeated calls.
+     */
+    void dispose() {
+        if (tableSkin.getSkinnable() == null) return;
+        // FIXME - couldn't produce a failing unit test
+        tableSkin.getSkinnable().widthProperty().removeListener(weakTableWidthListener);
+        tableSkin.getSkinnable().paddingProperty().removeListener(weakTablePaddingListener);
+        
+        TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
+        TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakTableColumnsListener);
+        
+        TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
+        updateTableColumnListeners( Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
         
     }
 
@@ -451,11 +470,10 @@ public class TableHeaderRow extends StackPane {
         if (c == null) {
             this.tableWidth = 0;
         } else {
+        }
             Insets insets = c.getInsets() == null ? Insets.EMPTY : c.getInsets();
             double padding = snapSizeX(insets.getLeft()) + snapSizeX(insets.getRight());
             this.tableWidth = snapSizeX(c.getWidth()) - padding;
-        }
-        System.out.println("in header width listener: " + tableWidth);
 
         clip.setWidth(tableWidth);
     }

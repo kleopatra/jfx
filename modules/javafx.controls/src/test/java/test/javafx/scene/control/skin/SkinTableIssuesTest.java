@@ -30,19 +30,27 @@ import java.util.Locale;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.javafx.tk.Toolkit;
 
+import static javafx.collections.FXCollections.*;
 import static javafx.scene.control.ControlShim.*;
+import static javafx.scene.control.skin.TableSkinShim.*;
+import static javafx.scene.control.skin.TableHeaderRowShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.skin.TableHeaderRow;
+import javafx.scene.control.skin.TableHeaderRowShim;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -62,33 +70,72 @@ public class SkinTableIssuesTest {
 //------------- TableView
 
     /**
+     * Any way to isolate the dangling references?
+     */
+    @Test
+    public void testTableHeaderRowMemoryLeak() {
+        TableView<Locale> control =  new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        installDefaultSkin(control);
+        //? wrong test assumption: there's still a strong reference from skin ..
+        WeakReference<TableHeaderRow> weakHeader = new WeakReference(getTableHeaderRow(control));
+        assertNotNull(weakHeader.get());
+        WeakReference<?> weakSkin = new WeakReference(replaceSkin(control));
+        
+        dispose(weakHeader.get());
+        attemptGC(weakHeader);
+        assertEquals("header must be gc'ed", null, weakHeader.get());
+    }
+    
+    /**
+     * Changing padding after skin replace throws NPE 
+     * (if TableHeaderRow.updateTableWidth is fixed to _not_ guard against null skinnable)
+     */
+    @Test
+    public void testTablePadding() {
+        TableView<Locale> control =  new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        installDefaultSkin(control);
+        replaceSkin(control);
+        control.setPadding(new Insets(100, 100, 100, 100));
+    }
+    /**
      * how to trigger width change of table?
      * TableHeaderRow has listeners that must be removed, how to test without change?
      * 
-     * doesn't throw but old is still listening?
+     * doesn't throw but old is still listening? yes, it's listening but table width is never
+     * updated, how to force it? region.setWidth is package .. 
      */
-    @Test
+    @Test @Ignore("FIXME - how to trigger actual resize?")
     public void testTableWidth() {
-        TableView<Locale> control =  new TableView<>();
-        control.setMaxWidth(Region.USE_PREF_SIZE);
-        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        ObservableList<Locale> data = observableArrayList(Locale.getAvailableLocales());
+        TableView<Locale> control =  new TableView<>(data);
+        TableColumn<Locale, String> column = new TableColumn<>("name");
+        column.setCellValueFactory(new PropertyValueFactory<>("displayName"));
         control.getColumns().addAll(column);
+        control.setMaxWidth(Region.USE_PREF_SIZE);
 //        BorderPane root = new BorderPane(control);
+        
 //        HBox root = new HBox(control);
-//        scene.setRoot(root);
-//        stage.show();
-        showControl(control, true);
+        VBox root = new VBox(10, control);
+//        StackPane 
+        scene.setRoot(root);
+        stage.show();
+//        showControl(control, true);
+        fireMethodPulse();
         control.widthProperty().addListener((e, ov, nv) -> System.out.println("getting width change"));
         root.widthProperty().addListener(e -> 
             System.out.println("getting width change from root: " + root.getWidth() + " table: " + control.getWidth()));
 //        replaceSkin(control);
-        stage.setWidth(1000);
+//        stage.setWidth(1000);
         System.out.println("stage width set, before pulse");
         fireMethodPulse();
         System.out.println("stage width set, after pulse");
 //        column.setPrefWidth(500);
         control.setPrefWidth(500);
-        control.requestLayout();
+        root.requestLayout();
         System.out.println("control width set, before pulse");
         fireMethodPulse();
         System.out.println("control width set, after pulse " + control.getWidth());
