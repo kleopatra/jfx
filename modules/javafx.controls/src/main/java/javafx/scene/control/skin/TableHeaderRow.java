@@ -86,7 +86,8 @@ public class TableHeaderRow extends StackPane {
             ControlResources.getString("TableView.nestedColumnControlMenuSeparator");
 
     private final VirtualFlow flow;
-    final TableViewSkinBase<?,?,?,?,?> tableSkin;
+//    final 
+    TableViewSkinBase<?,?,?,?,?> tableSkin;
     private Map<TableColumnBase, CheckMenuItem> columnMenuItems = new HashMap<TableColumnBase, CheckMenuItem>();
     private double scrollX;
     private double tableWidth;
@@ -290,9 +291,11 @@ public class TableHeaderRow extends StackPane {
         tableSkin.getSkinnable().widthProperty().removeListener(weakTableWidthListener);
         tableSkin.getSkinnable().paddingProperty().removeListener(weakTablePaddingListener);
         
+        // FIXME - test
         TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
         TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakTableColumnsListener);
         
+        // FIXME - test
         TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
         updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
         
@@ -580,8 +583,7 @@ public class TableHeaderRow extends StackPane {
             remove(tc);
         }
 
-        if (!added.isEmpty())
-            rebuildColumnMenu();
+        if (!added.isEmpty()) rebuildColumnMenu();
     }
 
     private void remove(TableColumnBase<?,?> col) {
@@ -590,6 +592,7 @@ public class TableHeaderRow extends StackPane {
         CheckMenuItem item = columnMenuItems.remove(col);
         if (item != null) {
             col.textProperty().removeListener(weakColumnTextListener);
+            // FIXME: there's no bidiBinding - see createMenuItem
             item.selectedProperty().unbindBidirectional(col.visibleProperty());
 
             columnPopupMenu.getItems().remove(item);

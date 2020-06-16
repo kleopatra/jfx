@@ -545,13 +545,16 @@ public class TableColumnHeader extends Region {
     void dispose() {
         // fixme: add test to guarantee removal of both listeners
         TableViewSkinBase tableSkin = getTableSkin();
-        if (tableSkin != null) {
+            // FIXME - test
             TableSkinUtils.getSortOrder(tableSkin).removeListener(weakSortOrderListener);
-            TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
+            // FIXME - test: TableSkinUtils are guarding against null skinnable
+//            TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
+            if (tableSkin != null) {
         }
 
         TableColumnBase tc = getTableColumn();
         if (tc != null) {
+            // was NPE without removing
             tc.getStyleClass().removeListener(weakStyleClassListener);
         }
 
@@ -987,6 +990,7 @@ public class TableColumnHeader extends Region {
 //        TableView tv = getTableView();
         TableColumnBase tc = getTableColumn();
         TableViewSkinBase tableSkin = getTableSkin();
+        if (tableSkin.getSkinnable() == null) throw new IllegalStateException("no skinnable - skin disposed!");
         columnIndex = tableSkin == null || tc == null ? -1 :TableSkinUtils.getVisibleLeafIndex(tableSkin,tc);
 
         // update the pseudo class state regarding whether this is the last

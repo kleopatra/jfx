@@ -72,6 +72,25 @@ public class SkinTableIssuesTest {
 
     
     @Test
+    public void testColumnHeaderLeafListener() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        showControl(control, true);
+        replaceSkin(control);
+        control.getColumns().addAll(new TableColumn("added"));
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+//        showControl(control, true);
+//        TableColumnHeader header = getColumnHeaderFor(column);
+//        assertNotNull(header);
+//        dispose(header);
+//        String testStyle = "test-style";
+//        column.getStyleClass().add(testStyle);
+//        assertFalse(header.getStyleClass().contains(testStyle));
+    }
+    
+    @Test
     public void testColumnHeaderStyleClass() {
         TableView<Locale> control = new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
@@ -86,43 +105,14 @@ public class SkinTableIssuesTest {
         String testStyle = "test-style";
         column.getStyleClass().add(testStyle);
         assertFalse(header.getStyleClass().contains(testStyle));
-       
     }
-    @Test
-    public void testTableHeaderRow() {
-        WeakReference<TableViewSkin> weakSkin = new WeakReference<>(new TableViewSkin<>(new TableView<>()));
-        WeakReference<TableHeaderRow> weakHeader = new WeakReference<>(getTableHeaderRow(weakSkin.get()));
-        weakSkin.get().dispose();
-        attemptGC(weakSkin);
-        assertEquals("skin must be gc'ed", null, weakSkin.get());
-        assertEquals("header must be gc'ed", null, weakHeader.get());
-//        assertNull(getTableHeaderRow(skin));
-    }
-    /**
-     * Any way to isolate the dangling references?
-     */
-    @Test
-    public void testTableHeaderRowMemoryLeak() {
-        TableView<Locale> control =  new TableView<>();
-        TableColumn<Locale, String> column = new TableColumn<>("dummy");
-        control.getColumns().addAll(column);
-        installDefaultSkin(control);
-        //? wrong test assumption: there's still a strong reference from skin ..
-        WeakReference<TableHeaderRow> weakHeader = new WeakReference(getTableHeaderRow(control));
-        assertNotNull(weakHeader.get());
-        WeakReference<?> weakSkin = new WeakReference(replaceSkin(control));
-        
-        dispose(weakHeader.get());
-        attemptGC(weakHeader);
-        assertEquals("header must be gc'ed", null, weakHeader.get());
-    }
-    
+
     /**
      * Changing padding after skin replace throws NPE 
      * (if TableHeaderRow.updateTableWidth is fixed to _not_ guard against null skinnable)
      */
     @Test
-    public void testTablePadding() {
+    public void failTablePadding() {
         TableView<Locale> control =  new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);

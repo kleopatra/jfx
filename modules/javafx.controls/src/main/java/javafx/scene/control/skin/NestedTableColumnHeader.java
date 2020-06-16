@@ -240,6 +240,7 @@ public class NestedTableColumnHeader extends TableColumnHeader {
     /** {@inheritDoc} */
     @Override void dispose() {
 
+        // FIXME (though was like this) - test!
         if (label != null) {
             label.dispose();
         }

@@ -179,6 +179,7 @@ class TableSkinUtils {
         } else if (control instanceof TreeTableView) {
             return ((TreeTableView)control).getVisibleLeafIndex((TreeTableColumn)tc);
         }
+//        throw new RuntimeException("no skinnable: " + control);
         return -1;
     }
 

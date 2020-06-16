@@ -146,12 +146,13 @@ public class TableViewSkin<T> extends TableViewSkinBase<T, T, TableView<T>, Tabl
 
     /** {@inheritDoc} */
     @Override public void dispose() {
-        flow.setCellFactory(null);
+//        flow.setCellFactory(null);
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
         }
+//        getChildren().clear();
     }
 
     /** {@inheritDoc} */
