@@ -33,6 +33,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.input.*;
 import javafx.util.Callback;
 
@@ -255,6 +256,14 @@ public class TreeViewBehavior<T> extends BehaviorBase<TreeView<T>> {
     }
 
     @Override public void dispose() {
+        // remove listeners and event handlers to fix memory leaks
+        getNode().selectionModelProperty().removeListener(weakSelectionModelListener);
+        MultipleSelectionModel sm = getNode().getSelectionModel();
+        if (sm != null) {
+            sm.getSelectedIndices().removeListener(weakSelectedIndicesListener);
+        }
+
+        getNode().removeEventFilter(KeyEvent.ANY, keyEventListener);
         TreeCellBehavior.removeAnchor(getNode());
         super.dispose();
     }

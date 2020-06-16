@@ -58,6 +58,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -90,6 +91,22 @@ public class SkinIssuesTest {
 
     private static final boolean showPulse = false; 
     private static final boolean methodPulse = true; 
+    
+//---------------- TreeView
+    
+    /**
+     * default skin -> set alternative
+     */
+    @Test
+    public void testMemoryLeakAlternativeSkin() {
+        TreeView<String> control = new TreeView<>();
+        installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
     
 //-------- label with graphics
     
@@ -127,21 +144,21 @@ public class SkinIssuesTest {
         graphic.setWidth(500);
     }
     
-    /**
-     * FIXME: remove again - temporary extracted to here for reducing test time!
-     */
-    @Test
-    public void testMemoryLeakAlternativeSkin() {
-        Label control = new Label();
-        control.setGraphic(new Rectangle());
-        installDefaultSkin(control);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
-        assertNotNull(weakRef.get());
-        attemptGC(weakRef);
-        assertEquals("Skin must be gc'ed", null, weakRef.get());
-    }
-
-    
+//    /**
+//     * FIXME: remove again - temporary extracted to here for reducing test time!
+//     */
+//    @Test
+//    public void testMemoryLeakAlternativeSkin() {
+//        Label control = new Label();
+//        control.setGraphic(new Rectangle());
+//        installDefaultSkin(control);
+//        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+//        assertNotNull(weakRef.get());
+//        attemptGC(weakRef);
+//        assertEquals("Skin must be gc'ed", null, weakRef.get());
+//    }
+//
+//    
     
 // ------------ combos
     

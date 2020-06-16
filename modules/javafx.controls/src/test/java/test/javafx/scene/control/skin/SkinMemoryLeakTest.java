@@ -128,7 +128,7 @@ public class SkinMemoryLeakTest {
                 SplitMenuButton.class,
                 SplitPane.class,
                 TableRow.class,
-//                TableView.class,
+                TableView.class,
                 // @Ignore("8242621")
                 TabPane.class,
                 // @Ignore("8244419")
@@ -138,8 +138,8 @@ public class SkinMemoryLeakTest {
                 ToolBar.class,
                 TreeCell.class,
                 TreeTableRow.class,
-                TreeTableView.class,
-                TreeView.class
+                TreeTableView.class
+//                TreeView.class
         );
         // remove the known issues to make the test pass
         controlClasses.removeAll(leakingClasses);
