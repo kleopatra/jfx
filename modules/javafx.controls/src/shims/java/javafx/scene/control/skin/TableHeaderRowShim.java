@@ -24,10 +24,12 @@
  */
 package javafx.scene.control.skin;
 
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumnBase;
+import javafx.scene.control.TableView;
 
 /**
- * Utility methods to access package-private api in TableHeaderRow.
+ * Utility methods to access package-private api in TableHeaderRow et al.
  */
 public class TableHeaderRowShim {
 
@@ -38,5 +40,8 @@ public class TableHeaderRowShim {
     public static void dispose(TableHeaderRow header) {
         header.dispose();
     }
-
+    
+    public static void dispose(TableColumnHeader header) {
+        header.dispose();
+    }
 }

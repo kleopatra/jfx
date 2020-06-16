@@ -25,6 +25,7 @@
 
 package javafx.scene.control.skin;
 
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 /**
@@ -32,10 +33,48 @@ import javafx.scene.control.TableView;
  */
 public class TableSkinShim {
 
+    /**
+     * Returns the TableHeaderRow of the skin's table if that is of type TableViewSkinBase
+     * or null if not.
+     * 
+     * @param <T>
+     * @param table the table to get the TableHeaderRow from
+     * @return the tableHeaderRow of the table's skin or null if the skin not of type
+     *    TableViewSkinBase
+     */
     public static <T> TableHeaderRow getTableHeaderRow(TableView<T> table) {
         if (table.getSkin() instanceof TableViewSkinBase) {
-            return ((TableViewSkinBase) table.getSkin()).getTableHeaderRow();
+            return getTableHeaderRow((TableViewSkinBase) table.getSkin());
         }
         return null;
     }
+    
+    /**
+     * Returns the TableHeaderRow of the given skin.
+     * 
+     * @param <T>
+     * @param skin the skin to get the TableHeaderRow from
+     * @return
+     * @throws NullPointerException if skin is null
+     */
+    public static <T> TableHeaderRow getTableHeaderRow(TableViewSkinBase skin) {
+        return skin.getTableHeaderRow();
+    }
+    
+    /**
+     * Returns the TableColumnHeader for the given column or null if not available.
+     * 
+     * @param <T>
+     * @param column
+     * @return
+     */
+    public static <T> TableColumnHeader getColumnHeaderFor(TableColumn<T, ?> column) {
+        TableView<T> table = column.getTableView();
+        TableHeaderRow tableHeader = getTableHeaderRow(table);
+        if (tableHeader != null) {
+            return tableHeader.getColumnHeaderFor(column);
+        }
+        return null;
+    }
+
 }

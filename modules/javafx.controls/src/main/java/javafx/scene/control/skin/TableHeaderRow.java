@@ -208,8 +208,8 @@ public class TableHeaderRow extends StackPane {
         // popup menu for hiding/showing columns
         columnPopupMenu = new ContextMenu();
         updateTableColumnListeners(TableSkinUtils.getColumns(tableSkin), Collections.<TableColumnBase<?,?>>emptyList());
-        TableSkinUtils.getVisibleLeafColumns(skin).addListener(weakTableColumnsListener);
         TableSkinUtils.getColumns(tableSkin).addListener(weakTableColumnsListener);
+        TableSkinUtils.getVisibleLeafColumns(skin).addListener(weakTableColumnsListener);
 
         // drag header region. Used to indicate the current column being reordered
         dragHeader = new StackPane();
@@ -283,6 +283,9 @@ public class TableHeaderRow extends StackPane {
      */
     void dispose() {
         if (tableSkin.getSkinnable() == null) return;
+        
+        getRootHeader().dispose();
+        
         // FIXME - couldn't produce a failing unit test
         tableSkin.getSkinnable().widthProperty().removeListener(weakTableWidthListener);
         tableSkin.getSkinnable().paddingProperty().removeListener(weakTablePaddingListener);
@@ -291,7 +294,7 @@ public class TableHeaderRow extends StackPane {
         TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakTableColumnsListener);
         
         TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
-        updateTableColumnListeners( Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
+        updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
         
     }
 
@@ -570,13 +573,15 @@ public class TableHeaderRow extends StackPane {
         return null;
     }
 
+    // FIXME: this removes the removed (okay) - then rebuild from skin, that is added not used!!
     private void updateTableColumnListeners(List<? extends TableColumnBase<?,?>> added, List<? extends TableColumnBase<?,?>> removed) {
         // remove binding from all removed items
         for (TableColumnBase tc : removed) {
             remove(tc);
         }
 
-        rebuildColumnMenu();
+        if (!added.isEmpty())
+            rebuildColumnMenu();
     }
 
     private void remove(TableColumnBase<?,?> col) {

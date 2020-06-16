@@ -37,8 +37,8 @@ import com.sun.javafx.tk.Toolkit;
 
 import static javafx.collections.FXCollections.*;
 import static javafx.scene.control.ControlShim.*;
-import static javafx.scene.control.skin.TableSkinShim.*;
 import static javafx.scene.control.skin.TableHeaderRowShim.*;
+import static javafx.scene.control.skin.TableSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
@@ -49,8 +49,9 @@ import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.skin.TableColumnHeader;
 import javafx.scene.control.skin.TableHeaderRow;
-import javafx.scene.control.skin.TableHeaderRowShim;
+import javafx.scene.control.skin.TableViewSkin;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -69,6 +70,34 @@ public class SkinTableIssuesTest {
 
 //------------- TableView
 
+    
+    @Test
+    public void testColumnHeaderStyleClass() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        //installDefaultSkin(control);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        TableColumnHeader header = getColumnHeaderFor(column);
+        assertNotNull(header);
+        dispose(header);
+        String testStyle = "test-style";
+        column.getStyleClass().add(testStyle);
+        assertFalse(header.getStyleClass().contains(testStyle));
+       
+    }
+    @Test
+    public void testTableHeaderRow() {
+        WeakReference<TableViewSkin> weakSkin = new WeakReference<>(new TableViewSkin<>(new TableView<>()));
+        WeakReference<TableHeaderRow> weakHeader = new WeakReference<>(getTableHeaderRow(weakSkin.get()));
+        weakSkin.get().dispose();
+        attemptGC(weakSkin);
+        assertEquals("skin must be gc'ed", null, weakSkin.get());
+        assertEquals("header must be gc'ed", null, weakHeader.get());
+//        assertNull(getTableHeaderRow(skin));
+    }
     /**
      * Any way to isolate the dangling references?
      */

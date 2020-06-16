@@ -239,7 +239,6 @@ public class NestedTableColumnHeader extends TableColumnHeader {
 
     /** {@inheritDoc} */
     @Override void dispose() {
-        super.dispose();
 
         if (label != null) {
             label.dispose();
@@ -262,7 +261,10 @@ public class NestedTableColumnHeader extends TableColumnHeader {
         dragRects.clear();
         getChildren().clear();
 
-        changeListenerHandler.dispose();
+        // changed sequence for sanity
+        super.dispose();
+        // this happens in super!
+//        changeListenerHandler.dispose();
     }
 
     /**
