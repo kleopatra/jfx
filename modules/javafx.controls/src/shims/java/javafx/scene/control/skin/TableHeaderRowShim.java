@@ -24,9 +24,9 @@
  */
 package javafx.scene.control.skin;
 
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableColumnBase;
-import javafx.scene.control.TableView;
 
 /**
  * Utility methods to access package-private api in TableHeaderRow et al.
@@ -43,5 +43,13 @@ public class TableHeaderRowShim {
     
     public static void dispose(TableColumnHeader header) {
         header.dispose();
+    }
+    
+    public static ContextMenu getColumnPopupMenu(TableHeaderRow header) {
+        return header.getColumnPopupMenu();
+    }
+    
+    public static CheckMenuItem getMenuItemFor(TableHeaderRow header, TableColumnBase column) {
+        return header.getMenuItemFor(column);
     }
 }

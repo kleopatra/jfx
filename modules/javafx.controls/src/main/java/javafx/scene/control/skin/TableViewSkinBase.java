@@ -372,13 +372,10 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
         getSkinnable().getProperties().removeListener(propertiesMapListener);
         
         final ObjectProperty<ObservableList<S>> itemsProperty = TableSkinUtils.itemsProperty(this);
-        // FIXME: test!
         itemsProperty.removeListener(weakItemsChangeListener);
-        // FIXME: test!
         // beware: old , new
         updateTableItems(itemsProperty.get(), null);
         
-        // FIXME: test!
         getVisibleLeafColumns().removeListener(weakVisibleLeafColumnsListener);
         // was: missing cleanup of listeners to leaf column widths -> NPE if done right
         // beware: added , removed

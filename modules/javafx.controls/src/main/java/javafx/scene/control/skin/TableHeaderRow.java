@@ -157,6 +157,14 @@ public class TableHeaderRow extends StackPane {
             menuItem.setText(getText(column.getText(), column));
         }
     };
+    
+    private final InvalidationListener columnVisibleListener = observable -> {
+        TableColumnBase<?,?> column = (TableColumnBase<?,?>) ((BooleanProperty)observable).getBean();
+        CheckMenuItem menuItem = columnMenuItems.get(column);
+        if (menuItem != null) {
+            menuItem.setSelected(column.isVisible());
+        }
+    };
 
     private final WeakInvalidationListener weakTableWidthListener =
             new WeakInvalidationListener(tableWidthListener);
@@ -290,14 +298,12 @@ public class TableHeaderRow extends StackPane {
         tableSkin.getSkinnable().widthProperty().removeListener(weakTableWidthListener);
         tableSkin.getSkinnable().paddingProperty().removeListener(weakTablePaddingListener);
         
-        // FIXME - test
         TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
         TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakTableColumnsListener);
         
-        // FIXME - test
+//      // FIXME - test: columns != visibleLeafColumns if there are nested columns
         TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
         updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
-        
     }
 
     /***************************************************************************
@@ -581,7 +587,7 @@ public class TableHeaderRow extends StackPane {
         for (TableColumnBase tc : removed) {
             remove(tc);
         }
-
+        // FIXME: check if it's really okay to not do anything if added is empty
         if (!added.isEmpty()) rebuildColumnMenu();
     }
 
@@ -656,7 +662,9 @@ public class TableHeaderRow extends StackPane {
             if (col.visibleProperty().isBound()) return;
             col.setVisible(_item.isSelected());
         });
-        col.visibleProperty().addListener(o -> _item.setSelected(col.isVisible()));
+        // FIXME .. this is never removed!
+//        col.visibleProperty().addListener(o -> _item.setSelected(col.isVisible()));
+        col.visibleProperty().addListener(columnVisibleListener);
 
         columnPopupMenu.getItems().add(item);
     }
@@ -694,5 +702,15 @@ public class TableHeaderRow extends StackPane {
         }
 
         return false;
+    }
+    
+    // test only
+    ContextMenu getColumnPopupMenu() {
+        return columnPopupMenu;
+    }
+    
+    // test only
+    CheckMenuItem getMenuItemFor(TableColumnBase column) {
+        return columnMenuItems.get(column);
     }
 }

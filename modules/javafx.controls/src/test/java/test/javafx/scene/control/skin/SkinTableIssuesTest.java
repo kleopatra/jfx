@@ -38,21 +38,25 @@ import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
 import static javafx.scene.control.skin.TableHeaderRowShim.*;
+import static javafx.scene.control.skin.TableSkinShim.*;
 import static javafx.scene.control.skin.TableSkinShim.getColumnHeaderFor;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.SortType;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableColumnHeader;
+import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -89,7 +93,7 @@ public class SkinTableIssuesTest {
     }
     
     /**
-     * Test cleanup of listener to items content (== rowcountListener) 
+     * Test cleanup of listener to items content (== rowCountListener) 
      * added by TableViewSkinBase
      */
     @Test
@@ -102,6 +106,22 @@ public class SkinTableIssuesTest {
         showControl(control, true);
         replaceSkin(control);
         control.getItems().add(Locale.GERMAN);
+    }
+    
+    /**
+     * Test cleanup of listener to items property (== itemsChangeListener) 
+     * added by TableViewSkinBase
+     */
+    @Test
+    public void failSkinSetItems() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        replaceSkin(control);
+        control.setItems(FXCollections.observableArrayList(Locale.GERMAN));
     }
     
     /**
@@ -214,6 +234,16 @@ public class SkinTableIssuesTest {
         assertEquals("column must not have added sort-related children", 0, changes.size());
     }
     
+    @Test
+    public void testColumnHeaderWithoutRowHeader() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        installDefaultSkin(control);
+        // pathological but possible
+        TableColumnHeader columnHeader = new TableColumnHeader(column);
+        dispose(columnHeader);
+    }
     /**
      * Sanity test of listener to sortorder of table: 
      *  adds sort-related children
@@ -237,11 +267,11 @@ public class SkinTableIssuesTest {
     }
 
     /**
-     * think: doesn't make much sense (a - the listener is removed anyway, 
-     * b - the header we get is from the current skin/headerRow, not the old) 
-     * 
      * in visual test, we get NPE in rebuildDragRects - to reproduce, we ignore
-     * the one from TableViewSkinBase here .. hmmm
+     * the one from TableViewSkinBase here .. ??
+     * 
+     * This fails if TableHeaderRow doesn't cleanup its visibleLeafColumnsListener 
+     * (which calls headersNeedsUpdate recursively in the nestedColumnHeader)
      */
     @Test
     public void failNestedColumnHeaderUpdate() {
@@ -290,8 +320,8 @@ public class SkinTableIssuesTest {
         showControl(control, true);
         fireMethodPulse();
         replaceSkin(control);
-        control.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         try {
+            control.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         } catch (NullPointerException npe) {
             StackTraceElement element = npe.getStackTrace()[0];
             if (!element.getClassName().contains("TableViewSkinBase")) {
@@ -305,6 +335,63 @@ public class SkinTableIssuesTest {
     
     
 //----------- tableHeaderRow
+    
+    /**
+     * Test items in contextMenu cleared on dispose and not re-filled on adding columns.
+     */
+    @Test
+    public void testHeaderRowContextMenu() {
+        TableView<Locale> control =  new TableView<>();
+        control.setTableMenuButtonVisible(true);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        installDefaultSkin(control);
+        TableHeaderRow headerRow = getTableHeaderRow(control);
+        ContextMenu menu = getColumnPopupMenu(headerRow);
+        assertEquals(1, menu.getItems().size());
+        replaceSkin(control);
+        assertEquals(0, menu.getItems().size());
+        control.getColumns().add(new TableColumn("added"));
+        assertEquals(0, menu.getItems().size());
+    }
+    
+    @Test
+    public void failHeaderRowColumnText() {
+        TableView<Locale> control =  new TableView<>();
+        control.setTableMenuButtonVisible(true);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+//        installDefaultSkin(control);
+        showControl(control, true);
+        replaceSkin(control);
+        column.setText("updated");
+    }
+    
+    @Test
+    public void failHeaderRowColumnHide() {
+        TableView<Locale> control =  new TableView<>();
+        control.setTableMenuButtonVisible(true);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        installDefaultSkin(control);
+        replaceSkin(control);
+        column.setVisible(false);
+    }
+    
+    @Test
+    public void compareHeaderRowColumnHide() {
+        TableView<Locale> control =  new TableView<>();
+        control.setTableMenuButtonVisible(true);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        installDefaultSkin(control);
+        TableHeaderRow headerRow = getTableHeaderRow(control);
+        CheckMenuItem check = getMenuItemFor(headerRow, column);
+        assertEquals(column.isVisible(), check.isSelected());
+        column.setVisible(false);
+        assertEquals(column.isVisible(), check.isSelected());
+    }
+    
     /**
      * Test cleanup of listener to padding property added by TableHeaderRow.
      * 

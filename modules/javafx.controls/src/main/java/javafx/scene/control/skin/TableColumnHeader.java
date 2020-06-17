@@ -545,10 +545,11 @@ public class TableColumnHeader extends Region {
     void dispose() {
         // fixme: add test to guarantee removal of both listeners
         TableViewSkinBase tableSkin = getTableSkin();
+        // might happen if this header was instantiated without invoking setTableRowHeader later
+        if (tableSkin != null) {
             TableSkinUtils.getSortOrder(tableSkin).removeListener(weakSortOrderListener);
             // FIXME - test: TableSkinUtils are guarding against null skinnable
             TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
-        if (tableSkin != null) {
         }
 
         TableColumnBase tc = getTableColumn();
