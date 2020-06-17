@@ -488,9 +488,9 @@ public class TableColumnHeader extends Region {
         this.columnReorderLine = tableSkin.getColumnReorderLine();
 
         if (getTableColumn() != null) {
-//            updateSortPosition();
-//            TableSkinUtils.getSortOrder(tableSkin).addListener(weakSortOrderListener);
-//            TableSkinUtils.getVisibleLeafColumns(tableSkin).addListener(weakVisibleLeafColumnsListener);
+            updateSortPosition();
+            TableSkinUtils.getSortOrder(tableSkin).addListener(weakSortOrderListener);
+            TableSkinUtils.getVisibleLeafColumns(tableSkin).addListener(weakVisibleLeafColumnsListener);
         }
     }
 
@@ -544,19 +544,17 @@ public class TableColumnHeader extends Region {
 
     void dispose() {
         // fixme: add test to guarantee removal of both listeners
-//        TableViewSkinBase tableSkin = getTableSkin();
-//            // FIXME - test
-//            TableSkinUtils.getSortOrder(tableSkin).removeListener(weakSortOrderListener);
-//            // FIXME - test: TableSkinUtils are guarding against null skinnable
-////            TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
-//            if (tableSkin != null) {
-//        }
-//
-//        TableColumnBase tc = getTableColumn();
-//        if (tc != null) {
-//            // was NPE without removing
-//            tc.getStyleClass().removeListener(weakStyleClassListener);
-//        }
+        TableViewSkinBase tableSkin = getTableSkin();
+            TableSkinUtils.getSortOrder(tableSkin).removeListener(weakSortOrderListener);
+            // FIXME - test: TableSkinUtils are guarding against null skinnable
+            TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
+        if (tableSkin != null) {
+        }
+
+        TableColumnBase tc = getTableColumn();
+        if (tc != null) {
+            tc.getStyleClass().removeListener(weakStyleClassListener);
+        }
 
         changeListenerHandler.dispose();
     }

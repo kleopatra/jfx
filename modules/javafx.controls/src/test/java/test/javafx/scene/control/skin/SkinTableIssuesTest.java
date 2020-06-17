@@ -74,7 +74,7 @@ public class SkinTableIssuesTest {
      * Test cleanup of scroll handler added by TableViewSkinBase
      */
     @Test
-    public void failScrollToColumn() {
+    public void failSkinScrollToColumn() {
         TableView<Locale> control = new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
@@ -82,6 +82,9 @@ public class SkinTableIssuesTest {
         // (there's some lazyness in setup, forgot where exactly)
         showControl(control, true);
         replaceSkin(control);
+        // force layout pass before scrollTo - without getting a StackOverflow
+        // because scrollHorizontally is waiting until header is layouted
+        fireMethodPulse();
         control.scrollToColumn(column);
     }
     
@@ -90,7 +93,7 @@ public class SkinTableIssuesTest {
      * added by TableViewSkinBase
      */
     @Test
-    public void failAddData() {
+    public void failSkinAddItem() {
         TableView<Locale> control = new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
@@ -105,7 +108,7 @@ public class SkinTableIssuesTest {
      * Test cleanup of listener to visibleLeafColumns added by TableViewSkinBase.
      */
     @Test
-    public void failPlaceHolderAddMoreColumns() {
+    public void failSkinPlaceHolderAddMoreColumns() {
         TableView<Locale> control = new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
@@ -120,7 +123,7 @@ public class SkinTableIssuesTest {
      * Test cleanup of listener to visibleLeafColumns added by TableViewSkinBase.
      */
     @Test
-    public void failPlaceHolderAddColumns() {
+    public void failSkinPlaceHolderAddColumn() {
         TableView<Locale> control = new TableView<>();
         // have to build a scenegraph before accessing headers 
         // (there's some lazyness in setup, forgot where exactly)
@@ -134,7 +137,7 @@ public class SkinTableIssuesTest {
      * by TableViewSkinBase.
      */
     @Test
-    public void failColumnWidthNPE() {
+    public void failSkinColumnWidth() {
         TableView<Locale> control =  new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().add(column);
@@ -142,6 +145,24 @@ public class SkinTableIssuesTest {
         replaceSkin(control);
         column.setPrefWidth(200);
     }
+
+    /**
+     * Changing resizePolicy updates columnn width, so this is just another
+     * guard against cleanup of column width listeners. Different in failing only if
+     * in active scenegraph.
+     */
+    @Test
+    public void failSkinResizePolicy() {
+        TableView<Locale> control = new TableView<>();
+        control.getItems().add(Locale.GERMAN);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        column.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+        control.getColumns().addAll(column);
+        showControl(control, true);
+        replaceSkin(control);
+        control.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    }
+
 
 //-------------- Nested/ColumnHeader    
     
@@ -223,7 +244,7 @@ public class SkinTableIssuesTest {
      * the one from TableViewSkinBase here .. hmmm
      */
     @Test
-    public void testNestedColumnHeaderUpdate() {
+    public void failNestedColumnHeaderUpdate() {
         TableView<Locale> control = new TableView<>();
         control.getItems().add(Locale.GERMAN);
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
@@ -247,6 +268,41 @@ public class SkinTableIssuesTest {
         }
         root.layout();
     }
+    
+    /**
+     * listener in NestedColumnHeader is added via registerListener -> removed on dispose
+     * (except that nobody calls header dispose? ..) But get it in visual test (both the NPE
+     * from skin's width listener and the NPE from updateDragRects)
+     * 
+     * The latter is triggered from the listener to resizePolicy which is added (via 
+     * changeListener api) in setTableHeaderRow of NestedColumnHeader.
+     */
+    @Test
+    public void failNestedColumnHeaderResizePolicy() {
+        TableView<Locale> control = new TableView<>();
+        control.getItems().add(Locale.GERMAN);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        column.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+        control.getColumns().addAll(column);
+        //installDefaultSkin(control);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        fireMethodPulse();
+        replaceSkin(control);
+        control.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        try {
+        } catch (NullPointerException npe) {
+            StackTraceElement element = npe.getStackTrace()[0];
+            if (!element.getClassName().contains("TableViewSkinBase")) {
+                // rethrow if its not from the known issues in TableViewSkinBase
+                throw npe;
+            }
+        }
+        fireMethodPulse();
+        root.layout();
+    }
+    
     
 //----------- tableHeaderRow
     /**
