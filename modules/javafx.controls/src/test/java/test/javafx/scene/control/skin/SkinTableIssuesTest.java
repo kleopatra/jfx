@@ -26,35 +26,34 @@
 package test.javafx.scene.control.skin;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.javafx.tk.Toolkit;
 
-import static javafx.collections.FXCollections.*;
 import static javafx.scene.control.ControlShim.*;
 import static javafx.scene.control.skin.TableHeaderRowShim.*;
-import static javafx.scene.control.skin.TableSkinShim.*;
+import static javafx.scene.control.skin.TableSkinShim.getColumnHeaderFor;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
-import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TableView;
 import javafx.scene.control.skin.TableColumnHeader;
-import javafx.scene.control.skin.TableHeaderRow;
-import javafx.scene.control.skin.TableViewSkin;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -69,12 +68,10 @@ public class SkinTableIssuesTest {
     private static final boolean showPulse = false;
     private static final boolean methodPulse = true;
 
-//------------- TableView
+//------------- TableViewSkin/Base
 
-    
-    
     /**
-     * This fails in scrollHorizontally
+     * Test cleanup of scroll handler added by TableViewSkinBase
      */
     @Test
     public void failScrollToColumn() {
@@ -89,7 +86,8 @@ public class SkinTableIssuesTest {
     }
     
     /**
-     * This fails in rowcountListener of TableViewSkinBase
+     * Test cleanup of listener to items content (== rowcountListener) 
+     * added by TableViewSkinBase
      */
     @Test
     public void failAddData() {
@@ -104,8 +102,7 @@ public class SkinTableIssuesTest {
     }
     
     /**
-     * This fails in the listener installed by TableViewSkinBase
-     * when updating the 
+     * Test cleanup of listener to visibleLeafColumns added by TableViewSkinBase.
      */
     @Test
     public void failPlaceHolderAddMoreColumns() {
@@ -119,6 +116,9 @@ public class SkinTableIssuesTest {
         control.getColumns().addAll(new TableColumn("added"));
     }
     
+    /**
+     * Test cleanup of listener to visibleLeafColumns added by TableViewSkinBase.
+     */
     @Test
     public void failPlaceHolderAddColumns() {
         TableView<Locale> control = new TableView<>();
@@ -129,8 +129,27 @@ public class SkinTableIssuesTest {
         control.getColumns().addAll(new TableColumn("added"));
     }
     
+    /**
+     * Test cleanup of listener to width property of columns added
+     * by TableViewSkinBase.
+     */
     @Test
-    public void testColumnHeaderStyleClass() {
+    public void failColumnWidthNPE() {
+        TableView<Locale> control =  new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().add(column);
+        installDefaultSkin(control);
+        replaceSkin(control);
+        column.setPrefWidth(200);
+    }
+
+//-------------- Nested/ColumnHeader    
+    
+    /**
+     * columnHeader registers style listener on column which must be removed
+     */
+    @Test
+    public void failColumnHeaderStyleClass() {
         TableView<Locale> control = new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
@@ -140,18 +159,104 @@ public class SkinTableIssuesTest {
         showControl(control, true);
         TableColumnHeader header = getColumnHeaderFor(column);
         assertNotNull(header);
-        dispose(header);
+        replaceSkin(control);
+        // trying more fine grained dispose, should we?
+//        dispose(header);
         String testStyle = "test-style";
         column.getStyleClass().add(testStyle);
         assertFalse(header.getStyleClass().contains(testStyle));
     }
+    
+    /**
+     * Test cleanup of listener to sortorder of table added by TableColumnHeader.
+     */
+    @Test
+    public void failColumnHeaderSortOrder() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        //installDefaultSkin(control);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        TableColumnHeader header = getColumnHeaderFor(column);
+        assertNotNull(header);
+        // PENDING: this is borderline - the header is no longer valid after dispose ..
+        List<Change> changes = new ArrayList<>();
+        header.getChildrenUnmodifiable().addListener((ListChangeListener)changes::add);
+//        replaceSkin(control);
+        // trying more fine grained dispose, should we?
+        dispose(header);
+        changes.clear();
+        column.setSortType(SortType.DESCENDING);
+        control.getSortOrder().add(column);
+        assertEquals("column must not have added sort-related children", 0, changes.size());
+    }
+    
+    /**
+     * Sanity test of listener to sortorder of table: 
+     *  adds sort-related children
+     */
+    @Test
+    public void compareColumnHeaderSortOrder() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        //installDefaultSkin(control);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        TableColumnHeader header = getColumnHeaderFor(column);
+        assertNotNull(header);
+        List<Change> changes = new ArrayList<>();
+        header.getChildrenUnmodifiable().addListener((ListChangeListener)changes::add);
+        column.setSortType(SortType.DESCENDING);
+        control.getSortOrder().add(column);
+        assertFalse("must have added sort-related children", changes.isEmpty());
+    }
 
     /**
+     * think: doesn't make much sense (a - the listener is removed anyway, 
+     * b - the header we get is from the current skin/headerRow, not the old) 
+     * 
+     * in visual test, we get NPE in rebuildDragRects - to reproduce, we ignore
+     * the one from TableViewSkinBase here .. hmmm
+     */
+    @Test
+    public void testNestedColumnHeaderUpdate() {
+        TableView<Locale> control = new TableView<>();
+        control.getItems().add(Locale.GERMAN);
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        column.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+        control.getColumns().addAll(column);
+        //installDefaultSkin(control);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+//        fireMethodPulse();
+        replaceSkin(control);
+        try {
+            control.getColumns().add(new TableColumn<>("added"));
+            
+        } catch (NullPointerException npe) {
+            StackTraceElement element = npe.getStackTrace()[0];
+            if (!element.getClassName().contains("TableViewSkinBase")) {
+                // rethrow if its not from the known issues in TableViewSkinBase
+                throw npe;
+            }
+        }
+        root.layout();
+    }
+    
+//----------- tableHeaderRow
+    /**
+     * Test cleanup of listener to padding property added by TableHeaderRow.
+     * 
      * Changing padding after skin replace throws NPE 
      * (if TableHeaderRow.updateTableWidth is fixed to _not_ guard against null skinnable)
      */
     @Test
-    public void failTablePadding() {
+    public void failHeaderRowPadding() {
         TableView<Locale> control =  new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
@@ -161,6 +266,8 @@ public class SkinTableIssuesTest {
     }
     
     /**
+     * Test cleanup of listener to width property of table added by TableHeaderRow.
+     * 
      * how to trigger width change of table?
      * TableHeaderRow has listeners that must be removed, how to test without change?
      * 
@@ -171,7 +278,7 @@ public class SkinTableIssuesTest {
      * is disposed. For now, removed the guard.
      */
     @Test //@Ignore("FIXME - how to trigger actual resize?")
-    public void failTableWidth() {
+    public void failHeaderRowWidth() {
         TableView<Locale> control =  new TableView<>();
         // here: control in a layout doesnt force re-layout on resizing stage
         // in "normal" context: does resize
@@ -185,15 +292,6 @@ public class SkinTableIssuesTest {
         fireMethodPulse();
     }
     
-    @Test
-    public void failColumnWidthNPE() {
-        TableView<Locale> control =  new TableView<>();
-        TableColumn<Locale, String> column = new TableColumn<>("dummy");
-        control.getColumns().add(column);
-        installDefaultSkin(control);
-        replaceSkin(control);
-        column.setPrefWidth(200);
-    }
     /**
      * This here is the default test, default constructor. Fails before.
      *

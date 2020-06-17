@@ -603,6 +603,7 @@ public class NestedTableColumnHeader extends TableColumnHeader {
 
         boolean isConstrainedResize = false;
         TableViewSkinBase tableSkin = getTableSkin();
+        // FIXME: property is null if skin disposed!
         Callback<ResizeFeaturesBase,Boolean> columnResizePolicy = TableSkinUtils.columnResizePolicyProperty(tableSkin).get();
         if (columnResizePolicy != null) {
             isConstrainedResize =

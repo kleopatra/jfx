@@ -71,6 +71,9 @@ class TableSkinUtils {
         return false;
     }
 
+    // FIXME whacky api - returning null for a property
+    // happens if called on a skin that's disposed - which is an error on the 
+    // part of the caller .. 
     public static ObjectProperty<Callback<ResizeFeaturesBase,Boolean>> columnResizePolicyProperty(TableViewSkinBase<?,?,?,?,?> tableSkin) {
         Object control = tableSkin.getSkinnable();
         if (control instanceof TableView) {
@@ -182,8 +185,8 @@ class TableSkinUtils {
         } else if (control instanceof TreeTableView) {
             return ((TreeTableView)control).getVisibleLeafIndex((TreeTableColumn)tc);
         }
-//        throw new RuntimeException("no skinnable: " + control);
-        return -1;
+        throw new RuntimeException("no skinnable: " + control);
+//        return -1;
     }
 
     // returns the leaf column at the given index

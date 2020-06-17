@@ -488,9 +488,9 @@ public class TableColumnHeader extends Region {
         this.columnReorderLine = tableSkin.getColumnReorderLine();
 
         if (getTableColumn() != null) {
-            updateSortPosition();
-            TableSkinUtils.getSortOrder(tableSkin).addListener(weakSortOrderListener);
-            TableSkinUtils.getVisibleLeafColumns(tableSkin).addListener(weakVisibleLeafColumnsListener);
+//            updateSortPosition();
+//            TableSkinUtils.getSortOrder(tableSkin).addListener(weakSortOrderListener);
+//            TableSkinUtils.getVisibleLeafColumns(tableSkin).addListener(weakVisibleLeafColumnsListener);
         }
     }
 
