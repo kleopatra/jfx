@@ -91,6 +91,9 @@ class TableSkinUtils {
         return null;
     }
 
+    // FIXME whacky api - returning null for a property
+    // happens if called on a skin that's disposed - which is an error on the 
+    // part of the caller .. 
     public static ObjectProperty<Node> placeholderProperty(TableViewSkinBase<?,?,?,?,?> tableSkin) {
         Object control = tableSkin.getSkinnable();
         if (control instanceof TableView) {

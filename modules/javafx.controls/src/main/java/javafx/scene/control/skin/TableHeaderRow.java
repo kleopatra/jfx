@@ -285,19 +285,19 @@ public class TableHeaderRow extends StackPane {
     void dispose() {
         if (tableSkin.getSkinnable() == null) return;
         
-        getRootHeader().dispose();
-        
-        // FIXME - couldn't produce a failing unit test
-        tableSkin.getSkinnable().widthProperty().removeListener(weakTableWidthListener);
-        tableSkin.getSkinnable().paddingProperty().removeListener(weakTablePaddingListener);
-        
-        // FIXME - test
-        TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
-        TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakTableColumnsListener);
-        
-        // FIXME - test
-        TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
-        updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
+//        getRootHeader().dispose();
+//        
+//        // FIXME - couldn't produce a failing unit test
+//        tableSkin.getSkinnable().widthProperty().removeListener(weakTableWidthListener);
+//        tableSkin.getSkinnable().paddingProperty().removeListener(weakTablePaddingListener);
+//        
+//        // FIXME - test
+//        TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
+//        TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakTableColumnsListener);
+//        
+//        // FIXME - test
+//        TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
+//        updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
         
     }
 

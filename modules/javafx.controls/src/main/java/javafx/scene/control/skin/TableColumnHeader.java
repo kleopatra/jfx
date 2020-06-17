@@ -544,19 +544,19 @@ public class TableColumnHeader extends Region {
 
     void dispose() {
         // fixme: add test to guarantee removal of both listeners
-        TableViewSkinBase tableSkin = getTableSkin();
-            // FIXME - test
-            TableSkinUtils.getSortOrder(tableSkin).removeListener(weakSortOrderListener);
-            // FIXME - test: TableSkinUtils are guarding against null skinnable
-//            TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
-            if (tableSkin != null) {
-        }
-
-        TableColumnBase tc = getTableColumn();
-        if (tc != null) {
-            // was NPE without removing
-            tc.getStyleClass().removeListener(weakStyleClassListener);
-        }
+//        TableViewSkinBase tableSkin = getTableSkin();
+//            // FIXME - test
+//            TableSkinUtils.getSortOrder(tableSkin).removeListener(weakSortOrderListener);
+//            // FIXME - test: TableSkinUtils are guarding against null skinnable
+////            TableSkinUtils.getVisibleLeafColumns(tableSkin).removeListener(weakVisibleLeafColumnsListener);
+//            if (tableSkin != null) {
+//        }
+//
+//        TableColumnBase tc = getTableColumn();
+//        if (tc != null) {
+//            // was NPE without removing
+//            tc.getStyleClass().removeListener(weakStyleClassListener);
+//        }
 
         changeListenerHandler.dispose();
     }

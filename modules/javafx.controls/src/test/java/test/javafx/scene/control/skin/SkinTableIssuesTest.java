@@ -52,6 +52,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableColumnHeader;
 import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.control.skin.TableViewSkin;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -71,23 +72,61 @@ public class SkinTableIssuesTest {
 //------------- TableView
 
     
+    
+    /**
+     * This fails in scrollHorizontally
+     */
     @Test
-    public void testColumnHeaderLeafListener() {
+    public void failScrollToColumn() {
         TableView<Locale> control = new TableView<>();
         TableColumn<Locale, String> column = new TableColumn<>("dummy");
         control.getColumns().addAll(column);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        replaceSkin(control);
+        control.scrollToColumn(column);
+    }
+    
+    /**
+     * This fails in rowcountListener of TableViewSkinBase
+     */
+    @Test
+    public void failAddData() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
+        showControl(control, true);
+        replaceSkin(control);
+        control.getItems().add(Locale.GERMAN);
+    }
+    
+    /**
+     * This fails in the listener installed by TableViewSkinBase
+     * when updating the 
+     */
+    @Test
+    public void failPlaceHolderAddMoreColumns() {
+        TableView<Locale> control = new TableView<>();
+        TableColumn<Locale, String> column = new TableColumn<>("dummy");
+        control.getColumns().addAll(column);
+        // have to build a scenegraph before accessing headers 
+        // (there's some lazyness in setup, forgot where exactly)
         showControl(control, true);
         replaceSkin(control);
         control.getColumns().addAll(new TableColumn("added"));
+    }
+    
+    @Test
+    public void failPlaceHolderAddColumns() {
+        TableView<Locale> control = new TableView<>();
         // have to build a scenegraph before accessing headers 
         // (there's some lazyness in setup, forgot where exactly)
-//        showControl(control, true);
-//        TableColumnHeader header = getColumnHeaderFor(column);
-//        assertNotNull(header);
-//        dispose(header);
-//        String testStyle = "test-style";
-//        column.getStyleClass().add(testStyle);
-//        assertFalse(header.getStyleClass().contains(testStyle));
+        showControl(control, true);
+        replaceSkin(control);
+        control.getColumns().addAll(new TableColumn("added"));
     }
     
     @Test
@@ -120,44 +159,30 @@ public class SkinTableIssuesTest {
         replaceSkin(control);
         control.setPadding(new Insets(100, 100, 100, 100));
     }
+    
     /**
      * how to trigger width change of table?
      * TableHeaderRow has listeners that must be removed, how to test without change?
      * 
      * doesn't throw but old is still listening? yes, it's listening but table width is never
      * updated, how to force it? region.setWidth is package .. 
+     * 
+     * headerRow.updateTableWidth guards against null skinnable - shouldn't if the skin
+     * is disposed. For now, removed the guard.
      */
-    @Test @Ignore("FIXME - how to trigger actual resize?")
-    public void testTableWidth() {
-        ObservableList<Locale> data = observableArrayList(Locale.getAvailableLocales());
-        TableView<Locale> control =  new TableView<>(data);
-        TableColumn<Locale, String> column = new TableColumn<>("name");
-        column.setCellValueFactory(new PropertyValueFactory<>("displayName"));
-        control.getColumns().addAll(column);
-        control.setMaxWidth(Region.USE_PREF_SIZE);
-//        BorderPane root = new BorderPane(control);
-        
+    @Test //@Ignore("FIXME - how to trigger actual resize?")
+    public void failTableWidth() {
+        TableView<Locale> control =  new TableView<>();
+        // here: control in a layout doesnt force re-layout on resizing stage
+        // in "normal" context: does resize
 //        HBox root = new HBox(control);
-        VBox root = new VBox(10, control);
-//        StackPane 
-        scene.setRoot(root);
+        // setting the control as root
+        scene.setRoot(control);
         stage.show();
-//        showControl(control, true);
+        replaceSkin(control);
+        stage.setWidth(1000);
+        // need this pulse to force re-sizing of control
         fireMethodPulse();
-        control.widthProperty().addListener((e, ov, nv) -> System.out.println("getting width change"));
-        root.widthProperty().addListener(e -> 
-            System.out.println("getting width change from root: " + root.getWidth() + " table: " + control.getWidth()));
-//        replaceSkin(control);
-//        stage.setWidth(1000);
-        System.out.println("stage width set, before pulse");
-        fireMethodPulse();
-        System.out.println("stage width set, after pulse");
-//        column.setPrefWidth(500);
-        control.setPrefWidth(500);
-        root.requestLayout();
-        System.out.println("control width set, before pulse");
-        fireMethodPulse();
-        System.out.println("control width set, after pulse " + control.getWidth());
     }
     
     @Test
