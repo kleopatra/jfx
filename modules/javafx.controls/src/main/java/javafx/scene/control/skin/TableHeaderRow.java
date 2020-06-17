@@ -588,6 +588,7 @@ public class TableHeaderRow extends StackPane {
             remove(tc);
         }
         // FIXME: check if it's really okay to not do anything if added is empty
+        // probably not .. getting weird behaviour .. need further testing!
         if (!added.isEmpty()) rebuildColumnMenu();
     }
 
