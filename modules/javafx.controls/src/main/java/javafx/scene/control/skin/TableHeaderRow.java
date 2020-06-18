@@ -85,7 +85,7 @@ public class TableHeaderRow extends StackPane {
     private final String MENU_SEPARATOR =
             ControlResources.getString("TableView.nestedColumnControlMenuSeparator");
 
-    private final VirtualFlow flow;
+    private /*final*/ VirtualFlow flow;
 //    final 
     TableViewSkinBase<?,?,?,?,?> tableSkin;
     private Map<TableColumnBase, CheckMenuItem> columnMenuItems = new HashMap<TableColumnBase, CheckMenuItem>();
@@ -305,6 +305,10 @@ public class TableHeaderRow extends StackPane {
         TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
         updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
 //        getChildren().clear();
+//        // doesn't help leak (and final anyway)
+//        tableSkin = null;
+//        // doesn't help leak (and final anyway)
+//        flow = null;
     }
 
     /***************************************************************************

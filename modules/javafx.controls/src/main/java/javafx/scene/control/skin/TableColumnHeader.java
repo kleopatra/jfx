@@ -668,7 +668,7 @@ public class TableColumnHeader extends Region {
             }
         }
 
-        // dispose of the cell to prevent it retaining listeners (see RT-31015)
+//        // dispose of the cell to prevent it retaining listeners (see RT-31015)
         cell.updateIndex(-1);
 
         // RT-36855 - take into account the column header text / graphic widths.

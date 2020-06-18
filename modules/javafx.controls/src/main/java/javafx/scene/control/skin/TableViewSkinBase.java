@@ -288,8 +288,9 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
 //        tableHeaderRow.setColumnReorderLine(columnReorderLine);
         tableHeaderRow.setFocusTraversable(false);
 
+        getChildren().addAll(tableHeaderRow, flow, columnReorderOverlay, columnReorderLine);
         // WHY? change addAll to setAll fixes last trace of memory leak
-        getChildren().setAll(tableHeaderRow, flow, columnReorderOverlay, columnReorderLine);
+//        getChildren().setAll(tableHeaderRow, flow, columnReorderOverlay, columnReorderLine);
 
         updateVisibleColumnCount();
         updateVisibleLeafColumnWidthListeners(getVisibleLeafColumns(), FXCollections.<TC>emptyObservableList());

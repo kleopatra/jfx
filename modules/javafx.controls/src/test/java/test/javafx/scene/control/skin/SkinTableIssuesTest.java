@@ -452,8 +452,11 @@ public class SkinTableIssuesTest {
     }
     
     /**
-     * Dispose: clear children doesn't help - naturally, still have a strong
-     * ref from control to skin
+     * Null skin: memory leak is fixed (without clearing children, just 
+     * cleanup for side-effects)
+     * 
+     * So looks like the new skin implicitly holds a strong ref to the 
+     * old skin, how?
      */
     @Test
     public void failTableViewNullMemoryLeak() {
@@ -461,7 +464,6 @@ public class SkinTableIssuesTest {
         installDefaultSkin(control);
         WeakReference<Skin<?>> weakRef = new WeakReference<>(control.getSkin());
         assertNotNull(weakRef.get());
-//        weakRef.get().dispose();
         control.setSkin(null);
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
@@ -478,7 +480,6 @@ public class SkinTableIssuesTest {
         WeakReference<Skin<?>> weakRef = new WeakReference<>(weakControl.get().getSkin());
         assertNotNull(weakRef.get());
         weakRef.get().dispose();
-//        control.setSkin(null);
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
     }
