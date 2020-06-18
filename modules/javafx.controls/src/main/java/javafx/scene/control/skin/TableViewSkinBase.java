@@ -288,7 +288,8 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
 //        tableHeaderRow.setColumnReorderLine(columnReorderLine);
         tableHeaderRow.setFocusTraversable(false);
 
-        getChildren().addAll(tableHeaderRow, flow, columnReorderOverlay, columnReorderLine);
+        // WHY? change addAll to setAll fixes last trace of memory leak
+        getChildren().setAll(tableHeaderRow, flow, columnReorderOverlay, columnReorderLine);
 
         updateVisibleColumnCount();
         updateVisibleLeafColumnWidthListeners(getVisibleLeafColumns(), FXCollections.<TC>emptyObservableList());
@@ -341,6 +342,9 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
         });
         registerChangeListener(TableSkinUtils.placeholderProperty(this), e -> updatePlaceholderRegionVisibility());
         registerChangeListener(flow.getVbar().visibleProperty(), e -> updateContentWidth());
+        
+        
+//        printChildren("after instantiation");
     }
 
 
@@ -385,11 +389,27 @@ public abstract class TableViewSkinBase<M, S, C extends Control, I extends Index
         getSkinnable().removeEventHandler(ScrollToEvent.<TC>scrollToColumn(), scrollToColumnHandler);
         
         super.dispose();
-        // this seems to fix all "remaining" leaks (that I couldn't nail) 
+        // clear all children fix all "remaining" leaks (that I couldn't nail) 
 //        getChildren().clear();
-
+        // these three don't make a difference
+//        getChildren().remove(columnReorderLine);
+//        getChildren().remove(columnReorderOverlay);
+//        getChildren().remove(placeholderRegion);
+        // remove both of these lets leak test pass 
+//        getChildren().remove(tableHeaderRow);
+//        getChildren().remove(flow);
+//        printChildren("after cleanup");
     }
 
+
+
+    protected void printChildren(String message) {;
+        StringBuilder builder = new StringBuilder(message + ": " + this );
+        getChildren().forEach(c -> builder.append("\n    " + c));
+        System.out.println(builder);
+    }
+
+    
     /** {@inheritDoc} */
     @Override protected double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
         return 400;

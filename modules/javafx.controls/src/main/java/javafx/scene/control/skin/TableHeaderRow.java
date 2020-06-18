@@ -304,6 +304,7 @@ public class TableHeaderRow extends StackPane {
 //      // FIXME - test: columns != visibleLeafColumns if there are nested columns
         TableSkinUtils.getColumns(tableSkin).removeListener(weakTableColumnsListener);
         updateTableColumnListeners(Collections.<TableColumnBase<?,?>>emptyList(), TableSkinUtils.getColumns(tableSkin));
+//        getChildren().clear();
     }
 
     /***************************************************************************

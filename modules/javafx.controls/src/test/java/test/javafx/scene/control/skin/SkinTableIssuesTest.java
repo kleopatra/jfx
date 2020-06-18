@@ -51,6 +51,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
+import javafx.scene.control.Skin;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
@@ -446,6 +447,38 @@ public class SkinTableIssuesTest {
         installDefaultSkin(control);
         WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
         assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+    
+    /**
+     * Dispose: clear children doesn't help - naturally, still have a strong
+     * ref from control to skin
+     */
+    @Test
+    public void failTableViewNullMemoryLeak() {
+        TableView<?> control =  new TableView<>();
+        installDefaultSkin(control);
+        WeakReference<Skin<?>> weakRef = new WeakReference<>(control.getSkin());
+        assertNotNull(weakRef.get());
+//        weakRef.get().dispose();
+        control.setSkin(null);
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+    
+    /**
+     * Dispose: clear children doesn't help - naturally, still have a strong
+     * ref from control to skin
+     */
+    @Test
+    public void failTableViewDisposeMemoryLeak() {
+        WeakReference<TableView<?>> weakControl =  new WeakReference<>(new TableView<>());
+        installDefaultSkin(weakControl.get());
+        WeakReference<Skin<?>> weakRef = new WeakReference<>(weakControl.get().getSkin());
+        assertNotNull(weakRef.get());
+        weakRef.get().dispose();
+//        control.setSkin(null);
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
     }
