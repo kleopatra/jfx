@@ -180,33 +180,7 @@ public class ComboSpecialKeyWithEscapeEnterTest {
         assertEquals(expected, sources);
     }
 
-//------------------ f4
-
-    @Test
-    public void testF4TogglePopup() {
-        showAndFocus();
-        assertFalse(comboBox.isShowing());
-        KeyEventFirer firer = new KeyEventFirer(comboBox);
-        firer.doKeyPress(F4);
-        assertTrue(failPrefix(), comboBox.isShowing());
-        firer.doKeyPress(F4);
-        assertFalse(failPrefix(), comboBox.isShowing());
-    }
-
-    @Test
-    public void testF4ConsumeFilterNotTogglePopup() {
-        showAndFocus();
-        List<KeyEvent> events = new ArrayList<>();
-        comboBox.addEventFilter(KEY_RELEASED, e -> {
-            if (e.getCode() == F4) {
-                events.add(e);
-                e.consume();
-            }
-        });
-        KeyEventFirer firer = new KeyEventFirer(comboBox);
-        firer.doKeyPress(F4);
-        assertFalse(failPrefix() + ": popup must not be showing", comboBox.isShowing());
-    }
+//------------------ f4 (in main ComboSpecialKeyTest
 
     protected String failPrefix() {
         String failPrefix = comboBox.getClass().getSimpleName() + " editable " + editable;

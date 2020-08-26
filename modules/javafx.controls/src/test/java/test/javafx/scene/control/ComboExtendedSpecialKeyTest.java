@@ -65,13 +65,12 @@ import test.com.sun.javafx.pgstub.StubToolkit;
 import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 
 /**
- * Test for https://bugs.openjdk.java.net/browse/JDK-8233040 - F4
- * must not be consumed by EventFilter in ComboBoxPopupControl.
+ * 
  * <p>
  * Parameterized in concrete sub of ComboBoxBase and editable.
  *
  * Initial testing of other keys and notification count (for future use,
- * don't add to F4 pull request)
+ * were not added F4 pull request)
  */
 @RunWith(Parameterized.class)
 public class ComboExtendedSpecialKeyTest {
@@ -225,33 +224,6 @@ public class ComboExtendedSpecialKeyTest {
 
 //-------------- F4
 
-
-    @Test
-    public void testF4TogglePopup() {
-        showAndFocus();
-        assertFalse(comboBox.isShowing());
-        KeyEventFirer firer = new KeyEventFirer(comboBox);
-        firer.doKeyPress(F4);
-        assertTrue(failPrefix(), comboBox.isShowing());
-        firer.doKeyPress(F4);
-        assertFalse(failPrefix(), comboBox.isShowing());
-    }
-
-
-    @Test
-    public void testF4ConsumeFilterNotTogglePopup() {
-        showAndFocus();
-        List<KeyEvent> events = new ArrayList<>();
-        comboBox.addEventFilter(KEY_RELEASED, e -> {
-            if (e.getCode() == F4) {
-                events.add(e);
-                e.consume();
-            }
-        });
-        KeyEventFirer firer = new KeyEventFirer(comboBox);
-        firer.doKeyPress(F4);
-        assertFalse(failPrefix() + ": popup must not be showing", comboBox.isShowing());
-    }
 
     protected String failPrefix(List<KeyEvent> events) {
         String failPrefix = failPrefix();
