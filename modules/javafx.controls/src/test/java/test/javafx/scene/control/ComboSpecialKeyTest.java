@@ -64,7 +64,7 @@ import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
  * Parameterized in concrete sub of ComboBoxBase and editable.
  */
 @RunWith(Parameterized.class)
-public class ComboSpecialKeyOrigTest {
+public class ComboSpecialKeyTest {
 
     private Toolkit tk;
     private Scene scene;
@@ -124,7 +124,7 @@ public class ComboSpecialKeyOrigTest {
         return Arrays.asList(data);
     }
 
-    public ComboSpecialKeyOrigTest(Supplier<ComboBoxBase> factory, boolean editable) {
+    public ComboSpecialKeyTest(Supplier<ComboBoxBase> factory, boolean editable) {
         this.comboFactory = factory;
         this.editable = editable;
     }
