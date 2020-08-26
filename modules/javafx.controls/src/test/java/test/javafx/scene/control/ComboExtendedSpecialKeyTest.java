@@ -136,6 +136,97 @@ public class ComboExtendedSpecialKeyTest {
         assertEquals(failPrefix(), expected, sources);
     }
 
+  //------------ esc
+
+    /**
+     * test to guarantee correct behavior for editors with textformatter
+     */
+    @Test
+    public void testEscapeEditorWithTextFormatter() {
+        if (!editable) return;
+        showAndFocus();
+        TextFormatter<String> formatter = new TextFormatter<>(TextFormatter.IDENTITY_STRING_CONVERTER);
+        TextField editor = null;
+        if (comboBox instanceof ComboBox) {
+            editor = ((ComboBox) comboBox).getEditor();
+        } else if (comboBox instanceof DatePicker) {
+            editor = ((DatePicker) comboBox).getEditor();
+        }
+        if (editor == null) {
+            fail("unexpected state: " + editable + " " + comboBox.getClass().getName());
+        }
+        editor.setTextFormatter(formatter);
+        KeyEventFirer firer = new KeyEventFirer(null, scene);
+        firer.doKeyTyped(A);
+        assertEquals("A", editor.getText());
+        firer.doKeyPress(ESCAPE);
+        assertEquals("", editor.getText());
+    }
+
+    @Test
+    public void testEventSequenceEscapePressedHandler() {
+        showAndFocus();
+        List<Event> events = new ArrayList<>();
+        EventHandler<KeyEvent> adder = events::add;
+        scene.addEventHandler(KEY_PRESSED, adder);
+        root.addEventHandler(KEY_PRESSED, adder);
+        comboBox.addEventHandler(KEY_PRESSED, adder);
+        KeyCode key = ESCAPE;
+        KeyEventFirer keyFirer = new KeyEventFirer(comboBox);
+        keyFirer.doKeyPress(key);
+        assertEquals(failPrefix() + " event count", 3, events.size());
+        List<Object> sources = events.stream()
+                .map(e -> e.getSource())
+                .collect(toList());
+        List<Object> expected = List.of(comboBox, root, scene);
+        assertEquals(failPrefix(), expected, sources);
+    }
+
+    @Test
+    public void testEventSequenceEscapeReleasedHandler() {
+        showAndFocus();
+        List<Event> events = new ArrayList<>();
+        EventHandler<KeyEvent> adder = events::add;
+        scene.addEventHandler(KEY_RELEASED, adder);
+        root.addEventHandler(KEY_RELEASED, adder);
+        comboBox.addEventHandler(KEY_RELEASED, adder);
+        KeyCode key = ESCAPE;
+        KeyEventFirer keyFirer = new KeyEventFirer(comboBox);
+        keyFirer.doKeyPress(key);
+        assertEquals(failPrefix() + " event count", 3, events.size());
+        List<Object> sources = events.stream()
+                .map(e -> e.getSource())
+                .collect(toList());
+        List<Object> expected = List.of(comboBox, root, scene);
+        assertEquals(failPrefix(), expected, sources);
+    }
+
+//---------- enter
+
+    /**
+     * Test related to https://bugs.openjdk.java.net/browse/JDK-8207759
+     * broken event dispatch sequence by forwardToParent.
+     *
+     * passes after fixing the textfield bug
+     */
+    @Test
+    public void testEventSequenceEnterPressedHandler() {
+        showAndFocus();
+        List<Event> events = new ArrayList<>();
+        EventHandler<KeyEvent> adder = events::add;
+        scene.addEventHandler(KEY_PRESSED, adder);
+        root.addEventHandler(KEY_PRESSED, adder);
+        comboBox.addEventHandler(KEY_PRESSED, adder);
+        KeyCode key = ENTER;
+        KeyEventFirer keyFirer = new KeyEventFirer(null, scene);
+        keyFirer.doKeyPress(key);
+        assertEquals("event count", 3, events.size());
+        List<Object> sources = events.stream()
+                .map(e -> e.getSource())
+                .collect(toList());
+        List<Object> expected = List.of(comboBox, root, scene);
+        assertEquals(expected, sources);
+    }
 
 
 //------------ normal key
