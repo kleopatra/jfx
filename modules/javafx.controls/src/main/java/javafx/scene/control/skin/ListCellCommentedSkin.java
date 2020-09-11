@@ -55,8 +55,8 @@ public class ListCellCommentedSkin<T> extends CellSkinBase<ListCell<T>> {
      *                                                                         *
      **************************************************************************/
 
-//    private double fixedCellSize;
-//    private boolean fixedCellSizeEnabled;
+    private double fixedCellSize;
+    private boolean fixedCellSizeEnabled;
     private BehaviorBase<ListCell<T>> behavior;
 
 
@@ -93,9 +93,9 @@ public class ListCellCommentedSkin<T> extends CellSkinBase<ListCell<T>> {
         
         //--------- BBBBBBBBBBBBB
         // pattern: skin api for parent property
-//        fixedCellSizeListener = o -> updateFixedCellSize();
-//        registerChangeListener(control.listViewProperty(), o -> updateListView());
-//        updateListView();
+        fixedCellSizeListener = o -> updateFixedCellSize();
+        registerChangeListener(control.listViewProperty(), o -> updateListView());
+        updateListView();
         
         //--------- CCCCCCCCCCCC
         // pattern manual changeListener, no reference to listView
@@ -190,8 +190,8 @@ public class ListCellCommentedSkin<T> extends CellSkinBase<ListCell<T>> {
      * should we cleanup in dispose?
      */
     private void updateFixedCellSize() {
-//        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
-//        this.fixedCellSizeEnabled = fixedCellSize > 0;
+        this.fixedCellSize = listView == null ? -1 : listView.getFixedCellSize();
+        this.fixedCellSizeEnabled = fixedCellSize > 0;
     }
     
     /** {@inheritDoc} */
@@ -354,16 +354,16 @@ public class ListCellCommentedSkin<T> extends CellSkinBase<ListCell<T>> {
 
     /** {@inheritDoc} */
     @Override 
-    protected double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
+    public double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
 
-//        if (fixedCellSizeEnabled) {
-//            return fixedCellSize;
-//        }
-        
-        double fixedCellSize = getFixedCellSize();
-        if (fixedCellSize > 0) {
+        if (fixedCellSizeEnabled) {
             return fixedCellSize;
-        }    
+        }
+        
+//        double fixedCellSize = getFixedCellSize();
+//        if (fixedCellSize > 0) {
+//            return fixedCellSize;
+//        }    
         // Added the comparison between the default cell size and the requested
         // cell size to prevent the issue identified in RT-19873.
         final double cellSize = getCellSize();
@@ -373,26 +373,26 @@ public class ListCellCommentedSkin<T> extends CellSkinBase<ListCell<T>> {
 
     /** {@inheritDoc} */
     @Override protected double computeMinHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-//        if (fixedCellSizeEnabled) {
-//            return fixedCellSize;
-//        }
-        double fixedCellSize = getFixedCellSize();
-        if (fixedCellSize > 0) {
+        if (fixedCellSizeEnabled) {
             return fixedCellSize;
-        }    
+        }
+//        double fixedCellSize = getFixedCellSize();
+//        if (fixedCellSize > 0) {
+//            return fixedCellSize;
+//        }    
 
         return super.computeMinHeight(width, topInset, rightInset, bottomInset, leftInset);
     }
 
     /** {@inheritDoc} */
     @Override protected double computeMaxHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-        double fixedCellSize = getFixedCellSize();
-        if (fixedCellSize > 0) {
-            return fixedCellSize;
-        }    
-//        if (fixedCellSizeEnabled) {
+//        double fixedCellSize = getFixedCellSize();
+//        if (fixedCellSize > 0) {
 //            return fixedCellSize;
-//        }
+//        }    
+        if (fixedCellSizeEnabled) {
+            return fixedCellSize;
+        }
 
         return super.computeMaxHeight(width, topInset, rightInset, bottomInset, leftInset);
     }
@@ -401,8 +401,8 @@ public class ListCellCommentedSkin<T> extends CellSkinBase<ListCell<T>> {
     double getFixedCellSize() {
         // FIXME - test must not call any method on a disposed skin
 //        if (getSkinnable() == null) return Region.USE_COMPUTED_SIZE;
-//        return fixedCellSize;
-        ListView<?> listView = getSkinnable().getListView();
-        return listView != null ? listView.getFixedCellSize() : Region.USE_COMPUTED_SIZE;
+        return fixedCellSize;
+//        ListView<?> listView = getSkinnable().getListView();
+//        return listView != null ? listView.getFixedCellSize() : Region.USE_COMPUTED_SIZE;
     }
 }
