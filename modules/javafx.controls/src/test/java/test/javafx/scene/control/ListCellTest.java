@@ -811,7 +811,7 @@ public class ListCellTest {
         ListCell cell = new ListCell();
         cell.setSkin(new ListCellSkin(cell));
     }
-    
+
     /**
      * Test that min/max/pref height respect fixedCellSize.
      * Sanity test when fixing JDK-8246745.

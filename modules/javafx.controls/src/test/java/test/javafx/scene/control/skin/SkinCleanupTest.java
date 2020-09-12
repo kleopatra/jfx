@@ -55,9 +55,9 @@ public class SkinCleanupTest {
     private Scene scene;
     private Stage stage;
     private Pane root;
-    
-// ------------------ ListCell    
-    
+
+// ------------------ ListCell
+
     @Test
     public void testListCellReplaceListViewWithNull() {
         ListCell<Object> cell =  new ListCell<>();
@@ -65,6 +65,7 @@ public class SkinCleanupTest {
         cell.updateListView(listView);
         installDefaultSkin(cell);
         cell.updateListView(null);
+        // 8246745: updating the old listView must not throw NPE in skin
         listView.setFixedCellSize(100);
     }
 
