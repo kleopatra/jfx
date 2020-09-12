@@ -41,6 +41,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -56,6 +58,149 @@ public class SkinCellIssuesTest {
     private static final boolean showPulse = false;
     private static final boolean methodPulse = true;
 
+//-------------- TreeCell
+    
+    /**
+     * This here is the default test, default constructor. Fails before.
+     *
+     * FIXME: don't add to final push - here just to understand and reducing test time
+     * Cell skin is leaking if has listView
+     *
+     * (cell without lv) skin -> replaceSkin
+     */
+    @Test
+    public void failTreeCellMemoryLeak() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        installDefaultSkin(cell);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+
+
+    /**
+     * Test that min/max/pref height respect fixedCellSize.
+     * Sanity test when fixing JDK-8246745.
+     * 
+     * move to TreeCellTest
+     */
+    @Test
+    public void testTreeCellHeights() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        TreeView<Object> listView = new TreeView<>();
+        cell.updateTreeView(listView);
+        installDefaultSkin(cell);
+        listView.setFixedCellSize(100);
+        assertEquals("pref height must be fixedCellSize",
+                listView.getFixedCellSize(),
+                cell.prefHeight(-1), 1);
+        assertEquals("min height must be fixedCellSize",
+                listView.getFixedCellSize(),
+                cell.minHeight(-1), 1);
+        assertEquals("max height must be fixedCellSize",
+                listView.getFixedCellSize(),
+                cell.maxHeight(-1), 1);
+    }
+
+    /**
+     * Here we null the listView in the cell -> fixedSizeListener throws NPE
+     * because listView is null (in cells skin)
+     *
+     * skin -> listView -> null
+     */
+    @Test
+    public void failTreeCellSkinWithTreeViewNullTreeView() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        installDefaultSkin(cell);
+        TreeView<Object> listView = new TreeView<>();
+        cell.updateTreeView(listView);
+        cell.updateTreeView(null);
+        // TBD: report and replace bug id here!
+        // 8246745: updating the old treeView must not throw NPE in skin
+        listView.setFixedCellSize(100);
+    }
+
+    /**
+     * Was: NPE on null listView and modify old listView
+     *
+     * listView -> skin -> null
+     */
+    @Test
+    public void failTreeCellWithTreeViewSkinNullTreeView() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        TreeView<Object> listView = new TreeView<>();
+        cell.updateTreeView(listView);
+        installDefaultSkin(cell);
+        cell.updateTreeView(null);
+        // throws NPE in original
+        listView.setFixedCellSize(100);
+    }
+
+    /**
+     * Test that state is updated to value of replaced listView. Fails before.
+     *
+     * listView -> skin -> replace listView
+     */
+    @Test
+    public void failTreeCellPrefHeightOnReplaceTreeView() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        cell.updateTreeView(new TreeView<>());
+        installDefaultSkin(cell);
+        TreeView<Object> listView = new TreeView<>();
+        listView.setFixedCellSize(100);
+        cell.updateTreeView(listView);
+        assertEquals("fixed cell set to value of new listView",
+                cell.getTreeView().getFixedCellSize(),
+                cell.prefHeight(-1), 1);
+    }
+
+    /**
+     * Test that state is updated when changing value in new ListView. Fails before.
+     *
+     * listView -> skin -> replace listView -> change fixedSize on replaced
+     * always failing in pair with the test above, changing before/after update
+     * doesn't make a difference?
+     */
+    @Test
+    public void failTreeCellPrefHeightReplaceTreeViewOnChange() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        cell.updateTreeView(new TreeView<>());
+        installDefaultSkin(cell);
+        cell.updateTreeView(new TreeView<>());
+        cell.getTreeView().setFixedCellSize(300);
+        assertEquals("pref height respects fixedCellSize new listView",
+                cell.getTreeView().getFixedCellSize(),
+                cell.prefHeight(-1), 1);
+    }
+
+    /**
+     * Test that state is not updated on replacing listView and changing
+     * property on old. Passes accidentally.
+     *
+     * Note: this passes accidentally before the fix - the skin is
+     * listening to changes of the property on first listView and updates itself
+     * to state of the property on current listView!
+     *
+     *  FIXME: any way to write a test such that it fails before and passes after?
+     */
+    @Test
+    public void removeTreeCellPrefHeightReplaceTreeView() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        TreeView<Object> initialLV = new TreeView<>();
+        cell.updateTreeView(initialLV);
+        installDefaultSkin(cell);
+        TreeView<Object> listView = new TreeView<>();
+        listView.setFixedCellSize(100);
+        cell.updateTreeView(listView);
+        initialLV.setFixedCellSize(300);
+        assertEquals("fixed cell updated in new",
+                cell.getTreeView().getFixedCellSize(),
+                cell.prefHeight(-1), 1);
+    }
+    
+    
 //------------- ListCell
 // note: core ListCellSkin doesn't re-wire path property on changing listView
 // for max failures make sure to install the listView before skin
@@ -63,6 +208,8 @@ public class SkinCellIssuesTest {
     /**
      * Test that min/max/pref height respect fixedCellSize.
      * Sanity test when fixing JDK-8246745.
+     * 
+     * Moved to ListCellTest for PR
      */
     @Test
     public void testListCellHeights() {

@@ -44,6 +44,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.Region;
 import javafx.css.StyleableDoubleProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.CssMetaData;
@@ -96,8 +97,8 @@ public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>> {
     private TreeItem<?> treeItem;
     private final BehaviorBase<TreeCell<T>> behavior;
 
-    private double fixedCellSize;
-    private boolean fixedCellSizeEnabled;
+//    private double fixedCellSize;
+//    private boolean fixedCellSizeEnabled;
 
 
 
@@ -130,28 +131,28 @@ public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>> {
         });
         registerChangeListener(control.textProperty(), e -> getSkinnable().requestLayout());
 
-        setupTreeViewListeners();
+//        setupTreeViewListeners();
     }
 
-    private void setupTreeViewListeners() {
-        TreeView<T> treeView = getSkinnable().getTreeView();
-        if (treeView == null) {
-            getSkinnable().treeViewProperty().addListener(new InvalidationListener() {
-                @Override public void invalidated(Observable observable) {
-                    getSkinnable().treeViewProperty().removeListener(this);
-                    setupTreeViewListeners();
-                }
-            });
-        } else {
-            this.fixedCellSize = treeView.getFixedCellSize();
-            this.fixedCellSizeEnabled = fixedCellSize > 0;
-            registerChangeListener(treeView.fixedCellSizeProperty(), e -> {
-                this.fixedCellSize = getSkinnable().getTreeView().getFixedCellSize();
-                this.fixedCellSizeEnabled = fixedCellSize > 0;
-            });
-        }
-    }
-
+//    private void setupTreeViewListeners() {
+//        TreeView<T> treeView = getSkinnable().getTreeView();
+//        if (treeView == null) {
+//            getSkinnable().treeViewProperty().addListener(new InvalidationListener() {
+//                @Override public void invalidated(Observable observable) {
+//                    getSkinnable().treeViewProperty().removeListener(this);
+//                    setupTreeViewListeners();
+//                }
+//            });
+//        } else {
+//            this.fixedCellSize = treeView.getFixedCellSize();
+//            this.fixedCellSizeEnabled = fixedCellSize > 0;
+//            registerChangeListener(treeView.fixedCellSizeProperty(), e -> {
+//                this.fixedCellSize = getSkinnable().getTreeView().getFixedCellSize();
+//                this.fixedCellSizeEnabled = fixedCellSize > 0;
+//            });
+//        }
+//    }
+//
 
 
     /***************************************************************************
@@ -277,7 +278,8 @@ public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>> {
 
     /** {@inheritDoc} */
     @Override protected double computeMinHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-        if (fixedCellSizeEnabled) {
+        double fixedCellSize = getFixedCellSize();
+        if (fixedCellSize > 0) {
             return fixedCellSize;
         }
 
@@ -288,7 +290,8 @@ public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>> {
 
     /** {@inheritDoc} */
     @Override protected double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-        if (fixedCellSizeEnabled) {
+        double fixedCellSize = getFixedCellSize();
+        if (fixedCellSize > 0) {
             return fixedCellSize;
         }
 
@@ -305,7 +308,8 @@ public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>> {
 
     /** {@inheritDoc} */
     @Override protected double computeMaxHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-        if (fixedCellSizeEnabled) {
+        double fixedCellSize = getFixedCellSize();
+        if (fixedCellSize > 0) {
             return fixedCellSize;
         }
 
@@ -340,6 +344,10 @@ public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>> {
         return pw;
     }
 
+    private double getFixedCellSize() {
+        TreeView<?> treeView = getSkinnable().getTreeView();
+        return treeView != null ? treeView.getFixedCellSize() : Region.USE_COMPUTED_SIZE;
+    }
 
 
     /***************************************************************************

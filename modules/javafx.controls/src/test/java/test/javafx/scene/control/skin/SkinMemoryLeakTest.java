@@ -138,9 +138,11 @@ public class SkinMemoryLeakTest {
                 TextArea.class,
                 // @Ignore("8240506")
                 TextField.class,
-                TreeCell.class,
+                // to report: fix same as ListCellSkin?
+//                TreeCell.class,
                 TreeTableRow.class,
                 TreeTableView.class
+                // to report
 //                TreeView.class
         );
         // remove the known issues to make the test pass
