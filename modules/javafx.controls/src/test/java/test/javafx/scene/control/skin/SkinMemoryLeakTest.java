@@ -78,6 +78,9 @@ import javafx.scene.shape.Rectangle;
 import test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory;
 
 /**
+ * Beware: this is different in doKeep - contains tests against future (attempts of) fixes!
+ * Changes in master must be merged manually to this to keep in synch with current fixes!
+ * <p>
  * Test memory leaks in Skin implementations.
  * <p>
  * This test is parameterized on control type.
@@ -135,7 +138,7 @@ public class SkinMemoryLeakTest {
                 TextArea.class,
                 // @Ignore("8240506")
                 TextField.class,
-                ToolBar.class,
+//                ToolBar.class,
                 TreeCell.class,
                 TreeTableRow.class,
                 TreeTableView.class
