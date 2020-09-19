@@ -243,13 +243,18 @@ public class TreeTableRowSkin<T> extends TableRowSkinBase<TreeItem<T>, TreeTable
             updateDisclosureNodeAndGraphic();
             disclosureNodeDirty = false;
         }
-
+        
+        // why the doubling?
         Node disclosureNode = getDisclosureNode();
         if (disclosureNode != null && disclosureNode.getScene() == null) {
             updateDisclosureNodeAndGraphic();
         }
 
         super.layoutChildren(x, y, w, h);
+//        if (disclosureNode != null && !disclosureNode.isVisible()) {
+//            System.out.println("removed");
+//            getChildren().remove(disclosureNode);
+//        }
     }
 
 

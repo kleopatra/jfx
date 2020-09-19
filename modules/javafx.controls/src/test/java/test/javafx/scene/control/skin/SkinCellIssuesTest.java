@@ -42,6 +42,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -59,7 +60,33 @@ public class SkinCellIssuesTest {
     private static final boolean methodPulse = true;
 
 //-------------- TreeCell
+
+    /**
+     * Variants of configuring a cell.
+     */
+    @Test
+    public void testTreeCellWithTreeViewAndRootMemoryLeak() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        cell.updateTreeView(new TreeView<>(new TreeItem<>("root")));
+        cell.updateTreeItem(cell.getTreeView().getRoot());
+        installDefaultSkin(cell);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
     
+    @Test
+    public void testTreeCellWithTreeViewMemoryLeak() {
+        TreeCell<Object> cell =  new TreeCell<>();
+        cell.updateTreeView(new TreeView<>());
+        installDefaultSkin(cell);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(cell));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
     /**
      * This here is the default test, default constructor. Fails before.
      *
@@ -89,77 +116,77 @@ public class SkinCellIssuesTest {
     @Test
     public void testTreeCellHeights() {
         TreeCell<Object> cell =  new TreeCell<>();
-        TreeView<Object> listView = new TreeView<>();
-        cell.updateTreeView(listView);
+        TreeView<Object> treeView = new TreeView<>();
+        cell.updateTreeView(treeView);
         installDefaultSkin(cell);
-        listView.setFixedCellSize(100);
+        treeView.setFixedCellSize(100);
         assertEquals("pref height must be fixedCellSize",
-                listView.getFixedCellSize(),
+                treeView.getFixedCellSize(),
                 cell.prefHeight(-1), 1);
         assertEquals("min height must be fixedCellSize",
-                listView.getFixedCellSize(),
+                treeView.getFixedCellSize(),
                 cell.minHeight(-1), 1);
         assertEquals("max height must be fixedCellSize",
-                listView.getFixedCellSize(),
+                treeView.getFixedCellSize(),
                 cell.maxHeight(-1), 1);
     }
 
     /**
-     * Here we null the listView in the cell -> fixedSizeListener throws NPE
-     * because listView is null (in cells skin)
+     * Here we null the treeView in the cell -> fixedSizeListener throws NPE
+     * because treeView is null (in cells skin)
      *
-     * skin -> listView -> null
+     * skin -> treeView -> null
      */
     @Test
     public void failTreeCellSkinWithTreeViewNullTreeView() {
         TreeCell<Object> cell =  new TreeCell<>();
         installDefaultSkin(cell);
-        TreeView<Object> listView = new TreeView<>();
-        cell.updateTreeView(listView);
+        TreeView<Object> treeView = new TreeView<>();
+        cell.updateTreeView(treeView);
         cell.updateTreeView(null);
         // TBD: report and replace bug id here!
         // 8246745: updating the old treeView must not throw NPE in skin
-        listView.setFixedCellSize(100);
+        treeView.setFixedCellSize(100);
     }
 
     /**
-     * Was: NPE on null listView and modify old listView
+     * Was: NPE on null treeView and modify old treeView
      *
-     * listView -> skin -> null
+     * treeView -> skin -> null
      */
     @Test
     public void failTreeCellWithTreeViewSkinNullTreeView() {
         TreeCell<Object> cell =  new TreeCell<>();
-        TreeView<Object> listView = new TreeView<>();
-        cell.updateTreeView(listView);
+        TreeView<Object> treeView = new TreeView<>();
+        cell.updateTreeView(treeView);
         installDefaultSkin(cell);
         cell.updateTreeView(null);
         // throws NPE in original
-        listView.setFixedCellSize(100);
+        treeView.setFixedCellSize(100);
     }
 
     /**
-     * Test that state is updated to value of replaced listView. Fails before.
+     * Test that state is updated to value of replaced treeView. Fails before.
      *
-     * listView -> skin -> replace listView
+     * treeView -> skin -> replace treeView
      */
     @Test
     public void failTreeCellPrefHeightOnReplaceTreeView() {
         TreeCell<Object> cell =  new TreeCell<>();
         cell.updateTreeView(new TreeView<>());
         installDefaultSkin(cell);
-        TreeView<Object> listView = new TreeView<>();
-        listView.setFixedCellSize(100);
-        cell.updateTreeView(listView);
+        TreeView<Object> treeView = new TreeView<>();
+        treeView.setFixedCellSize(100);
+        cell.updateTreeView(treeView);
         assertEquals("fixed cell set to value of new listView",
                 cell.getTreeView().getFixedCellSize(),
                 cell.prefHeight(-1), 1);
     }
 
     /**
-     * Test that state is updated when changing value in new ListView. Fails before.
+     * Test that state is updated when changing value in new treeView. Fails before.
      *
-     * listView -> skin -> replace listView -> change fixedSize on replaced
+     * treeView -> skin -> replace treeView -> change fixedSize on replaced
      * always failing in pair with the test above, changing before/after update
      * doesn't make a difference?
      */
@@ -176,12 +203,12 @@ public class SkinCellIssuesTest {
     }
 
     /**
-     * Test that state is not updated on replacing listView and changing
+     * Test that state is not updated on replacing treeView and changing
      * property on old. Passes accidentally.
      *
      * Note: this passes accidentally before the fix - the skin is
-     * listening to changes of the property on first listView and updates itself
-     * to state of the property on current listView!
+     * listening to changes of the property on first treeView and updates itself
+     * to state of the property on current treeView!
      *
      *  FIXME: any way to write a test such that it fails before and passes after?
      */
@@ -191,9 +218,9 @@ public class SkinCellIssuesTest {
         TreeView<Object> initialLV = new TreeView<>();
         cell.updateTreeView(initialLV);
         installDefaultSkin(cell);
-        TreeView<Object> listView = new TreeView<>();
-        listView.setFixedCellSize(100);
-        cell.updateTreeView(listView);
+        TreeView<Object> treeView = new TreeView<>();
+        treeView.setFixedCellSize(100);
+        cell.updateTreeView(treeView);
         initialLV.setFixedCellSize(300);
         assertEquals("fixed cell updated in new",
                 cell.getTreeView().getFixedCellSize(),
