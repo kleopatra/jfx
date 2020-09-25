@@ -145,7 +145,7 @@ public class SkinCellIssuesTest {
         cell.updateTreeView(treeView);
         cell.updateTreeView(null);
         // TBD: report and replace bug id here!
-        // 8246745: updating the old treeView must not throw NPE in skin
+        // JDK-8253634: updating the old treeView must not throw NPE in skin
         treeView.setFixedCellSize(100);
     }
 
