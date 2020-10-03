@@ -2294,4 +2294,17 @@ public class TabPaneSkin extends SkinBase<TabPane> {
         closeTabAnimation.set(TabAnimation.NONE);
         openTabAnimation.set(TabAnimation.NONE);
     }
+    
+    // tbd: change scope to package! 
+    public double test_getHeaderAreaScrollOffset() {
+        return tabHeaderArea.getScrollOffset();
+    }
+
+    void test_setHeaderAreaScrollOffset(double offset) {
+        tabHeaderArea.setScrollOffset(offset);
+    }
+    
+    public boolean test_isTabsFit() {
+        return tabHeaderArea.tabsFit();
+    }
 }
