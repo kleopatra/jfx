@@ -206,8 +206,8 @@ public class ChoiceBoxSkin<T> extends SkinBase<ChoiceBox<T>> {
 
     /** {@inheritDoc} */
     @Override public void dispose() {
-        // fix for left-over part of choiceBox fix
         if (getSkinnable() == null) return;
+        // removing itemsObserver fixes NP on setting items
         getSkinnable().itemsProperty().removeListener(itemsObserver);
          // removing the content listener fixes NPE from listener
         if (choiceBoxItems != null) {
