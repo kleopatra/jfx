@@ -75,7 +75,7 @@ public class SkinCellIssuesTest {
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
     }
-    
+
     @Test
     public void testTreeCellWithTreeViewMemoryLeak() {
         TreeCell<Object> cell =  new TreeCell<>();
@@ -110,7 +110,7 @@ public class SkinCellIssuesTest {
     /**
      * Test that min/max/pref height respect fixedCellSize.
      * Sanity test when fixing JDK-8246745.
-     * 
+     *
      * move to TreeCellTest
      */
     @Test
@@ -144,7 +144,7 @@ public class SkinCellIssuesTest {
         TreeView<Object> treeView = new TreeView<>();
         cell.updateTreeView(treeView);
         cell.updateTreeView(null);
-        // JDK-8253634: updating the old treeView must not throw NPE in skin
+        // 8253634: updating the old treeView must not throw NPE in skin
         treeView.setFixedCellSize(100);
     }
 
@@ -160,7 +160,7 @@ public class SkinCellIssuesTest {
         cell.updateTreeView(treeView);
         installDefaultSkin(cell);
         cell.updateTreeView(null);
-        // throws NPE in original
+        // 8253634: updating the old treeView must not throw NPE in skin
         treeView.setFixedCellSize(100);
     }
 
@@ -225,8 +225,8 @@ public class SkinCellIssuesTest {
                 cell.getTreeView().getFixedCellSize(),
                 cell.prefHeight(-1), 1);
     }
-    
-    
+
+
 //------------- ListCell
 // note: core ListCellSkin doesn't re-wire path property on changing listView
 // for max failures make sure to install the listView before skin
@@ -234,7 +234,7 @@ public class SkinCellIssuesTest {
     /**
      * Test that min/max/pref height respect fixedCellSize.
      * Sanity test when fixing JDK-8246745.
-     * 
+     *
      * Moved to ListCellTest for PR
      */
     @Test
