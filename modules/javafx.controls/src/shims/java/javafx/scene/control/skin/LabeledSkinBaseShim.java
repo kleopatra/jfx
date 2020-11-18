@@ -26,6 +26,9 @@ package javafx.scene.control.skin;
 
 import com.sun.javafx.scene.control.LabeledText;
 
+import javafx.scene.Node;
+import javafx.scene.control.Labeled;
+
 public class LabeledSkinBaseShim {
 
     public static LabeledText get_text(LabeledSkinBase b) {
@@ -47,5 +50,10 @@ public class LabeledSkinBaseShim {
     public static double get_ellipsisWidth(LabeledSkinBase b) {
         return b.ellipsisWidth;
     }
+
+    public static Node getSkinGraphic(Labeled labeled) {
+        return ((LabeledSkinBase) labeled.getSkin()).graphic;
+    }
+
 
 }

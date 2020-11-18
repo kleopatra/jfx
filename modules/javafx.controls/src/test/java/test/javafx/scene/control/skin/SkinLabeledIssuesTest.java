@@ -25,6 +25,8 @@
 
 package test.javafx.scene.control.skin;
 
+import java.lang.ref.WeakReference;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -35,7 +37,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static javafx.scene.control.ControlShim.*;
+import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
+import static javafx.scene.control.skin.LabeledSkinBaseShim.*;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -43,9 +47,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.skin.LabeledSkinBaseShim;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -54,7 +60,10 @@ import javafx.stage.Stage;
 /**
  * Test issues with Labeled that turned up in cleanup task.
  * <p>
- * This test is parameterized on type of Labeled.
+ * This test is parameterized on class of Labeled.
+ * 
+ * <p>
+ * TODO: cells?
  */
 @RunWith(Parameterized.class)
 public class SkinLabeledIssuesTest {
@@ -63,54 +72,72 @@ public class SkinLabeledIssuesTest {
     private Stage stage;
     private Pane root;
 
-    private Labeled control;
+    private Class<Labeled> labeledClass;
+    private Labeled labeled;
 
 // ------------ test issues around graphic
+    
+    @Test
+    public void testLabeledGraphic() {
+        installDefaultSkin(labeled);
+        assertSame(labeled.getGraphic(), getSkinGraphic(labeled));
+        labeled.setGraphic(null);
+        assertNull(getSkinGraphic(labeled));
+    }
     
     /**
      * Cleanup graphic listener -
      */
     @Test
     public void testLabeledGraphicDispose() {
-        Rectangle graphic = (Rectangle) control.getGraphic();
-        installDefaultSkin(control);
-        control.getSkin().dispose();
+        Rectangle graphic = (Rectangle) labeled.getGraphic();
+        installDefaultSkin(labeled);
+        labeled.getSkin().dispose();
         graphic.setWidth(500);
     }
     
+    /**
+     * Temporary memory leak test
+     * default skin -> set alternative
+     */
+    @Test
+    public void testMemoryLeakAlternativeSkin() {
+        installDefaultSkin(labeled);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(labeled));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+
 //----------- parameterized
     
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Object[]> data() {
-        Button button = new Button("dummy", new Rectangle());
-        CheckBox checkBox = new CheckBox("dummy");
-        checkBox.setGraphic(new Rectangle());
-        Hyperlink hyperlink = new Hyperlink("dummy", new Rectangle());
-        Label label = new Label("dummy", new Rectangle());
-        // leaking w/out - fix than add here
-        //MenuButton menuButton = new MenuButton("", new Rectangle());
-        ToggleButton toggleButton = new ToggleButton("", new Rectangle());
-        RadioButton radioButton = new RadioButton("");
-        radioButton.setGraphic(new Rectangle());
-        TitledPane titled = new TitledPane();
-        titled.setGraphic(new Rectangle());
-        List<Labeled> controls = List.of(                
-                button,
-                checkBox,
-                hyperlink,
-                label, 
-//                menuButton,
-                toggleButton,
-                radioButton,
-                titled
+        List<Class> labeledClasses = List.of(
+               Button.class,
+               CheckBox.class,
+               Hyperlink.class,
+               Label.class,
+               // MenuButton is-a Labeled but
+               // TODO: skin is _not_ a LabeledSkinBase
+               // MenuButton.class,
+               ToggleButton.class,
+               RadioButton.class,
+               TitledPane.class
                 );
-        return asArrays(controls);
+        return asArrays(labeledClasses);
     }
-    
-    public SkinLabeledIssuesTest(Labeled control) {
-        this.control = control;
+    public SkinLabeledIssuesTest(Class<Labeled> labeledClass) {
+        this.labeledClass = labeledClass;
     }
 //---------------- setup/cleanup
+    
+    @Test
+    public void testSetupState() {
+        assertNotNull(labeled);
+        assertNotNull(labeled.getGraphic());
+    }
     
     @After
     public void cleanup() {
@@ -128,6 +155,8 @@ public class SkinLabeledIssuesTest {
             }
         });
 
+        labeled = createControl(labeledClass);
+        labeled.setGraphic(new Rectangle());
         root = new VBox();
         scene = new Scene(root);
         stage = new Stage();
