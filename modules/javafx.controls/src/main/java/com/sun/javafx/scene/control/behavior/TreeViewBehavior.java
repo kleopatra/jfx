@@ -155,14 +155,6 @@ public class TreeViewBehavior<T> extends BehaviorBase<TreeView<T>> {
     public TreeViewBehavior(TreeView<T> control) {
         super(control);
 
-//        // Fix for RT-16565
-//        getNode().selectionModelProperty().addListener(weakSelectionModelListener);
-//        if (control.getSelectionModel() != null) {
-//            control.getSelectionModel().getSelectedIndices().addListener(weakSelectedIndicesListener);
-//        }
-
-
-
         // create a map for treeView-specific mappings
         treeViewInputMap = createInputMap();
 
@@ -256,13 +248,11 @@ public class TreeViewBehavior<T> extends BehaviorBase<TreeView<T>> {
     }
 
     @Override public void dispose() {
-        // remove listeners and event handlers to fix memory leaks
         getNode().selectionModelProperty().removeListener(weakSelectionModelListener);
-        MultipleSelectionModel sm = getNode().getSelectionModel();
+        MultipleSelectionModel<TreeItem<T>> sm = getNode().getSelectionModel();
         if (sm != null) {
             sm.getSelectedIndices().removeListener(weakSelectedIndicesListener);
         }
-
         getNode().removeEventFilter(KeyEvent.ANY, keyEventListener);
         TreeCellBehavior.removeAnchor(getNode());
         super.dispose();

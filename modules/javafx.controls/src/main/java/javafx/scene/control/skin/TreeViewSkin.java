@@ -136,7 +136,7 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
 
 
-    private EventHandler<MouseEvent> ml;
+//    private EventHandler<MouseEvent> ml;
 
 
 
@@ -169,7 +169,7 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
         setRoot(getSkinnable().getRoot());
 
-        ml = event -> {
+        EventHandler<MouseEvent> ml = event -> {
             // RT-15127: cancel editing on scroll. This is a bit extreme
             // (we are cancelling editing on touching the scrollbars).
             // This can be improved at a later date.
