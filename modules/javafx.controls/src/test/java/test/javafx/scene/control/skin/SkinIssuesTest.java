@@ -37,6 +37,7 @@ import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.ButtonBehavior;
 import com.sun.javafx.tk.Toolkit;
 
+import static javafx.collections.FXCollections.*;
 import static javafx.scene.control.ControlShim.*;
 import static javafx.scene.control.skin.ComboSkinShim.*;
 import static org.junit.Assert.*;
@@ -58,6 +59,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.skin.SpinnerSkin;
 import javafx.scene.layout.Pane;
@@ -93,6 +95,52 @@ public class SkinIssuesTest {
     private static final boolean methodPulse = true; 
     
 //---------------- TreeView
+ 
+    /**
+     * Sanity: replacing the root has no side-effect, listener to rootProperty
+     * is registered with skin api
+     */
+    @Test
+    public void testTreeViewSetRoot() {
+        TreeView<String> listView = new TreeView<>(createRoot());
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.setRoot(createRoot());
+    }
+    
+    /**
+     * NPE from event handler to treeModefication of root.
+     */
+    @Test
+    public void testTreeViewAddRootChild() {
+        TreeView<String> listView = new TreeView<>(createRoot());
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.getRoot().getChildren().add(createRoot());
+    }
+    
+    /**
+     * NPE from event handler to treeModefication of root.
+     */
+    @Test
+    public void testTreeViewReplaceRootChildren() {
+        TreeView<String> listView = new TreeView<>(createRoot());
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.getRoot().getChildren().setAll(createRoot().getChildren());
+    }
+
+
+    /**
+     * NPE due to properties listener not removed
+     */
+    @Test
+    public void testTreeViewRefresh() {
+        TreeView<String> listView = new TreeView<>();
+        installDefaultSkin(listView);
+        replaceSkin(listView);
+        listView.refresh();
+    }
     
     /**
      * default skin -> set alternative
@@ -106,8 +154,32 @@ public class SkinIssuesTest {
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
     }
-
     
+    /**
+     * MemoryLeak from root modification listener? not if others are fixed
+     */
+    @Test
+    public void testMemoryLeakAlternativeSkinWithRoot() {
+        TreeView<String> control = new TreeView<>(createRoot());
+        installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+    /**
+     * Creates and returns an expanded root with two children
+     * @return
+     */
+    private TreeItem<String> createRoot() {
+        TreeItem<String> root = new TreeItem<>("root");
+        root.setExpanded(true);
+        root.getChildren().addAll(new TreeItem<>("child one"), new TreeItem<>("child two"));
+        return root;
+    }
+
+   
 //-------- label with graphics
     
     @Test @Ignore("incorrect test setup")

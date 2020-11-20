@@ -136,7 +136,7 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
 
 
-//    private EventHandler<MouseEvent> ml;
+    private EventHandler<MouseEvent> ml;
 
 
 
@@ -169,7 +169,7 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
         setRoot(getSkinnable().getRoot());
 
-        EventHandler<MouseEvent> ml = event -> {
+        ml = event -> {
             // RT-15127: cancel editing on scroll. This is a bit extreme
             // (we are cancelling editing on touching the scrollbars).
             // This can be improved at a later date.
@@ -233,13 +233,12 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
         if (getSkinnable() == null) return;
         
         getSkinnable().getProperties().removeListener(propertiesMapListener);
-        // flow related cleanup
-        // leaking without nulling factory
+//        // leaking without nulling factory
         flow.setCellFactory(null);
-        // for completeness - but no effect with/out?
-        // don't without seeing any effect - it's not on the skinnable, but on a child, so shouldn't
-//        flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
-//        flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
+//        // for completeness - but no effect with/out? Same as in ListViewSkin
+//        // don't without seeing any effect - it's not on the skinnable, but on a child, so shouldn't
+        flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
+        flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
 
         super.dispose();
 
