@@ -28,7 +28,6 @@ package test.javafx.scene.control.skin;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,22 +40,15 @@ import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
 import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
@@ -67,15 +59,8 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.TreeView;
-import javafx.scene.shape.Rectangle;
-import test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory;
 
 /**
  * Beware: this is different in doKeep - contains tests against future (attempts of) fixes!
@@ -88,6 +73,7 @@ import test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory;
 @RunWith(Parameterized.class)
 public class SkinMemoryLeakTest {
 
+    private Class<Control> controlClass;
     private Control control;
 
 //--------- tests
@@ -145,41 +131,11 @@ public class SkinMemoryLeakTest {
         );
         // remove the known issues to make the test pass
         controlClasses.removeAll(leakingClasses);
-        // instantiate controls
-        List<Control> controls = controlClasses.stream()
-                .map(ControlSkinFactory::createControl)
-                .collect(Collectors.toList());
-        // controls with configuration
-        Button button = new Button("dummy", new Rectangle());
-        CheckBox checkBox = new CheckBox("dummy");
-        checkBox.setGraphic(new Rectangle());
-        Hyperlink hyperlink = new Hyperlink("dummy", new Rectangle());
-        Label label = new Label("dummy", new Rectangle());
-        ListCell<?> listCell = new ListCell<>();
-        listCell.updateListView(new ListView<>());
-        // leaking w/out - fix than add here
-        //MenuButton menuButton = new MenuButton("", new Rectangle());
-        ToggleButton toggleButton = new ToggleButton("", new Rectangle());
-        RadioButton radioButton = new RadioButton("");
-        radioButton.setGraphic(new Rectangle());
-        TitledPane titled = new TitledPane();
-        titled.setGraphic(new Rectangle());
-        controls.addAll(List.of(
-                button,
-                checkBox,
-                hyperlink,
-                listCell,
-                label, 
-//                menuButton,
-                toggleButton,
-                radioButton,
-                titled
-                ));
-        return asArrays(controls);
+        return asArrays(controlClasses);
     }
 
-    public SkinMemoryLeakTest(Control control) {
-        this.control = control;
+    public SkinMemoryLeakTest(Class<Control> controlClass) {
+        this.controlClass = controlClass;
     }
 
 //------------ setup
@@ -193,6 +149,7 @@ public class SkinMemoryLeakTest {
                 Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
             }
         });
+        this.control = createControl(controlClass);
         assertNotNull(control);
     }
 
