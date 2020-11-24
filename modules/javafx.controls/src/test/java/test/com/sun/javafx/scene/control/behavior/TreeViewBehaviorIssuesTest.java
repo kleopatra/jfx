@@ -61,7 +61,7 @@ public class TreeViewBehaviorIssuesTest {
      * Don't move to cleanup test!
      */
     @Test
-    public void testTreeViewBehaviorRemoveItem() {
+    public void failedTreeViewBehaviorRemoveItem() {
         TreeView<String> treeView = new TreeView<>(createRoot());
         createBehavior(treeView);
         int last = 2;
@@ -73,40 +73,7 @@ public class TreeViewBehaviorIssuesTest {
     }
     
     /**
-     * Test cleanup of selection listeners in TreeViewBehavior.
-     */
-    @Test
-    public void testTreeViewBehaviorDisposeSelect() {
-        TreeView<String> treeView = new TreeView<>(createRoot());
-        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(treeView));
-        treeView.getSelectionModel().select(1);
-        weakRef.get().dispose();
-        treeView.getSelectionModel().select(0);
-        assertNull("anchor must remain cleared on selecting when disposed",
-                treeView.getProperties().get("anchor"));
-    }
-
-    @Test
-    public void testTreeViewBehaviorSelect() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        createBehavior(listView);
-        int last = 1;
-        listView.getSelectionModel().select(last);
-        assertEquals("anchor must be set", last, listView.getProperties().get("anchor"));
-    }
-
-    @Test
-    public void testTreeViewBehaviorDispose() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(listView));
-        listView.getSelectionModel().select(1);
-        weakRef.get().dispose();
-        assertNull("anchor must be cleared after dispose", listView.getProperties().get("anchor"));
-    }
-
-    /**
-     * Creates and returns an expanded root with two children
-     * @return
+     * Creates and returns an expanded treeItem with two children.
      */
     private TreeItem<String> createRoot() {
         TreeItem<String> root = new TreeItem<>("root");
@@ -116,14 +83,13 @@ public class TreeViewBehaviorIssuesTest {
     }
 
 
-
 //--------------- memory leak (temp)
     
     /**
      * Create behavior -> dispose behavior -> gc
      */
     @Test
-    public void testMemoryLeakDisposeBehavior() {
+    public void failedMemoryLeakDisposeBehavior() {
         TreeView<Object> control = new TreeView<>();
         WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(control));
         assertNotNull(weakRef.get());
@@ -132,7 +98,8 @@ public class TreeViewBehaviorIssuesTest {
         assertNull("behavior must be gc'ed", weakRef.get());
     }
 
-//----------- setup    
+//----------- setup   
+    
     @After
     public void cleanup() {
         Thread.currentThread().setUncaughtExceptionHandler(null);
@@ -140,7 +107,6 @@ public class TreeViewBehaviorIssuesTest {
 
     @Before
     public void setup() {
-        
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RuntimeException) {
                 throw (RuntimeException)throwable;
@@ -148,8 +114,6 @@ public class TreeViewBehaviorIssuesTest {
                 Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
             }
         });
-
-        
     }
 
 

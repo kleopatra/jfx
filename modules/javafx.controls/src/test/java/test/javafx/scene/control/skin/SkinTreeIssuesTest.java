@@ -27,6 +27,8 @@ package test.javafx.scene.control.skin;
 
 import java.lang.ref.WeakReference;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static javafx.scene.control.ControlShim.*;
@@ -42,91 +44,22 @@ import javafx.scene.control.TreeView;
  */
 public class SkinTreeIssuesTest {
 
-  //---------------- TreeView
+//-------------------- setup
     
-    /**
-     * Sanity: replacing the root has no side-effect, listener to rootProperty
-     * is registered with skin api
-     */
-    @Test
-    public void testTreeViewSetRoot() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.setRoot(createRoot());
-    }
-    
-    /**
-     * NPE from event handler to treeModefication of root.
-     */
-    @Test
-    public void testTreeViewAddRootChild() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.getRoot().getChildren().add(createRoot());
-    }
-    
-    /**
-     * NPE from event handler to treeModefication of root.
-     */
-    @Test
-    public void testTreeViewReplaceRootChildren() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.getRoot().getChildren().setAll(createRoot().getChildren());
+    @After
+    public void cleanup() {
+        Thread.currentThread().setUncaughtExceptionHandler(null);
     }
 
-
-    /**
-     * NPE due to properties listener not removed
-     */
-    @Test
-    public void testTreeViewRefresh() {
-        TreeView<String> listView = new TreeView<>();
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.refresh();
+    @Before
+    public void setup() {
+        Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
+            if (throwable instanceof RuntimeException) {
+                throw (RuntimeException)throwable;
+            } else {
+                Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
+            }
+        });
     }
-    
-    /**
-     * default skin -> set alternative
-     */
-    @Test
-    public void testMemoryLeakAlternativeSkin() {
-        TreeView<String> control = new TreeView<>();
-        installDefaultSkin(control);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
-        assertNotNull(weakRef.get());
-        attemptGC(weakRef);
-        assertEquals("Skin must be gc'ed", null, weakRef.get());
-    }
-    
-    /**
-     * MemoryLeak from root modification listener? not if others are fixed
-     */
-    @Test
-    public void testMemoryLeakAlternativeSkinWithRoot() {
-        TreeView<String> control = new TreeView<>(createRoot());
-        installDefaultSkin(control);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
-        assertNotNull(weakRef.get());
-        attemptGC(weakRef);
-        assertEquals("Skin must be gc'ed", null, weakRef.get());
-    }
-
-    /**
-     * Creates and returns an expanded root with two children
-     * @return
-     */
-    private TreeItem<String> createRoot() {
-        TreeItem<String> root = new TreeItem<>("root");
-        root.setExpanded(true);
-        root.getChildren().addAll(new TreeItem<>("child one"), new TreeItem<>("child two"));
-        return root;
-    }
-
-   
 
 }

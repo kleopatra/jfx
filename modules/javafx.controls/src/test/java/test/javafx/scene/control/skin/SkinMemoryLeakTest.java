@@ -126,8 +126,6 @@ public class SkinMemoryLeakTest {
                 TextField.class,
                 TreeTableRow.class,
                 TreeTableView.class
-                // to report
-//                TreeView.class
         );
         // remove the known issues to make the test pass
         controlClasses.removeAll(leakingClasses);
