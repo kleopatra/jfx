@@ -233,10 +233,11 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
         if (getSkinnable() == null) return;
         
         getSkinnable().getProperties().removeListener(propertiesMapListener);
-//        // leaking without nulling factory
+        setRoot(null);
+        // leaking without nulling factory
         flow.setCellFactory(null);
-//        // for completeness - but no effect with/out? Same as in ListViewSkin
-//        // don't without seeing any effect - it's not on the skinnable, but on a child, so shouldn't
+        // for completeness - but no effect with/out? Same as in ListViewSkin
+        // don't without seeing any effect - it's not on the skinnable, but on a child, so shouldn't
         flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
         flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
 
