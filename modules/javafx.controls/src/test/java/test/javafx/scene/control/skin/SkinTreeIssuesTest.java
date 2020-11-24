@@ -37,7 +37,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
 /**
- * Temp test for treeView skin issues.
+ * Temp test for treeView skin issues JDK-8256821
  * Extracted from SkinIssuesTest - to be moved to SkinCleanupTest and SkinMemoryTest for commit.
  */
 public class SkinTreeIssuesTest {
