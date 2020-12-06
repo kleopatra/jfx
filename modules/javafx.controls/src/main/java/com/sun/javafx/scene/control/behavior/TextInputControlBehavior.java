@@ -90,7 +90,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
     final T textInputControl;
 
     protected ContextMenu contextMenu;
-
+    // this is properly removed!
     private InvalidationListener textListener = observable -> invalidateBidi();
 
     private final InputMap<T> inputMap;
@@ -108,8 +108,8 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
         super(c);
 
         this.textInputControl = c;
-
-        textInputControl.textProperty().addListener(textListener);
+        // added twice!
+//        textInputControl.textProperty().addListener(textListener);
 
         // create a map for text input-specific mappings (this reuses the default
         // InputMap installed on the control, if it is non-null, allowing us to pick up any user-specified mappings)
@@ -262,6 +262,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
 
         addKeyPadMappings(inputMap);
 
+        // added twice?
         textInputControl.textProperty().addListener(textListener);
 
         contextMenu = new ContextMenu();
@@ -344,6 +345,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
      *************************************************************************/
 
     @Override public void dispose() {
+        // was: added twice, removed once
         textInputControl.textProperty().removeListener(textListener);
         super.dispose();
     }
@@ -445,6 +447,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
 
     private void nextCharacterVisually(boolean moveRight) {
         if (isMixed()) {
+            // PENDING JW: this assumes the inputControl _has_ a skin!
             TextInputControlSkin<?> skin = (TextInputControlSkin<?>)textInputControl.getSkin();
             skin.moveCaret(TextUnit.CHARACTER, moveRight ? Direction.RIGHT : Direction.LEFT, false);
         } else if (moveRight != isRTLText()) {

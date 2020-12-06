@@ -84,7 +84,7 @@ public class BehaviorMemoryLeakTest {
                 PasswordField.class,
                 TableView.class,
                 TextArea.class,
-                TextField.class,
+//                TextField.class,
                 TreeTableView.class
 //                TreeView.class
          );

@@ -181,6 +181,13 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
     public TextInputControlSkin(final T control) {
         super(control);
 
+        // Note: bindings will remove themselves as listener from the long-lived property
+        // if they are no longer reachable at the time of the notification
+        // drawbacks: 
+        // a) cleanup not happening if the long-lived property doesn't change
+        // b) active between dispose and gc
+        // Note: all bindings access the parameter (vs. getSkinnable)
+        // so there's no NPE after dispose
         fontMetrics = new ObjectBinding<FontMetrics>() {
             { bind(control.fontProperty()); }
             @Override protected FontMetrics computeValue() {

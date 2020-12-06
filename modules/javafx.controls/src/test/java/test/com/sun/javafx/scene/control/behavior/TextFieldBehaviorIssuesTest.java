@@ -23,7 +23,7 @@
  * questions.
  */
 
-package test.javafx.scene.control.skin;
+package test.com.sun.javafx.scene.control.behavior;
 
 import java.lang.ref.WeakReference;
 
@@ -31,20 +31,40 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static javafx.scene.control.ControlShim.*;
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
+
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.TextField;
 
 /**
- * Temp test for treeView skin issues JDK-8256821
- * Extracted from SkinIssuesTest - to be moved to SkinCleanupTest and SkinMemoryTest for commit.
+ * This test has methods defining the behavior (of the textField w/out behavior) and
+ * unrelated issues. Those around fixing ?? will be moved into BehaviourCleanupTest 
+ * before commit.
+ * 
+ * Note: do not include in the fix, meant for keeping around in dokeep-branch. 
  */
-public class SkinTreeIssuesTest {
+public class TextFieldBehaviorIssuesTest {
 
-//-------------------- setup
+
+
+//--------------- memory leak (temp)
+    
+    /**
+     * Create behavior -> dispose behavior -> gc
+     */
+    @Test
+    public void failedMemoryLeakDisposeBehavior() {
+        TextField control = new TextField();
+        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(control));
+        assertNotNull(weakRef.get());
+        weakRef.get().dispose();
+        attemptGC(weakRef);
+        assertNull("behavior must be gc'ed", weakRef.get());
+    }
+
+//----------- setup   
     
     @After
     public void cleanup() {
@@ -61,5 +81,6 @@ public class SkinTreeIssuesTest {
             }
         });
     }
+
 
 }
