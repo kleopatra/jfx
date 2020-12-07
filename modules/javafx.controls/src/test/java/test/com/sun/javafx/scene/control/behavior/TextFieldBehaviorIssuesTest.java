@@ -111,14 +111,21 @@ public class TextFieldBehaviorIssuesTest {
     
     /**
      * Test behavior memory leak from scene listener.
+     * Wrong setup?: behaviour cannot be gc`d if the skin isn't?
+     * 
+     * But: without skin being gc'd (no attempt), this passes if the skin
+     * null its behavior (temporary change to not have behavior final)
      */
     @Test
     public void failedMemoryLeakBehaviorInScene() {
         TextField control = new TextField();
         showControl(control);
+        WeakReference<?> weakSkin = new WeakReference<>(control.getSkin());
         WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(getBehavior(control.getSkin()));
         assertNotNull(weakRef.get());
         replaceSkin(control);
+//        attemptGC(weakSkin);
+//        assertNull("skin must be gc'ed", weakSkin.get());
         attemptGC(weakRef);
         assertNull("behavior must be gc'ed", weakRef.get());
     }

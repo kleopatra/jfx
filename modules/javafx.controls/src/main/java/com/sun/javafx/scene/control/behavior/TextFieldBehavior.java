@@ -113,11 +113,11 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     @Override public void dispose() {
         // memory leak
         getNode().focusedProperty().removeListener(focusListener);
-//         no effect? more likely test artefact: no scene, no listener installed
-//        getNode().sceneProperty().removeListener(weakSceneListener);
-//        if (getNode().getScene() != null) {
-//            getNode().getScene().focusOwnerProperty().removeListener(weakFocusOwnerListener);
-//        }
+//         no effect? or test artefact: no scene, no listener installed ?
+        getNode().sceneProperty().removeListener(weakSceneListener);
+        if (getNode().getScene() != null) {
+            getNode().getScene().focusOwnerProperty().removeListener(weakFocusOwnerListener);
+        }
         skin = null;
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
