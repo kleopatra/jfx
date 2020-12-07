@@ -103,7 +103,7 @@ import javafx.stage.Stage;
  * <p>
  * This test is parameterized on control class.
  */
-@Ignore
+//@Ignore
 @RunWith(Parameterized.class)
 public class BehaviorLeakTest {
 
@@ -116,19 +116,36 @@ public class BehaviorLeakTest {
     
    
 //--------------- no scene
+ 
+    /**
+     * default skin -> set alternative
+     * behavior cannot be gc'ed if skin is leaking (and the other way round?)
+     */
+    @Test
+    public void testMemoryLeakAlternativeSkin2() {
+        installDefaultSkin(control);
+        WeakReference<?> weakSkin = new WeakReference<>(control.getSkin());
+        WeakReference<?> weakRef = new WeakReference<>(getBehavior(control.getSkin()));
+        replaceSkin(control);
+        attemptGC(weakSkin);
+        assertNull("skin must be gc'ed", weakSkin.get());
+        attemptGC(weakRef);
+        assertNull("behavior must be gc'ed", weakRef.get());
+    }
     
-//    /**
-//     * default skin -> set alternative
-//     */
-//    @Test
-//    public void testMemoryLeakAlternativeSkin() {
-//        installDefaultSkin(control);
-//        WeakReference<?> weakRef = new WeakReference<>(getBehavior(control.getSkin()));
-//        replaceSkin(control);
-//        attemptGC(weakRef);
-//        assertNull("behavior must be gc'ed", weakRef.get());
-//    }
-//    
+
+    /**
+     * default skin -> set alternative
+     */
+    @Test
+    public void testMemoryLeakAlternativeSkin() {
+        installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(getBehavior(control.getSkin()));
+        replaceSkin(control);
+        attemptGC(weakRef);
+        assertNull("behavior must be gc'ed", weakRef.get());
+    }
+    
     /**
      * Test gc of behavior
      * default skin -> set null skin
@@ -157,23 +174,10 @@ public class BehaviorLeakTest {
         assertNull("behavior must be gc'ed", weakRef.get());
     }
     
-    
-//    /**
-//     * Create behavior -> dispose behavior -> gc
-//     */
-//    @Test
-//    public void testMemoryLeakDisposeBehavior() {
-//        WeakReference<BehaviorBase<?>> weakRef = new WeakReference<>(createBehavior(control));
-//        assertNotNull(weakRef.get());
-//        weakRef.get().dispose();
-//        attemptGC(weakRef);
-//        assertNull("behavior must be gc'ed", weakRef.get());
-//    }
-//    
-    //---------------- parameterized
+//---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Class<Control>> data() {
         return getControlClassesWithBehavior();
     }

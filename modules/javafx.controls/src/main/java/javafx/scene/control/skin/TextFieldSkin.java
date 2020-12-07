@@ -77,7 +77,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
      *
      **************************************************************************/
 
-    private final TextFieldBehavior behavior;
+    // final hinders cleanup
+    private /* final*/ TextFieldBehavior behavior;
 
     /**
      * This group contains the text, caret, and selection rectangle.
@@ -395,6 +396,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
         if (behavior != null) {
             behavior.dispose();
+            behavior = null;
         }
     }
 
