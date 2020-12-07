@@ -44,11 +44,16 @@ import javafx.scene.control.TextField;
  * before commit.
  * 
  * Note: do not include in the fix, meant for keeping around in dokeep-branch. 
+ * 
+ * TODO: make sure there are tests that keyPad mappings are still working (install
+ * was changed!), both in parent and child mappings
  */
 public class TextFieldBehaviorIssuesTest {
 
 
-
+//------------ 
+    
+    
 //--------------- memory leak (temp)
     
     /**

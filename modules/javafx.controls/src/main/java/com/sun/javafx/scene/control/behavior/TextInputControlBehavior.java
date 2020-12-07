@@ -46,6 +46,7 @@ import javafx.scene.control.TextInputControl;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.Clipboard;
 import com.sun.javafx.scene.control.inputmap.InputMap;
+import com.sun.javafx.scene.control.inputmap.InputMap.Mapping;
 import com.sun.javafx.scene.control.inputmap.KeyBinding;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -262,7 +263,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
 
         addKeyPadMappings(inputMap);
 
-        // added twice?
+        // was: added twice, removed once
         textInputControl.textProperty().addListener(textListener);
 
         contextMenu = new ContextMenu();
@@ -278,6 +279,8 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
     protected void addKeyPadMappings(InputMap<T> map) {
         // First create a temporary map for the keypad mappings
         InputMap<T> tmpMap = new InputMap<>(getNode());
+        // this loop introduces a memoryLeak - even if its contained mappings 
+        // are not copied to the real inputMap - must be disposed!!!
         for (Object o : map.getMappings()) {
             if (o instanceof KeyMapping) {
                 KeyMapping mapping = (KeyMapping)o;
@@ -301,15 +304,24 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
                 }
             }
         }
-        // Install mappings
-        for (Object o : tmpMap.getMappings()) {
-            map.getMappings().add((KeyMapping)o);
+        if (map == getInputMap()) {
+            for (Mapping mapping : tmpMap.getMappings()) {
+                addDefaultMapping(map, mapping);
+            }
+        } else {
+            // Install mappings in child maps
+            for (Object o : tmpMap.getMappings()) {
+                map.getMappings().add((KeyMapping)o);
+            }
         }
+        // tmpMap introduces memory leak if not disposed
+        tmpMap.dispose();
 
         // Recursive call for child maps
         for (Object o : map.getChildInputMaps()) {
             addKeyPadMappings((InputMap<T>)o);
         }
+        
     }
 
 
