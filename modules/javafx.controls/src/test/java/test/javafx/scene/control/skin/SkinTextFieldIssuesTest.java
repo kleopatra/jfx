@@ -194,12 +194,33 @@ public class SkinTextFieldIssuesTest {
     /**
      * Test caret position and move - implicit selection change.
      * was: NPE from updateSelection
+     * 
+     * install skin -> set caret -> replace skin -> change caret
      */
     @Test
     public void failedMove() {
-        TextField field = new TextField();
-        field.setText("initial");
+        TextField field = new TextField("initial");
         installDefaultSkin(field);
+        int index = 2;
+        field.positionCaret(index);
+        replaceSkin(field);
+        assertEquals(index, field.getCaretPosition());
+        field.positionCaret(index + 1);
+    }
+    
+    /**
+     * Test caret position and move - implicit selection change.
+     * 
+     * show -> set caret -> replace skin -> change caret
+     * 
+     * was: a) NPE from updateSelection b) NPE from listener to caretPosition
+     * 
+     * Note: the listener to caretPosition is a no-op if control.width <= 0
+     */
+    @Test
+    public void failedMoveShow() {
+        TextField field = new TextField("initial");
+        showControl(field, true);
         int index = 2;
         field.positionCaret(index);
         replaceSkin(field);

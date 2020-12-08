@@ -156,8 +156,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 //        control.setInputMap(behavior.getInputMap());
 
         // FIXME: manual listener registration
-        control.caretPositionProperty().addListener((observable, oldValue, newValue) -> {
-//        registerChangeListener(control.caretPositionProperty(), e -> {
+//        control.caretPositionProperty().addListener((observable, oldValue, newValue) -> {
+        registerChangeListener(control.caretPositionProperty(), e -> {
             if (control.getWidth() > 0) {
                 updateTextNodeCaretPos(control.getCaretPosition());
                 if (!isForwardBias()) {
