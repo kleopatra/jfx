@@ -211,6 +211,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         textNode.fontProperty().bind(control.fontProperty());
 
         textNode.layoutXProperty().bind(textTranslateX);
+        // FIXME - this (all?) bindings are still effective after switching skins 
         textNode.textProperty().bind(new StringBinding() {
             { bind(control.textProperty()); }
             @Override protected String computeValue() {
@@ -239,6 +240,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         selectionHighlightPath.layoutXProperty().bind(textTranslateX);
         selectionHighlightPath.visibleProperty().bind(control.anchorProperty().isNotEqualTo(control.caretPositionProperty()).and(control.focusedProperty()));
         selectionHighlightPath.fillProperty().bind(highlightFillProperty());
+        
         // FIXME this listener blows on replace skin 
 //        textNode.selectionShapeProperty().addListener(observable -> {
 //        // replace invalidationListener with changeListener introduces stackOverflowError ... why?    
@@ -317,7 +319,9 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             updateTextPos();
         });
 
-        control.textProperty().addListener(observable -> {
+        // FIXME throwing NPE after replacing skin
+//        control.textProperty().addListener(observable -> {
+        registerChangeListener(control.textProperty(), e -> {
             if (!behavior.isEditing()) {
                 // Text changed, but not by user action
                 updateTextPos();

@@ -156,8 +156,27 @@ public class SkinTextFieldIssuesTest {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         replaceSkin(field);
-        field.setText("newe text");
+        field.setText("replaced");
     }
+    
+    /**
+     * Side-effect: changing text after switching skin effects old textNode 
+     */
+    @Test
+    public void failedTextNodeReplaced() {
+        String initial = "some text";
+        TextField field = new TextField(initial);
+        installDefaultSkin(field);
+        Text textNode = getTextNode(field);
+        assertEquals("sanity: text sync'ed to textNode", initial, textNode.getText());
+        replaceSkin(field);
+        String replaced = "newe text";
+        field.setText(replaced);
+        assertEquals("text of replaced textNode changed", replaced, getTextNode(field).getText());
+        assertEquals("text of initial textNode unchanged", initial, textNode.getText());
+    }
+    
+    
     /**
      * InvalidationListener on alignmentProperty -> NPE
      * fixed by using skin api
