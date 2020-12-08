@@ -88,22 +88,6 @@ public class SkinTextFieldIssuesTest {
     }
     
     /**
-     * Test caret position and move
-     * NPE from updateSelection
-     */
-    @Test
-    public void failedMove() {
-        TextField field = new TextField();
-        field.setText("initial");
-        installDefaultSkin(field);
-        int index = 2;
-        field.positionCaret(index);
-        replaceSkin(field);
-        assertEquals(index, field.getCaretPosition());
-        field.positionCaret(index + 1);
-    }
-    
-    /**
      * Invalidation listener on prompt text fill: calls updateTextPos (no direct access to skinnable)
      * no side-effect, probably no leak (it's a property of the skin)
      */
@@ -206,8 +190,26 @@ public class SkinTextFieldIssuesTest {
     public void testTextNodeSelectionShape() {
         
     }
+    
     /**
-     * InvalidationListener to selection - not removed -> NPE 
+     * Test caret position and move - implicit selection change.
+     * was: NPE from updateSelection
+     */
+    @Test
+    public void failedMove() {
+        TextField field = new TextField();
+        field.setText("initial");
+        installDefaultSkin(field);
+        int index = 2;
+        field.positionCaret(index);
+        replaceSkin(field);
+        assertEquals(index, field.getCaretPosition());
+        field.positionCaret(index + 1);
+    }
+    
+
+    /**
+     * InvalidationListener to selection - not removed -> was: NPE 
      */
     @Test
     public void failedSelectionUpdate() {
@@ -233,20 +235,6 @@ public class SkinTextFieldIssuesTest {
     }
     
     /**
-     * fails before/after fix: textNode caret not updated to textField caret
-     * unrelated? -
-     * wrong test assumption? 
-     */
-    @Test
-    public void failedTextNodeCaret() {
-        TextField field = new TextField("some text");
-        installDefaultSkin(field);
-        Text textNode = getTextNode(field);
-        field.selectAll();
-        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
-    }
-    
-    /**
      * Sanity: test textNode state for empty selection
      */
     @Test
@@ -265,6 +253,55 @@ public class SkinTextFieldIssuesTest {
         assertEquals("textNode end", -1, textNode.getSelectionEnd());
         assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
     }
+    
+    /**
+     * fails before/after fix: textNode caret not updated to textField caret
+     * 
+     * install skin -> select
+     * 
+     * Note: textNode caretPosition only updated if control.width > 0 - why?
+     */
+    @Test
+    public void failedTextNodeCaret() {
+        TextField field = new TextField("some text");
+        installDefaultSkin(field);
+        Text textNode = getTextNode(field);
+        field.selectAll();
+        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+    }
+    
+    /**
+     * Sanity: initial textNode caret
+     * 
+     * select -> install skin 
+     * 
+     */
+    @Test
+    public void testTextNodeCaretInitial() {
+        TextField field = new TextField("some text");
+        field.selectAll();
+        installDefaultSkin(field);
+        Text textNode = getTextNode(field);
+        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+    }
+    
+    /**
+     * manual changeListener to control.caretPosition
+     * -> replace with api
+     * 
+     * show -> select
+     * 
+     * Note: textNode caretPosition only updated if control.width > 0 - why?
+     */
+    @Test
+    public void testTextNodeCaretPositionUpdate() {
+        TextField field = new TextField("some text");
+        showControl(field, true);
+        Text textNode = getTextNode(field);
+        field.selectAll();
+        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+    }
+    
     /**
      * Children accumulating? textNode added via addAll (vs. setAll)
      */
@@ -282,14 +319,6 @@ public class SkinTextFieldIssuesTest {
      */
     @Test
     public void testForwardBias() {
-        
-    }
-    /**
-     * manual changeListener to control.caretPosition
-     * -> replace with api
-     */
-    @Test
-    public void testCaretPosition() {
         
     }
 //------- TextInputControlSkin  
