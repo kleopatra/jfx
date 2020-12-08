@@ -34,6 +34,7 @@ import org.junit.Test;
 import static javafx.scene.control.ControlShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
+import static javafx.scene.control.skin.TextInputSkinShim.*;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -44,12 +45,14 @@ import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextField;
 import javafx.scene.control.skin.TextInputSkinShim;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 /**
@@ -73,7 +76,7 @@ public class SkinTextFieldIssuesTest {
      * NPE from updateSelection
      */
     @Test
-    public void testDeleteNextChar() {
+    public void failedDeleteNextChar() {
         TextField field = new TextField();
         field.setText("initial");
         installDefaultSkin(field);
@@ -89,7 +92,7 @@ public class SkinTextFieldIssuesTest {
      * NPE from updateSelection
      */
     @Test
-    public void testMove() {
+    public void failedMove() {
         TextField field = new TextField();
         field.setText("initial");
         installDefaultSkin(field);
@@ -149,7 +152,7 @@ public class SkinTextFieldIssuesTest {
      * cleaned out)
      */
     @Test
-    public void testPromptText() {
+    public void failedPromptText() {
         TextField field = new TextField();
         installDefaultSkin(field);
         replaceSkin(field);
@@ -164,7 +167,7 @@ public class SkinTextFieldIssuesTest {
      *  binding from textNode/text internals?
      */
     @Test
-    public void testText() {
+    public void failedText() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         replaceSkin(field);
@@ -174,7 +177,7 @@ public class SkinTextFieldIssuesTest {
      * InvalidationListener on alignmentProperty -> NPE
      */
     @Test
-    public void testAlignment() {
+    public void failedAlignment() {
         TextField field = new TextField("some text");
         showControl(field, true);
         assertTrue(field.getWidth() > 0);
@@ -186,7 +189,7 @@ public class SkinTextFieldIssuesTest {
      * InvalidationListener to font - not removed -> NPE
      */
     @Test
-    public void testFont() {
+    public void failedFont() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         replaceSkin(field);
@@ -207,17 +210,66 @@ public class SkinTextFieldIssuesTest {
      * InvalidationListener to selection - not removed -> NPE 
      */
     @Test
-    public void testSelection() {
+    public void failedSelectionUpdate() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         replaceSkin(field);
         field.selectAll();
     }
+    
+    /**
+     * Sanity test: ensure that skin's updating itself on selection change
+     */
+    @Test
+    public void testTextNodeSelectionUpdate() {
+        TextField field = new TextField("some text");
+        installDefaultSkin(field);
+        Text textNode = getTextNode(field);
+        field.selectAll();
+        int end = field.getLength();
+        assertEquals("sanity: field caret moved to end", end, field.getCaretPosition());
+        assertEquals("sanity: field selection updated", end, field.getSelection().getEnd());
+        assertEquals("textNode end", end, textNode.getSelectionEnd());
+    }
+    
+    /**
+     * fails before/after fix: textNode caret not updated to textField caret
+     * unrelated? -
+     * wrong test assumption? 
+     */
+    @Test
+    public void failedTextNodeCaret() {
+        TextField field = new TextField("some text");
+        installDefaultSkin(field);
+        Text textNode = getTextNode(field);
+        field.selectAll();
+        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+    }
+    
+    /**
+     * Sanity: test textNode state for empty selection
+     */
+    @Test
+    public void testTextNodeSelectionEmpty() {
+        TextField field = new TextField("some text");
+        IndexRange initial = field.getSelection();
+        // characterize empty selection state
+        assertEquals("sanity: empty selection", 0, initial.getLength());
+        assertEquals("sanity: start of empty selection ", 0, initial.getStart());
+        assertEquals("sanity: end of empty selection ", 0, initial.getEnd());
+        assertEquals("sanity: caret at end", field.getCaretPosition(), initial.getEnd());
+        installDefaultSkin(field);
+        assertEquals("sanity: initial selection unchanged by skin", initial, field.getSelection());
+        Text textNode = getTextNode(field);
+        assertEquals("textNode start", -1, textNode.getSelectionStart());
+        assertEquals("textNode end", -1, textNode.getSelectionEnd());
+        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+    }
     /**
      * Children accumulating? textNode added via addAll (vs. setAll)
      */
     @Test
-    public void testChildren() {
+    public void failedChildren() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         int children = field.getChildrenUnmodifiable().size();
@@ -296,7 +348,7 @@ public class SkinTextFieldIssuesTest {
      * default skin -> set alternative
      */
     @Test
-    public void testMemoryLeakAlternativeSkin() {
+    public void failedMemoryLeakAlternativeSkin() {
         TextField control = new TextField();
         installDefaultSkin(control);
         WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));

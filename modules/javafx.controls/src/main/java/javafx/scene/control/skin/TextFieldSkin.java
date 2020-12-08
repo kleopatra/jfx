@@ -220,10 +220,13 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         });
         // updated by listener on caretPosition to ensure order
         updateTextNodeCaretPos(control.getCaretPosition());
-        control.selectionProperty().addListener(observable -> {
-            updateSelection();
-        });
-
+        // FIXME listener must be removed on dispose
+//        control.selectionProperty().addListener(observable -> {
+//            updateSelection();
+//        });
+        // FIXME replaced by skin api implies listening changed from invalidation to change
+        registerChangeListener(control.selectionProperty(), e -> updateSelection());
+        
         // Add selection
         selectionHighlightPath.setManaged(false);
         selectionHighlightPath.setStroke(null);
@@ -396,7 +399,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
         if (behavior != null) {
             behavior.dispose();
-            behavior = null;
+//            behavior = null;
         }
     }
 
@@ -709,10 +712,16 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
      *
      **************************************************************************/
 
+    // unused?
     TextInputControlBehavior getBehavior() {
         return behavior;
     }
 
+    // for testing only!
+    Text getTextNode() {
+        return textNode;
+    }
+    
     private void updateTextNodeCaretPos(int pos) {
         if (pos == 0 || isForwardBias()) {
             textNode.setCaretPosition(pos);

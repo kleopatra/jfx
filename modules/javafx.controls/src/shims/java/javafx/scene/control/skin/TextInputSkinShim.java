@@ -25,16 +25,30 @@
 
 package javafx.scene.control.skin;
 
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 
 /**
- *
+ * Utility methods to access package-private api in TextInput-related skins.
  */
 public class TextInputSkinShim {
 
+    /**
+     * Sets the fill of the promptText. The skin must be of type TextInputControlSkin.
+     */
     public static void setPromptTextFill(TextInputControl control, Paint fill) {
-        TextInputControlSkin skin = (TextInputControlSkin) control.getSkin();
+        TextInputControlSkin<?> skin = (TextInputControlSkin<?>) control.getSkin();
         skin.setPromptTextFill(fill);
+    }
+    
+    /**
+     * Returns the textNode from the textField's skin. The skin must be of type
+     * TextFieldSkin.
+     */
+    public static Text getTextNode(TextField textField) {
+        TextFieldSkin skin = (TextFieldSkin) textField.getSkin();
+        return skin.getTextNode();
     }
 }
