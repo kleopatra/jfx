@@ -134,7 +134,7 @@ public class TableViewSkin<T> extends TableViewSkinBase<T, T, TableView<T>, Tabl
         registerChangeListener(control.fixedCellSizeProperty(), e -> flow.setFixedCellSize(getSkinnable().getFixedCellSize()));
 
         updateItemCount();
-        printChildren("after instantiation");
+//        printChildren("after instantiation");
     }
 
 
@@ -154,7 +154,7 @@ public class TableViewSkin<T> extends TableViewSkinBase<T, T, TableView<T>, Tabl
             behavior.dispose();
         }
 //        getChildren().clear();
-        printChildren("after dispose");
+//        printChildren("after dispose");
     }
 
     /** {@inheritDoc} */
