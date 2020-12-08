@@ -25,9 +25,14 @@
 
 package javafx.scene.control.skin;
 
-import com.sun.javafx.scene.control.behavior.BehaviorBase;
-import com.sun.javafx.scene.control.behavior.TextAreaBehavior;
+import java.util.List;
+
+import com.sun.javafx.scene.control.behavior.PasswordFieldBehavior;
+import com.sun.javafx.scene.control.behavior.TextFieldBehavior;
 import com.sun.javafx.scene.control.behavior.TextInputControlBehavior;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -44,8 +49,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.PasswordField;
@@ -57,11 +60,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.scene.text.HitInfo;
-import java.util.List;
-import com.sun.javafx.scene.control.behavior.TextFieldBehavior;
-import com.sun.javafx.scene.control.behavior.PasswordFieldBehavior;
+import javafx.scene.text.Text;
 
 /**
  * Default skin implementation for the {@link TextField} control.
@@ -130,7 +130,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
     // For use with PasswordField
     static final char BULLET = '\u25cf';
 
-
+    InvalidationListener selectionShapeListener = e -> updateSelection();
+    WeakInvalidationListener weakSelectionShapeListener = new WeakInvalidationListener(selectionShapeListener);
 
     /**************************************************************************
      *
@@ -158,6 +159,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // FIXME: manual listener registration
 //        control.caretPositionProperty().addListener((observable, oldValue, newValue) -> {
         registerChangeListener(control.caretPositionProperty(), e -> {
+            // FIXME: why noop for width <= 0?
             if (control.getWidth() > 0) {
                 updateTextNodeCaretPos(control.getCaretPosition());
                 if (!isForwardBias()) {
@@ -204,6 +206,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // Add text
         textNode.setManaged(false);
         textNode.getStyleClass().add("text");
+        // FIXME: this binding blows after replaceSkin/setFont - it's called _before_ the 
+        // listener to fontProperty installed below
         textNode.fontProperty().bind(control.fontProperty());
 
         textNode.layoutXProperty().bind(textTranslateX);
@@ -235,9 +239,14 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         selectionHighlightPath.layoutXProperty().bind(textTranslateX);
         selectionHighlightPath.visibleProperty().bind(control.anchorProperty().isNotEqualTo(control.caretPositionProperty()).and(control.focusedProperty()));
         selectionHighlightPath.fillProperty().bind(highlightFillProperty());
-        textNode.selectionShapeProperty().addListener(observable -> {
-            updateSelection();
-        });
+        // FIXME this listener blows on replace skin 
+//        textNode.selectionShapeProperty().addListener(observable -> {
+//        // replace invalidationListener with changeListener introduces stackOverflowError ... why?    
+////        registerChangeListener(textNode.selectionShapeProperty(), e -> {;
+//            updateSelection();
+//        });
+        // replaced with listener to be removed in dispose
+        textNode.selectionShapeProperty().addListener(weakSelectionShapeListener);
 
         // Add caret
         caretPath.setManaged(false);
@@ -268,7 +277,9 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
         // Be sure to get the control to request layout when the font changes,
         // since this will affect the pref height and pref width.
-        control.fontProperty().addListener(observable -> {
+        // FIXME: manual installed listener
+//        control.fontProperty().addListener(observable -> {
+        registerChangeListener(control.fontProperty(), e -> {
             // I do both so that any cached values for prefWidth/height are cleared.
             // The problem is that the skin is unmanaged and so calling request layout
             // doesn't walk up the tree all the way. I think....
@@ -279,7 +290,9 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         registerChangeListener(control.prefColumnCountProperty(), e -> getSkinnable().requestLayout());
         if (control.isFocused()) setCaretAnimating(true);
 
-        control.alignmentProperty().addListener(observable -> {
+        // FIXME: manual installed listener
+        // control.alignmentProperty().addListener(observable -> {
+        registerChangeListener(control.alignmentProperty(), e -> {
             if (control.getWidth() > 0) {
                 updateTextPos();
                 updateCaretOff();
@@ -397,6 +410,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
     /** {@inheritDoc} */
     @Override public void dispose() {
+        textNode.selectionShapeProperty().removeListener(weakSelectionShapeListener);
         super.dispose();
 
         if (behavior != null) {

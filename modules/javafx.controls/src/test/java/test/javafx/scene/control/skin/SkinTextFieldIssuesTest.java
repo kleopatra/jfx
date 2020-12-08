@@ -29,6 +29,7 @@ import java.lang.ref.WeakReference;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static javafx.scene.control.ControlShim.*;
@@ -159,6 +160,7 @@ public class SkinTextFieldIssuesTest {
     }
     /**
      * InvalidationListener on alignmentProperty -> NPE
+     * fixed by using skin api
      */
     @Test
     public void failedAlignment() {
@@ -171,12 +173,18 @@ public class SkinTextFieldIssuesTest {
     
     /**
      * InvalidationListener to font - not removed -> NPE
+     * bubbles up in updateSelection from manually installed listener to textNode.selectionShapeProperty 
+     * not fixed by using skin api on control.fontProperty: 
+     *          textNode font is bound to control.font
      */
     @Test
     public void failedFont() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         replaceSkin(field);
+        // doesn't help: the skin isn't gc'ed, the binding not gc'ed
+//        WeakReference<?> weakSkin = new WeakReference<>(replaceSkin(field));
+//        attemptGC(weakSkin);
         field.setFont(new Font(30));
     }
     
@@ -512,7 +520,7 @@ public class SkinTextFieldIssuesTest {
      * 
      * Still sitting in memory until the longLived prop _does_ change.
      */
-    @Test
+    @Test @Ignore
     public void testBindingMemoryLeak() {
         LongLived longLived = new LongLived();
         WeakReference<ShortLived> weakRef = new WeakReference<>(longLived.getShortLived());
