@@ -33,9 +33,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static javafx.scene.control.ControlShim.*;
+import static javafx.scene.control.skin.TextInputSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
-import static javafx.scene.control.skin.TextInputSkinShim.*;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -48,6 +48,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextField;
+import javafx.scene.control.skin.TextFieldSkin;
 import javafx.scene.control.skin.TextInputSkinShim;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -135,6 +136,9 @@ public class SkinTextFieldIssuesTest {
      * 
      * called from skin's listener to usePrompt binding (which is not yet
      * cleaned out)
+     * 
+     * open: fixed by overriding dispose in usePromptText binding and calling dispose
+     * in skin.dispose.
      */
     @Test
     public void failedPromptText() {
@@ -161,9 +165,16 @@ public class SkinTextFieldIssuesTest {
     
     /**
      * Side-effect: changing text after switching skin effects old textNode 
+     * 
+     * General issue: the binding will be gc'ed sooner or later but until then 
+     * is updating itself it least along with the changes of the field.
+     * There are more bindings (untested) doing the same. 
+     * 
+     * Question: is that a problem or not? As long as the field isn't updated
+     * to stale state, that should be okay? Also, replacement skin does the same.
      */
     @Test
-    public void failedTextNodeReplaced() {
+    public void debatableTextNodeReplaced() {
         String initial = "some text";
         TextField field = new TextField(initial);
         installDefaultSkin(field);
@@ -208,17 +219,6 @@ public class SkinTextFieldIssuesTest {
     }
     
     /**
-     * TextNode (the view installed by the skin) has listener on its selectionShape
-     * that calls skin updateSelection (which access getSkinnable)
-     * 
-     * deep down is a binding to Text's selectionStart/-End
-     */
-    @Test
-    public void testTextNodeSelectionShape() {
-        
-    }
-    
-    /**
      * Test caret position and move - implicit selection change.
      * was: NPE from updateSelection
      * 
@@ -255,7 +255,41 @@ public class SkinTextFieldIssuesTest {
         field.positionCaret(index + 1);
     }
     
-
+    /**
+     * TextNode (the view installed by the skin) has listener on its selectionShape
+     * that calls skin updateSelection (which access getSkinnable)
+     * 
+     * deep down is a binding to Text's selectionStart/-End
+     * 
+     * --------------- 
+     * 
+     * here trying to find a failing test if the listener to selectionShape
+     * is removed.
+     * 
+     * Note: the listener calls skin.updateSelection which sync's from
+     * textField to textNode (not the other way round), so can't 
+     * expect any change in the textField state.
+     * 
+     * Which poses the eternal WHY? Probably not needed..
+     * 
+     * Decision: give up trying to detect changes, just register/remove 
+     * InvalidationListener (to neither throw NPE nor SO). 
+     */
+    @Test @Ignore("FIXME: unclear reason for having selectionShapeListener")
+    public void testTextNodeSelectionShapeShow() {
+        TextField field = new TextField("initial words");
+        int target = field.getText().indexOf("words");
+        showControl(field, true);
+        TextFieldSkin skin = (TextFieldSkin) field.getSkin();
+        Text textNode = getTextNode(field);
+//        skin.setForwardBias(true);
+        textNode.setSelectionStart(0);
+        textNode.setSelectionEnd(target);
+        assertEquals("textNode caret", target, textNode.getCaretPosition());
+//        field.nextWord();
+        assertEquals(target, field.getCaretPosition());
+    }
+    
     /**
      * InvalidationListener to selection - not removed -> was: NPE 
      */
@@ -307,10 +341,10 @@ public class SkinTextFieldIssuesTest {
      * 
      * install skin -> select
      * 
-     * Note: textNode caretPosition only updated if control.width > 0 - why?
+     * So here we have a wrong test assumption!
      */
-    @Test
-    public void failedTextNodeCaret() {
+    @Test @Ignore("wrong test assumption: control width must be > 0")
+    public void failedTextNodeCaretInstallSkin() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
         Text textNode = getTextNode(field);
@@ -318,6 +352,31 @@ public class SkinTextFieldIssuesTest {
         assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
     }
     
+    /**
+     * 
+     * Sanity: textNode caret must be updated on change of control caret.
+     * 
+     * manual changeListener to control.caretPosition
+     * -> replace with api
+     * 
+     * show -> select
+     * 
+     * Note: textNode caretPosition only updated if control.width > 0 - why?
+     * There are more locations that guard against width > 0 .. 
+     * 
+     * Even though not understood: all tests trying to see effects of those
+     * syncs must install via the skin via show!
+     * 
+     */
+    @Test
+    public void testTextNodeCaretShow() {
+        TextField field = new TextField("some text");
+        showControl(field, true);
+        Text textNode = getTextNode(field);
+        field.selectAll();
+        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+    }
+
     /**
      * Sanity: initial textNode caret
      * 
@@ -334,26 +393,27 @@ public class SkinTextFieldIssuesTest {
     }
     
     /**
-     * manual changeListener to control.caretPosition
-     * -> replace with api
+     * listener to skin's property - no problem?
+     * There are many  more internal bindings .. all with the same caveat as noted below
      * 
-     * show -> select
-     * 
-     * Note: textNode caretPosition only updated if control.width > 0 - why?
+     * changeable only from skin internals (on mouse events from skin/behaviour), so 
+     * don't expect macroscopic residues after switching skin?
      */
     @Test
-    public void testTextNodeCaretPositionUpdate() {
+    public void testForwardBias() {
         TextField field = new TextField("some text");
+        field.nextWord();
         showControl(field, true);
-        Text textNode = getTextNode(field);
-        field.selectAll();
-        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
+        TextFieldSkin skin = (TextFieldSkin) field.getSkin();
     }
     
     /**
      * Children accumulating? textNode added via addAll (vs. setAll)
+     * This is jdk-?? (todo: find issue) - not yet reported?
+     * Only private test here, copied to special case in SpinnerSkin,
+     * JDK-8245145
      */
-    @Test
+    @Test @Ignore("JDK-8245145")
     public void failedChildren() {
         TextField field = new TextField("some text");
         installDefaultSkin(field);
@@ -361,14 +421,7 @@ public class SkinTextFieldIssuesTest {
         replaceSkin(field);
         assertEquals("children size must be unchanged: ", children, field.getChildrenUnmodifiable().size());
     }
-    /**
-     * listener to skin's property - no problem?
-     * There are many  more internal bindings .. all with the same caveat as noted below
-     */
-    @Test
-    public void testForwardBias() {
-        
-    }
+    
 //------- TextInputControlSkin  
     
 //---------- listeners/eventhandler 
@@ -393,7 +446,7 @@ public class SkinTextFieldIssuesTest {
     /**
      * singleton eventHandler: calls handleInputMethodEvent -> access getSkinnable
      * expected: NPE
-     * also: only set if null, that is the second skin does not resets it
+     * also: only set if null, that is the second skin does not reset it
      */
     @Test
     public void testOnInputMethodTextChanged() {

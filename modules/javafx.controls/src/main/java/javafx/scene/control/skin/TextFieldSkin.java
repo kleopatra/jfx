@@ -248,6 +248,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 //            updateSelection();
 //        });
         // replaced with listener to be removed in dispose
+        // FIXME: why needed at all? updateSelection syncs textField -> textNode, so this is 
+        // effectively updating itself
         textNode.selectionShapeProperty().addListener(weakSelectionShapeListener);
 
         // Add caret
@@ -313,6 +315,14 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
                         promptTxt != null && !promptTxt.isEmpty() &&
                         !getPromptTextFill().equals(Color.TRANSPARENT));
             }
+            @Override
+            public void dispose() {
+                unbind(control.textProperty(),
+                        control.promptTextProperty(),
+                        promptTextFillProperty());
+            }
+            
+            
         };
 
         promptTextFillProperty().addListener(observable -> {
@@ -415,6 +425,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
     /** {@inheritDoc} */
     @Override public void dispose() {
         textNode.selectionShapeProperty().removeListener(weakSelectionShapeListener);
+        ((BooleanBinding) usePromptText).dispose();
         super.dispose();
 
         if (behavior != null) {
@@ -766,6 +777,11 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         updateSelection();
     }
 
+    /**
+     * Updates selection state from textField to textNode (no the other way round)
+     * FIXME: being so, why is it called from listener to TextNode.selectionShapeProperty?
+     * And: it does NOT update the textNode's caret?
+     */
     private void updateSelection() {
         TextField textField = getSkinnable();
         IndexRange newValue = textField.getSelection();
