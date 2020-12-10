@@ -315,11 +315,14 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
                         promptTxt != null && !promptTxt.isEmpty() &&
                         !getPromptTextFill().equals(Color.TRANSPARENT));
             }
+            // Fix for part of 8240506:
+            // overridden to unbind allowing skin.dispose to cleanup this binding
+            // without, setting the promptText after switching skin throws NPE
             @Override
             public void dispose() {
-                unbind(control.textProperty(),
-                        control.promptTextProperty(),
-                        promptTextFillProperty());
+//                unbind(control.textProperty(),
+//                        control.promptTextProperty(),
+//                        promptTextFillProperty());
             }
             
             
@@ -342,7 +345,11 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             createPromptNode();
         }
 
-        usePromptText.addListener(observable -> {
+        // alternative approaches for disposing usePromptText binding: 
+        // a) install listener via skin api
+        // b) have listener stored as fiedl and remove
+        registerChangeListener(usePromptText, e -> {;
+//        usePromptText.addListener(observable -> {
             createPromptNode();
             control.requestLayout();
         });

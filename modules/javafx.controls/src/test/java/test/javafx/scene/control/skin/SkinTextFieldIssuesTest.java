@@ -32,6 +32,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sun.javafx.tk.Toolkit;
+
 import static javafx.scene.control.ControlShim.*;
 import static javafx.scene.control.skin.TextInputSkinShim.*;
 import static org.junit.Assert.*;
@@ -206,6 +208,9 @@ public class SkinTextFieldIssuesTest {
      * bubbles up in updateSelection from manually installed listener to textNode.selectionShapeProperty 
      * not fixed by using skin api on control.fontProperty: 
      *          textNode font is bound to control.font
+     *          
+     * PENDING - analysis no longer correct? after removing selectionShapeProperty 
+     * this doesn't blow         
      */
     @Test
     public void failedFont() {
@@ -459,10 +464,29 @@ public class SkinTextFieldIssuesTest {
      * Binding to several control properties determining the caret visibility
      * 
      * Used in TextFieldSkin to toggle opacity of caretPath (in a binding, also)
+     * 
+     * Bindings as such are not a problem, as long as their value is not computed?
+     * Also, they remove themselves from the gc'ed - they don't here but: already are 
+     * invalidated in the replaced skin, no collaborator tries to query them 
+     * (because the skin is no longer part of the scenegraph) so
+     * they don't blow, even when they are accessing control properties.
      */
     @Test
-    public void testCaretVisible() {
-        
+    public void testCaretVisibleShow() {
+        TextField field = new TextField("some text");
+        showControl(field, true);
+        replaceSkin(field);
+        field.setEditable(false);
+        field.nextWord();
+    }
+    
+    @Test
+    public void testCaretVisibleSkin() {
+        TextField field = new TextField("some text");
+        installDefaultSkin(field);
+        replaceSkin(field);
+        field.setEditable(false);
+        field.nextWord();
     }
     
     /**
