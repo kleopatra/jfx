@@ -286,6 +286,7 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                     }
                 }
             }
+            // FIXME: manually installed listener that's not removed
             control.focusedProperty().addListener(observable -> {
                 if (FXVK.useFXVK()) {
                     Scene scene = getSkinnable().getScene();
@@ -699,6 +700,7 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
 
     protected void handleInputMethodEvent(InputMethodEvent event) {
         final TextInputControl textInput = getSkinnable();
+        System.out.println("handleInput: " + event);
         if (textInput.isEditable() && !textInput.textProperty().isBound() && !textInput.isDisabled()) {
 
             // remove previous input method text (if any) or selected text

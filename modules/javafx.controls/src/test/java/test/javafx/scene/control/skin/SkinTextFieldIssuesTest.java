@@ -32,19 +32,20 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sun.javafx.tk.Toolkit;
-
 import static javafx.scene.control.ControlShim.*;
 import static javafx.scene.control.skin.TextInputSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
@@ -52,12 +53,15 @@ import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextField;
 import javafx.scene.control.skin.TextFieldSkin;
 import javafx.scene.control.skin.TextInputSkinShim;
+import javafx.scene.input.InputMethodRequests;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 
 /**
  * Temp test for TextField skin issues JDK-8240506
@@ -436,26 +440,66 @@ public class SkinTextFieldIssuesTest {
      * used in private nextCharVisually which is called in public skin.moveCaret
      * which is called in TextInputControlBehavior.nextCharVisually (access of _current skin_
      * not the one stored!)
+     * 
+     * should not cause trouble: the mappings are removed - if any, it's a problem of the
+     * behavior (how to test?)
+     * 
+     * Sanity: old behavior doesn't interfere.
      */
     @Test
     public void testIsRTL() {
-        
+        TextField field = new TextField("some text");
+        showControl(field, true);
+        int caret = 2;
+        field.positionCaret(caret);
+        KeyEventFirer firer = new KeyEventFirer(field);
+        firer.doRightArrowPress();
+        assertEquals(caret + 1, field.getCaretPosition());
+        replaceSkin(field);
+        firer.doRightArrowPress();
+        assertEquals(caret + 2, field.getCaretPosition());
     }
+    
     /**
      * replaced by second skin - no effect expected?
+     * 
+     * Nevertheless, cleanup required
      */
     @Test
     public void testInputMethodRequests() {
-        
+        TextField field = new TextField("some text");
+        InputMethodRequests im = field.getInputMethodRequests();
+        installDefaultSkin(field);
+//        showControl(field, true);
+        assertNotNull("skin must have set inputMethodRequests", field.getInputMethodRequests());
+        field.getSkin().dispose();
+        assertEquals("inputMethodRequests must be reset", im, field.getInputMethodRequests());
     }
+    
     /**
      * singleton eventHandler: calls handleInputMethodEvent -> access getSkinnable
      * expected: NPE
      * also: only set if null, that is the second skin does not reset it
+     * 
+     * no effect on memory when commented? It's about input methods (composed text?
+     * touch screens? embedded only? language specific like chinese glyphs?)
+     * not supported on my desktop - should remove in skin, even though not testable?
+     * 
      */
     @Test
     public void testOnInputMethodTextChanged() {
-        
+        TextField field = new TextField("some text");
+        EventHandler<?> handler = field.getOnInputMethodTextChanged();
+        installDefaultSkin(field);
+//        showControl(field, true);
+        if (handler != null) {
+            assertSame("inputMethodTextChanged handler must be unchanged",
+                 handler, field.getOnInputMethodTextChanged());
+        } else {
+            assertNotNull("inputMethodTextChanged handler must be set", field.getOnInputMethodTextChanged());
+        }
+        field.getSkin().dispose();
+        assertSame("inputMethodTextChanged handler must be reset", handler, field.getOnInputMethodTextChanged());
     }
     
 //------- bindings
@@ -491,6 +535,11 @@ public class SkinTextFieldIssuesTest {
     
     /**
      * binding to control.fontProperty
+     * 
+     * calling invalidateMetrics: no-op for textFieldSkin, resetting internal
+     * cache in TextAreaSkin
+     * 
+     * no side-effect expected
      */
     @Test
     public void testFontMetrics() {

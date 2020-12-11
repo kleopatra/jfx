@@ -431,8 +431,12 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
     /** {@inheritDoc} */
     @Override public void dispose() {
+        if (getSkinnable() == null) return;
         textNode.selectionShapeProperty().removeListener(weakSelectionShapeListener);
-        ((BooleanBinding) usePromptText).dispose();
+        // has no effect on memory leak?
+//        getChildren().remove(textGroup);
+        // with dispose implemented in binding
+//        ((BooleanBinding) usePromptText).dispose();
         super.dispose();
 
         if (behavior != null) {
