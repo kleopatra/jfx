@@ -25,13 +25,28 @@
 
 package javafx.scene.control.skin;
 
+import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.sun.javafx.PlatformUtil;
 import com.sun.javafx.scene.control.Properties;
+import com.sun.javafx.scene.control.behavior.TextInputControlBehavior;
 import com.sun.javafx.scene.control.skin.FXVK;
 import com.sun.javafx.scene.input.ExtendedInputMethodRequests;
+import com.sun.javafx.tk.FontMetrics;
+import com.sun.javafx.tk.Toolkit;
+
+import static com.sun.javafx.PlatformUtil.*;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
@@ -45,6 +60,8 @@ import javafx.css.Styleable;
 import javafx.css.StyleableBooleanProperty;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
+import javafx.css.converter.BooleanConverter;
+import javafx.css.converter.PaintConverter;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -69,22 +86,8 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.VLineTo;
-import javafx.scene.text.HitInfo;
 import javafx.stage.Window;
 import javafx.util.Duration;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import com.sun.javafx.PlatformUtil;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.PaintConverter;
-import com.sun.javafx.scene.control.behavior.TextInputControlBehavior;
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
-import static com.sun.javafx.PlatformUtil.isWindows;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * Abstract base class for text input skins.
@@ -194,6 +197,11 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                 invalidateMetrics();
                 return Toolkit.getToolkit().getFontLoader().getFontMetrics(control.getFont());
             }
+            @Override
+            public void dispose() {
+                unbind(control.fontProperty());
+            }
+            
         };
 
         /**
@@ -214,6 +222,12 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                         !control.isDisabled() &&
                         control.isEditable();
             }
+            @Override
+            public void dispose() {
+                unbind(control.focusedProperty(), control.anchorProperty(), control.caretPositionProperty(),
+                        control.disabledProperty(), control.editableProperty(), displayCaret, blinkProperty());
+            }
+            
         };
 
         if (SHOW_HANDLES) {
@@ -365,6 +379,21 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
             }
         });
     }
+
+    
+    
+
+    @Override
+    public void dispose() {
+        if (getSkinnable() == null) return;
+        getSkinnable().setOnInputMethodTextChanged(null);
+        getSkinnable().setInputMethodRequests(null);
+        // dispose bindings
+        ((Binding) caretVisible).dispose();
+        ((Binding) fontMetrics).dispose();
+        super.dispose();
+    }
+
 
 
 

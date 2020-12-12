@@ -208,6 +208,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         textNode.getStyleClass().add("text");
         // FIXME: this binding blows after replaceSkin/setFont - it's called _before_ the 
         // listener to fontProperty installed below
+        // implicitly fixed?
         textNode.fontProperty().bind(control.fontProperty());
 
         textNode.layoutXProperty().bind(textTranslateX);
@@ -433,6 +434,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
     @Override public void dispose() {
         if (getSkinnable() == null) return;
         textNode.selectionShapeProperty().removeListener(weakSelectionShapeListener);
+        // no effect on memery leak (looks cleanly implemented with weak references)
+        setCaretAnimating(false);
         // has no effect on memory leak?
 //        getChildren().remove(textGroup);
         // with dispose implemented in binding
