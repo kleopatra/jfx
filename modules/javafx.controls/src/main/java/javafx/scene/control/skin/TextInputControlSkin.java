@@ -386,11 +386,14 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
     @Override
     public void dispose() {
         if (getSkinnable() == null) return;
+        // remove to fix memory leak
         getSkinnable().setOnInputMethodTextChanged(null);
+        // no effect on memory leak, sanity to guard against potential side-effects
+        // FIXME: write a test in environment with inputMethods
         getSkinnable().setInputMethodRequests(null);
-        // dispose bindings
-        ((Binding) caretVisible).dispose();
-        ((Binding) fontMetrics).dispose();
+        // dispose bindings - no effect on memory leak, no macroscopic effects w/out?
+//        ((Binding) caretVisible).dispose();
+//        ((Binding) fontMetrics).dispose();
         super.dispose();
     }
 

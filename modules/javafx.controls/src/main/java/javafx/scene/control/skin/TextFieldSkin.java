@@ -434,17 +434,17 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
     @Override public void dispose() {
         if (getSkinnable() == null) return;
         textNode.selectionShapeProperty().removeListener(weakSelectionShapeListener);
-        // no effect on memery leak (looks cleanly implemented with weak references)
-        setCaretAnimating(false);
-        // has no effect on memory leak?
-//        getChildren().remove(textGroup);
+        // no effect on mem0ry leak (looks cleanly implemented with weak references)
+//        setCaretAnimating(false);
+        // remove to fix memory leak 
+        getChildren().remove(textGroup);
         // with dispose implemented in binding
 //        ((BooleanBinding) usePromptText).dispose();
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
-//            behavior = null;
+            behavior = null;
         }
     }
 
