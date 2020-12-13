@@ -37,6 +37,11 @@ public class TabPaneSkinShim {
     public static ContextMenu getTabsMenu(TabPaneSkin tpSkin) {
         return tpSkin.test_getTabsMenu();
     }
+    
+    public static ContextMenu getTabsMenu(TabPane tabPane) {
+        TabPaneSkin skin = (TabPaneSkin) tabPane.getSkin();
+        return getTabsMenu(skin);
+    }
 
     public static void disableAnimations(TabPaneSkin tpSkin) {
         tpSkin.test_disableAnimations();
