@@ -682,7 +682,7 @@ public class TabPaneSkin extends SkinBase<TabPane> {
     }
 
     private void updateTabPosition() {
-        tabHeaderArea.setScrollOffset(0.0F);
+        tabHeaderArea.invalidateScrollOffset();
         getSkinnable().applyCss();
         getSkinnable().requestLayout();
     }
