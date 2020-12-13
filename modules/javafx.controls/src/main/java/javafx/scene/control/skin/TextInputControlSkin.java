@@ -197,11 +197,11 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                 invalidateMetrics();
                 return Toolkit.getToolkit().getFontLoader().getFontMetrics(control.getFont());
             }
-            @Override
-            public void dispose() {
-                unbind(control.fontProperty());
-            }
-            
+//            @Override
+//            public void dispose() {
+//                unbind(control.fontProperty());
+//            }
+//            
         };
 
         /**
@@ -222,11 +222,11 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                         !control.isDisabled() &&
                         control.isEditable();
             }
-            @Override
-            public void dispose() {
-                unbind(control.focusedProperty(), control.anchorProperty(), control.caretPositionProperty(),
-                        control.disabledProperty(), control.editableProperty(), displayCaret, blinkProperty());
-            }
+//            @Override
+//            public void dispose() {
+//                unbind(control.focusedProperty(), control.anchorProperty(), control.caretPositionProperty(),
+//                        control.disabledProperty(), control.editableProperty(), displayCaret, blinkProperty());
+//            }
             
         };
 

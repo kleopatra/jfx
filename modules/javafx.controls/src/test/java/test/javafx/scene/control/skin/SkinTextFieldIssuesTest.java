@@ -178,19 +178,28 @@ public class SkinTextFieldIssuesTest {
      * 
      * Question: is that a problem or not? As long as the field isn't updated
      * to stale state, that should be okay? Also, replacement skin does the same.
+     * 
+     * This text was completely wrong: it kept a strong reference to the node ..
+     * Replaced by both a weak ref to the skin and the node, trigger gc of skin: 
+     * NPE because the skin/node indeed is gc'ed.
+     * 
+     * So it's down to the usual: what happens between replacement of the skin and
+     * a gc - we have to make sure that the binding doesn't call back into the 
+     * skinnable. 
      */
-    @Test
+    @Test @Ignore("incorrect test setup")
     public void debatableTextNodeReplaced() {
         String initial = "some text";
         TextField field = new TextField(initial);
         installDefaultSkin(field);
-        Text textNode = getTextNode(field);
-        assertEquals("sanity: text sync'ed to textNode", initial, textNode.getText());
-        replaceSkin(field);
+        WeakReference<Text> textNode = new WeakReference<>(getTextNode(field));
+        assertEquals("sanity: text sync'ed to textNode", initial, textNode.get().getText());
+        WeakReference<?> weakSkin = new WeakReference<>(replaceSkin(field));
+        attemptGC(weakSkin);
         String replaced = "newe text";
         field.setText(replaced);
         assertEquals("text of replaced textNode changed", replaced, getTextNode(field).getText());
-        assertEquals("text of initial textNode unchanged", initial, textNode.getText());
+        assertEquals("text of initial textNode unchanged", initial, textNode.get().getText());
     }
     
     
