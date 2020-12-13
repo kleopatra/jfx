@@ -310,8 +310,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
                    control.promptTextProperty(),
                    promptTextFillProperty()); }
             @Override protected boolean computeValue() {
-                String txt = control.getText();
-                String promptTxt = control.getPromptText();
+                String txt = getSkinnable().getText();
+                String promptTxt = getSkinnable().getPromptText();
                 return ((txt == null || txt.isEmpty()) &&
                         promptTxt != null && !promptTxt.isEmpty() &&
                         !getPromptTextFill().equals(Color.TRANSPARENT));
@@ -321,9 +321,9 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             // without, setting the promptText after switching skin throws NPE
             @Override
             public void dispose() {
-//                unbind(control.textProperty(),
-//                        control.promptTextProperty(),
-//                        promptTextFillProperty());
+                unbind(control.textProperty(),
+                        control.promptTextProperty(),
+                        promptTextFillProperty());
             }
             
             
@@ -333,7 +333,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             updateTextPos();
         });
 
-        // FIXME throwing NPE after replacing skin
+        // FIXME throwing NPE after replacing skin, causes memory leak
 //        control.textProperty().addListener(observable -> {
         registerChangeListener(control.textProperty(), e -> {
             if (!behavior.isEditing()) {
@@ -439,7 +439,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // remove to fix memory leak 
         getChildren().remove(textGroup);
         // with dispose implemented in binding
-//        ((BooleanBinding) usePromptText).dispose();
+        ((BooleanBinding) usePromptText).dispose();
         super.dispose();
 
         if (behavior != null) {
