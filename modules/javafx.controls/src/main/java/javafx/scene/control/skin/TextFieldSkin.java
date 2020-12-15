@@ -437,7 +437,15 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // no effect on mem0ry leak (looks cleanly implemented with weak references)
 //        setCaretAnimating(false);
         // remove to fix memory leak 
-        getChildren().remove(textGroup);
+//        getChildren().remove(textGroup);
+        // testing removal of suspected culprit
+        // textNode only doesn't help
+//        textGroup.getChildren().remove(textNode);
+        System.out.println(textGroup.getChildren());
+        textGroup.getChildren().removeAll(textNode, selectionHighlightPath, promptNode);
+        System.out.println(textGroup.getChildren());
+        // clearing all is fine
+//        textGroup.getChildren().clear();
         // with dispose implemented in binding
         ((BooleanBinding) usePromptText).dispose();
         super.dispose();
