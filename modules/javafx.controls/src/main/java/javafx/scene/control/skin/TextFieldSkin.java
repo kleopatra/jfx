@@ -194,7 +194,14 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // Hack to defeat the fact that otherwise when the caret blinks the parent group
         // bounds are completely invalidated and therefore the dirty region is much
         // larger than necessary.
-        textGroup.getChildren().addAll(selectionHighlightPath, textNode, new Group(caretPath));
+        Path localPath = new Path();
+        textGroup.getChildren().addAll(selectionHighlightPath, textNode, 
+                // experimenting: local field: leaking?
+                //localPath 
+//                 new Path() //- no problem
+                 // original: leaking without remove
+                 new Group(caretPath)
+                 );
         getChildren().add(textGroup);
         if (SHOW_HANDLES) {
             handleGroup = new Group();
@@ -441,9 +448,9 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // testing removal of suspected culprit
         // textNode only doesn't help
 //        textGroup.getChildren().remove(textNode);
-        System.out.println(textGroup.getChildren());
+//        System.out.println(textGroup.getChildren());
         textGroup.getChildren().removeAll(textNode, selectionHighlightPath, promptNode);
-        System.out.println(textGroup.getChildren());
+//        System.out.println(textGroup.getChildren());
         // clearing all is fine
 //        textGroup.getChildren().clear();
         // with dispose implemented in binding
