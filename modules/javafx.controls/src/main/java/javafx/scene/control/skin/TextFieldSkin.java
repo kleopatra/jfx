@@ -169,6 +169,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             }
         });
 
+        // invalidition not needed: updateTextNodeCaretPosition calls isForwardBias, validating
         forwardBiasProperty().addListener(observable -> {
             if (control.getWidth() > 0) {
                 updateTextNodeCaretPos(control.getCaretPosition());
@@ -240,6 +241,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 //            updateSelection();
 //        });
         // FIXME replaced by skin api implies listening changed from invalidation to change
+        // invalidition not needed: updateSelection implicit validation by calling field.getSelection
         registerChangeListener(control.selectionProperty(), e -> updateSelection());
         
         // Add selection
@@ -290,6 +292,8 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // Be sure to get the control to request layout when the font changes,
         // since this will affect the pref height and pref width.
         // FIXME: manual installed listener
+        // validation in computePrefWidth: queries fontMetrics which is a binding to fontProperty
+        // important or not?
 //        control.fontProperty().addListener(observable -> {
         registerChangeListener(control.fontProperty(), e -> {
             // I do both so that any cached values for prefWidth/height are cleared.
