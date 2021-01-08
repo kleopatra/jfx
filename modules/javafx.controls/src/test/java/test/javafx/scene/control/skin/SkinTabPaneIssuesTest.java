@@ -37,14 +37,18 @@ import static javafx.scene.control.skin.TabPaneSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.skin.ListViewSkin;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -57,9 +61,34 @@ public class SkinTabPaneIssuesTest {
     private Stage stage;
     private Pane root;
 
+//---------- 
+    
+    
+    
 //----------- looking for side-effects
     
+    /**
+     * this passes before, fails after the fix
+     * reason is a lost getChildren().remove(contentArea) in skin's removeTab(tab)
+     */
+    @Test
+    public void testRemoveTab() {
+        TabPane control = createTabPane();
+        installDefaultSkin(control);
+        int childCount = control.getChildrenUnmodifiable().size();
+        assertEquals("child count: headerArea plus one for each tab", control.getTabs().size() + 1 , childCount);
+        control.getTabs().remove(0);
+        assertEquals("child count decreased by one", childCount -1, control.getChildrenUnmodifiable().size());
+    }
     
+    @Test
+    public void testChildCount() {
+        TabPane control = createTabPane();
+        installDefaultSkin(control);
+        int childCount = control.getChildrenUnmodifiable().size();
+        replaceSkin(control);
+        assertEquals("childcount must be unchanged", childCount, control.getChildrenUnmodifiable().size());
+    }
     
     /**
      */
@@ -70,8 +99,6 @@ public class SkinTabPaneIssuesTest {
         replaceSkin(control);
         control.getTabs().get(0).setContent(new Label("new tab content"));
     }
-    
-    
     
     /**
      */
@@ -141,7 +168,73 @@ public class SkinTabPaneIssuesTest {
         control.getTabs().remove(0);
     }
     
-//--------------    
+//-------------- testing under which conditions a child causes a memory leak   
+    public static class ListViewSkinX<T> extends ListViewSkin<T> {
+
+        /**
+         * @param control
+         */
+        public ListViewSkinX(ListView<T> control) {
+            super(control);
+            InnerPane myPane = new InnerPane();
+            myPane.getStyleClass().add("inner-pane");
+            getChildren().add(myPane);
+            StaticPane staticPane = new StaticPane();
+            staticPane.getStyleClass().add("static-pane");
+            getChildren().add(staticPane);
+        }
+        
+        @Override
+        public void dispose() {
+            if (getSkinnable() == null) return;
+            Node myChild = getSkinnable().lookup(".inner-pane");
+            // inner class: must be removed
+            getChildren().remove(myChild);
+            // static class: no memory leak (other than piling up)
+            super.dispose();
+        }
+        
+        private class InnerPane extends StackPane {
+        }
+        
+        private static class StaticPane extends StackPane {
+        }
+
+    }
+    
+    @Test
+    public void testInnerSkinClass() {
+        ListView<String> listView = new ListView<>();
+        listView.setSkin(new ListViewSkinX<>(listView));
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(listView));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+        
+    }
+    @Test
+    public void testCellFactory() {
+        ListView<String> listView = new ListView<>();
+        listView.setCellFactory(cc -> {
+            ListCell<String> c = new ListCell<>() {
+
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(item);
+                }
+                
+            };
+            return c;
+        });
+        installDefaultSkin(listView);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(listView));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+//-------------- end: general   
     
     /**
      * tabPane with tabs
