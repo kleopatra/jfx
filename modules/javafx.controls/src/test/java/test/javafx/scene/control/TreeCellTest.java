@@ -581,7 +581,7 @@ public class TreeCellTest {
         assertNull(tree.getEditingItem());
     }
 
-    @Ignore // TODO file bug!
+//    @Ignore("JDK-8187474") 
     @Test public void editCellWithTreeResultsInUpdatedEditingIndexProperty() {
         tree.setEditable(true);
         cell.updateTreeView(tree);
@@ -636,6 +636,8 @@ public class TreeCellTest {
         cell.updateTreeView(tree);
         cell.updateIndex(1);
         cell.startEdit();
+        // FIXME: testing editingItem is a no-op - due to JDK-8187474 the editingItem was never !=null
+        // assertNotNull(tree.getEditingItem());
         cell.commitEdit("Watermelon");
         assertNull(tree.getEditingItem());
         assertFalse(cell.isEditing());
@@ -666,6 +668,8 @@ public class TreeCellTest {
         cell.updateTreeView(tree);
         cell.updateIndex(1);
         cell.startEdit();
+        // FIXME: testing editingItem is a no-op - due to JDK-8187474 the editingItem was never !=null
+        // assertNotNull(tree.getEditingItem());
         cell.cancelEdit();
         assertNull(tree.getEditingItem());
         assertFalse(cell.isEditing());

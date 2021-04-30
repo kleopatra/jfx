@@ -39,152 +39,157 @@ import static org.junit.Assert.*;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableColumn.CellEditEvent;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ListView.EditEvent;
 
 /**
- * Test TreeTableCell editing state updated on re-use (aka after updateIndex(old, new)).
- *
+ * Test listCell editing state updated on re-use (aka: updateIndex(old, new)).
+ * 
  * This test is parameterized in cellIndex and editingIndex.
- *
+ * 
  */
 @RunWith(Parameterized.class)
-public class TreeTableCellEditingTest {
-    private TreeTableCell<String,String> cell;
-    private TreeTableView<String> table;
-    private TreeTableColumn<String, String> editingColumn;
-    private ObservableList<TreeItem<String>> model;
-
+public class ListCellEditingTest {
+    private ListCell<String> cell;
+    private ListView<String> list;
+    private ObservableList<String> model;
+    
     private int cellIndex;
     private int editingIndex;
-
+    
 //--------------- change off editing index
-
+    
     @Test
     public void testOffEditingIndex() {
+        
         cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
+        list.edit(editingIndex);
         cell.updateIndex(cellIndex);
         assertEquals("sanity: cell index changed", cellIndex, cell.getIndex());
-        assertEquals("sanity: treeTable editingIndex must be unchanged", editingIndex, table.getEditingCell().getRow());
-        assertEquals("sanity: treeTable editingColumn must be unchanged", editingColumn, table.getEditingCell().getTableColumn());
-        assertFalse("cell must not be editing on update from editingIndex" + editingIndex
+        assertEquals("sanity: list editing Index must be unchanged", editingIndex, list.getEditingIndex());
+        assertFalse("cell must not be editing on update from editingIndex" + editingIndex 
                 + " to cellIndex " + cellIndex, cell.isEditing());
     }
-
+    
     @Test
     public void testCancelOffEditingIndex() {
         cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
-        List<CellEditEvent<String, String>> events = new ArrayList<>();
-        editingColumn.setOnEditCancel(e -> {
+        list.edit(editingIndex);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        list.setOnEditCancel(e -> {
             events.add(e);
         });
         cell.updateIndex(cellIndex);
         assertEquals("cell must have fired edit cancel", 1, events.size());
-        assertEquals("cancel event index must be same as editingIndex", editingIndex,
-                events.get(0).getTreeTablePosition().getRow());
-        // forgot in integrated version
-        assertEquals(editingIndex, table.getEditingCell().getRow());
+        assertEquals("cancel event index must be same as editingIndex", editingIndex, events.get(0).getIndex());
     }
-
+    
 //--------------- change to editing index
+
 
     @Test
     public void testToEditingIndex() {
         cell.updateIndex(cellIndex);
-        table.edit(editingIndex, editingColumn);
+        list.edit(editingIndex);
         cell.updateIndex(editingIndex);
         assertEquals("sanity: cell at editing index", editingIndex, cell.getIndex());
-        assertEquals("sanity: treeTable editingIndex must be unchanged", editingIndex, table.getEditingCell().getRow());
-        assertEquals("sanity: treeTable editingColumn must be unchanged", editingColumn, table.getEditingCell().getTableColumn());
-        assertTrue("cell must be editing on update from " + cellIndex
+        assertEquals("sanity: list editing Index must be unchanged", editingIndex, list.getEditingIndex());
+        assertTrue("cell must be editing on update from " + cellIndex 
                 + " to editingIndex " + editingIndex, cell.isEditing());
     }
-
+    
     @Test
     public void testStartEvent() {
         cell.updateIndex(cellIndex);
-        table.edit(editingIndex, editingColumn);
-        List<CellEditEvent<String, String>> events = new ArrayList<>();
-        editingColumn.setOnEditStart(e -> {
+        list.edit(editingIndex);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        list.setOnEditStart(e -> {
             events.add(e);
         });
         cell.updateIndex(editingIndex);
-        assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex,
+        assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex, 
                 1, events.size());
-        assertEquals("start event index must be same as editingIndex", editingIndex,
-                events.get(0).getTreeTablePosition().getRow());
+        assertEquals("start event index must be same as editingIndex", editingIndex, events.get(0).getIndex());
     }
-
+    
 //------------- parameterized
-
+ 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: cellIndex {0}, editingIndex {1}")
+    @Parameterized.Parameters // (name = "{index}: cellIndex {0}, editingIndex {1}")
     public static Collection<Object[]> data() {
      // [0] is cellIndex, [1] is editingIndex
         Object[][] data = new Object[][] {
             {1, 2}, // normal
             {0, 1}, // zero cell index
             {1, 0}, // zero editing index
-            {-1, 1}, // negative cell - JDK-8265206
+            {-1, 1}, // negative cell
         };
         return Arrays.asList(data);
     }
 
-    public TreeTableCellEditingTest(int cellIndex, int editingIndex) {
+
+    public ListCellEditingTest(int cellIndex, int editingIndex) {
         this.cellIndex = cellIndex;
         this.editingIndex = editingIndex;
     }
-
-//-------------- setup and sanity
-
+//-------------- setup and helpers
+    
     /**
      * Sanity: cell editing state updated when on editing index.
      */
     @Test
     public void testEditOnCellIndex() {
         cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
+        list.edit(editingIndex);
         assertTrue("sanity: cell must be editing", cell.isEditing());
     }
-
+    
     /**
      * Sanity: cell editing state unchanged when off editing index.
      */
     @Test
     public void testEditOffCellIndex() {
         cell.updateIndex(cellIndex);
-        table.edit(editingIndex, editingColumn);
+        list.edit(editingIndex);
         assertFalse("sanity: cell editing must be unchanged", cell.isEditing());
     }
-
-    @Before
-    public void setup() {
-        cell = new TreeTableCell<String,String>();
-        model = FXCollections.observableArrayList(new TreeItem<>("Four"),
-                new TreeItem<>("Five"), new TreeItem<>("Fear")); // "Flop", "Food", "Fizz"
-        TreeItem<String> root = new TreeItem<>("root");
-        root.getChildren().addAll(model);
-        root.setExpanded(true);
-        table = new TreeTableView<String>(root);
-        table.setEditable(true);
-        editingColumn = new TreeTableColumn<>("TEST");
-        editingColumn.setCellValueFactory(param -> null);
-        table.getColumns().add(editingColumn);
-        cell.updateTreeTableView(table);
-        cell.updateTreeTableColumn(editingColumn);
-        // make sure that focus change doesn't interfere with tests
-        // (editing cell loosing focus will be canceled from focusListener in Cell)
-        // Note: not really needed for Tree/TableCell because the cell is never focused
-        // if !cellSelectionEnabled nor if not in Tree/TableRow
-        // done here for consistency across analogous tests for List/Tree/Cell
-        table.getFocusModel().focus(-1);
+    
+    /**
+     * Sanity: edit on list does not fire start.
+     */
+    @Test
+    public void testStartEventEditOffCellIndex() {
+        cell.updateIndex(cellIndex);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        list.setOnEditStart(e -> {
+            events.add(e);
+        });
+        list.edit(editingIndex);
+        assertEquals("sanity: edit list must not fire editStart", 0, events.size());
+    }
+    
+    @Before public void setup() {
+        cell = new ListCell<String>();
+        model = FXCollections.observableArrayList("Apples", "Oranges", "Pears");
+        list = new ListView<String>(model);
+        list.setEditable(true);
+        // doesn't matter whether updateList is called before/after fiddling with focus
+        cell.updateListView(list);
+        // failures for cellIndex == 0 -> editingIndex for default focus
+//        list.getFocusModel().focus(0);
+        // init to cellIndex lead to broken listEditingIndex
+        // in all toXX for Florian's fix (updateEditing before updateFocus
+        // in all offXX for mine (updateEditing after updateFocus, similar to TableCell)
+//        list.getFocusModel().focus(cellIndex);
+        // can be fixed by setup focus state to either editing index or -1
+        // note: that's different from TableCell - why?
+//        list.getFocusModel().focus(editingIndex);
+        list.getFocusModel().focus(-1);
         assertFalse("sanity: cellIndex not same as editingIndex", cellIndex == editingIndex);
         assertTrue("sanity: valid editingIndex", editingIndex < model.size());
+//        System.out.println("changed?");
+        
     }
 
 }

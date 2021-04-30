@@ -257,7 +257,7 @@ public class TreeTableCellTest {
      ********************************************************************/
 
     // startEdit()
-    @Ignore // TODO file bug!
+//    @Ignore // TODO file bug!
     @Test public void editOnTreeTableViewResultsInEditingInCell() {
         tree.setEditable(true);
         cell.updateTreeTableView(tree);
@@ -275,6 +275,7 @@ public class TreeTableCellTest {
     }
 
     @Test public void editCellWithNullTreeTableViewResultsInNoExceptions() {
+        // FIXME: don't set the tree to really test what the name states
         cell.updateTreeTableView(tree);
         cell.updateIndex(1);
         cell.startEdit();
@@ -288,7 +289,7 @@ public class TreeTableCellTest {
         assertNull(tree.getEditingCell());
     }
 
-    @Ignore // TODO file bug!
+//    @Ignore("JDK-8187474") 
     @Test public void editCellWithTreeResultsInUpdatedEditingIndexProperty() {
         tree.setEditable(true);
         cell.updateTreeTableView(tree);
@@ -303,10 +304,8 @@ public class TreeTableCellTest {
 //        cell.updateTreeTableView(tree);
 //        cell.updateIndex(2);
 //        final boolean[] called = new boolean[] { false };
-//        tree.setOnEditStart(new EventHandler<TreeTableView.EditEvent<String>>() {
-//            @Override public void handle(TreeTableView.EditEvent<String> event) {
+//        tree.setOnEditStart(e -> {
 //                called[0] = true;
-//            }
 //        });
 //        cell.startEdit();
 //        assertTrue(called[0]);
@@ -314,13 +313,18 @@ public class TreeTableCellTest {
 
     // commitEdit()
     @Test public void commitWhenTreeIsNullIsOK() {
+        // FIXME: tree should be null
         cell.updateTreeTableView(tree);
         cell.updateIndex(1);
         cell.startEdit();
         cell.commitEdit("Watermelon");
     }
 
-    @Ignore // TODO file bug!
+    /**
+     * Will fail without fix for startEdit issue.
+     * Beware: we need a column for these tests to make sense?
+     */
+//    @Ignore("8187474") 
     @Test public void commitWhenTreeIsNotNullWillUpdateTheItemsTree() {
         tree.setEditable(true);
         cell.updateTreeTableView(tree);
@@ -346,6 +350,9 @@ public class TreeTableCellTest {
 //        assertTrue(called[0]);
 //    }
 
+    /**
+     * Beware: without fixing the startEdit this test doesn't make sense
+     */
     @Test public void afterCommitTreeTableViewEditingCellIsNull() {
         tree.setEditable(true);
         cell.updateTreeTableView(tree);
