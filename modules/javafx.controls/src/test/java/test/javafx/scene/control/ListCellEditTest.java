@@ -25,6 +25,9 @@
 
 package test.javafx.scene.control;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -33,6 +36,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ListView.EditEvent;
 
 /**
  *
@@ -42,22 +46,22 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
  
     @Test
     public void test() {
-        assertTrue(editableView.isEditable());
+        assertTrue(editableView.isViewEditable());
     }
     
     @Override
-    protected EditableView<ListCell, ListView> createEditableView() {
-        return new EditableListView();
+    protected EditableView<ListCell, ListView> createEditableView(boolean prepareEditing) {
+        return new EditableListView(prepareEditing);
     }
 
     public static class EditableListView extends EditableView<ListCell, ListView> {
 
-        public EditableListView() {
-            
+        public EditableListView(boolean prepareEditing) {
+            super(prepareEditing);
         }
 
         @Override
-        protected boolean isEditable() {
+        protected boolean isViewEditable() {
             return view.isEditable();
         }
 
@@ -92,6 +96,24 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
         @Override
         public boolean isViewEditing() {
             return view.getEditingIndex() != -1;
+        }
+
+        @Override
+        protected void setViewEditable(boolean editable) {
+            view.setEditable(false);
+        }
+
+        @Override
+        public int getViewEditingIndex() {
+            return view.getEditingIndex();
+        }
+
+        @Override
+        public List<?> startCellEdit() {
+            List<Object> collector = new ArrayList<>();
+            view.setOnEditStart(collector::add);
+            cell.startEdit();
+            return collector;
         }
         
     }

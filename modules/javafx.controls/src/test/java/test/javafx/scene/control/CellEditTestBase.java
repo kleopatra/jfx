@@ -25,16 +25,21 @@
 
 package test.javafx.scene.control;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import javafx.event.Event;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 
 /**
- *
+ * Test state transitions on editing.
  */
 public abstract class CellEditTestBase<C extends IndexedCell, V extends Control> {
 
@@ -42,10 +47,64 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     protected C cell;
     protected V view;
     
-//------------- testing basics: control editing on view
+// ------------ testing basics: manage editing on cell
+
+    @Test
+    public void testCellStartEditFiresEditStart() {
+        int cellIndex = 0;
+        cell.updateIndex(cellIndex);
+        List<?> events = editableView.startCellEdit();
+        assertTrue(cell.isEditing());
+        assertEquals(cellIndex, editableView.getViewEditingIndex());
+        assertNotNull(events);
+        assertEquals(1, events.size());
+    }
     
     @Test
-    public void editOnViewResultsInEditingInCell() {
+    public void testCellStartEditUpdatesListEditing() {
+        int cellIndex = 1;
+        cell.updateIndex(cellIndex);
+        cell.startEdit();
+        assertTrue(cell.isEditing());
+        assertEquals(cellIndex, editableView.getViewEditingIndex());
+    }
+    
+    @Test
+    public void testCellStartEditNotEditableView() {
+        editableView.setViewEditable(false);
+        cell.updateIndex(1);
+        cell.startEdit();
+        assertFalse(cell.isEditing());
+        assertFalse(editableView.isViewEditing());
+    }
+    
+// ------------ testing basics: manage editing on cell (no preconditon)
+    
+    @Test
+    public void testCellStartEditWithoutView() {
+        EditableView<C, V> editableView = createEditableView(false);
+        editableView.getCell().updateIndex(1);
+        editableView.getCell().startEdit();
+    }
+    
+    @Test
+    public void testCellCancelEditWithoutView() {
+        EditableView<C, V> editableView = createEditableView(false);
+        editableView.getCell().updateIndex(1);
+        editableView.getCell().cancelEdit();
+    }
+    
+    @Test
+    public void testCellCommitEditWithoutView() {
+        EditableView<C, V> editableView = createEditableView(false);
+        editableView.getCell().updateIndex(1);
+        editableView.getCell().commitEdit(null);
+    }
+    
+//------------- testing basics: manage editing on view
+    
+    @Test
+    public void editOnViewSyncsEditingInCell() {
         int editingIndex = 1;
         cell.updateIndex(editingIndex);
         editableView.editView(editingIndex);
@@ -63,44 +122,74 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         assertFalse(cell.isEditing());
     }
     
+//------------sanity: test facade methods
+    
+    @Test
+    public void testViewEditingIndex() {
+        int editingIndex = 1;
+        editableView.editView(editingIndex);
+        assertEquals(editingIndex, editableView.getViewEditingIndex());
+    }
+    
+    @Test
+    public void testViewEditable() {
+        EditableView<C, V> facade = createEditableView(true);
+        assertTrue(facade.isViewEditable());
+        facade.setViewEditable(false);
+        assertFalse(facade.isViewEditable());
+    }
+    
 //----------------------- init and sanity 
+    
     
     @Test
     public void testIntialEditable() {
-        assertTrue(editableView.isEditable());
+        assertTrue(editableView.isViewEditable());
         assertTrue(editableView.cellCouldStartEdit());
         assertFalse(cell.isEditing());
         assertEquals(-1, cell.getIndex());
         assertFalse(editableView.isViewEditing());
+        assertEquals(-1, editableView.getViewEditingIndex());
     }
     
     @Before
     public void setup() {
-        editableView = createEditableView();
+        editableView = createEditableView(true);
         // convenience caching
         cell = editableView.cell;
         view = editableView.view;
         assertNotNull(editableView);
     }
     
-    protected abstract EditableView<C, V> createEditableView();
+    protected abstract EditableView<C, V> createEditableView(boolean prepareEditable);
     
     public static abstract class EditableView<C extends IndexedCell, V extends Control> {
         protected V view;
         protected C cell;
         
+        /**
+         * Instantiates an EditableView with view/cell prepared for editing.
+         */
         public EditableView() {
+            this(true);
+        }
+        
+        public EditableView(boolean prepareForEditing) {
             view = createView();
             cell = createCell();
             assertNotNull(view);
             assertNotNull(cell);
-            prepareEditableState();
-            assertTrue(cellCouldStartEdit());
+            if (prepareForEditing) {
+                prepareEditableState();
+                assertTrue(cellCouldStartEdit());
+            }
         }
         
-        // control state
-        protected abstract boolean isEditable();
+        public abstract List<?> startCellEdit();
         
+        // view state
+        protected abstract boolean isViewEditable();
+        protected abstract void setViewEditable(boolean editable);
         
         /** 
          * start/cancel edit on control
@@ -109,6 +198,7 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
          */
         public abstract void editView(int index);
         public abstract boolean isViewEditing();
+        public abstract int getViewEditingIndex();
         
         /**
          *  
@@ -127,5 +217,14 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         protected abstract C createCell();
         protected abstract V createView();
         
+    }
+    
+    public static class EventCollector<T extends Event> implements Consumer<T> {
+        List<Event> events = new ArrayList<>();
+
+        @Override
+        public void accept(T t) {
+            events.add(t);
+        }
     }
 }
