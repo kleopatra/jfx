@@ -435,8 +435,10 @@ public class TreeCell<T> extends IndexedCell<T> {
         super.cancelEdit();
 
         if (tree != null) {
-            TreeItem<T> editingItem = tree.getEditingItem();
-            T value = editingItem.getValue();
+            // FIXME: trying to fix incorrect event state - is wrong:
+            // this causes a NPE when cancel is triggered from tree.edit(null)
+//            TreeItem<T> editingItem = tree.getEditingItem();
+//            T value = editingItem.getValue();
             // reset the editing index on the TreeView
             if (updateEditingIndex) tree.edit(null);
 
@@ -448,10 +450,10 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             tree.fireEvent(new TreeView.EditEvent<T>(tree,
                     TreeView.<T>editCancelEvent(),
-//                    getTreeItem(),
-//                    getItem(),
-                    editingItem,
-                    value,
+                    getTreeItem(),
+                    getItem(),
+//                    editingItem,
+//                    value,
                     null));
         }
     }

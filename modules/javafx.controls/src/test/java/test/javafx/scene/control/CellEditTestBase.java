@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,7 +49,66 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     protected V view;
     
 // ------------ testing basics: manage editing on cell
+    
+    
+    //----- cancelEdit
+    @Test
+    public void testCellCancelEditFiresEditCancel() {
+        int cellIndex = 0;
+        cell.updateIndex(cellIndex);
+        cell.startEdit();
+        List<?> events = editableView.cancelCellEdit();
+        assertNotNull(events);
+        assertEquals(1, events.size());
+        editableView.assertCancelEditEvent(events.get(0), cellIndex);
+    }
+    
+    @Test
+    public void testCellCancelTerminatesViewEditing() {
+        int cellIndex = 0;
+        cell.updateIndex(cellIndex);
+        cell.startEdit();
+        cell.cancelEdit();
+        assertFalse(cell.isEditing());
+        assertFalse(editableView.isViewEditing());
+    }
 
+    //--------- commitEdit
+    @Test
+    public void testCellCommitEditFiresEditCommit() {
+        int cellIndex = 0;
+        cell.updateIndex(cellIndex);
+        cell.startEdit();
+        String value = "edited";
+        List<?> events = editableView.commitCellEdit(value);
+        assertNotNull(events);
+        assertEquals(1, events.size());
+        editableView.assertCommitEditEvent(events.get(0), cellIndex, value);
+    }
+    
+    
+    @Test
+    public void testCellCommitEditUpdatesItems() {
+        int cellIndex = 0;
+        cell.updateIndex(cellIndex);
+        cell.startEdit();
+        Object edited = "edited";
+        cell.commitEdit(edited);
+        assertEquals(edited, editableView.getItem(cellIndex));
+    }
+    
+    @Test
+    public void testCellCommitTerminatesViewEditing() {
+        int cellIndex = 0;
+        cell.updateIndex(cellIndex);
+        cell.startEdit();
+        Object edited = "edited";
+        cell.commitEdit(edited);
+        assertFalse(cell.isEditing());
+        assertFalse(editableView.isViewEditing());
+    }
+    
+    // start edit
     @Test
     public void testCellStartEditFiresEditStart() {
         int cellIndex = 0;
@@ -58,10 +118,11 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         assertEquals(cellIndex, editableView.getViewEditingIndex());
         assertNotNull(events);
         assertEquals(1, events.size());
+        editableView.assertStartEditEvent(events.get(0), cellIndex);
     }
     
     @Test
-    public void testCellStartEditUpdatesListEditing() {
+    public void testCellStartEditStartsViewEditing() {
         int cellIndex = 1;
         cell.updateIndex(cellIndex);
         cell.startEdit();
@@ -78,7 +139,7 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         assertFalse(editableView.isViewEditing());
     }
     
-// ------------ testing basics: manage editing on cell (no preconditon)
+// ------------ testing basics: manage editing on cell (no preconditons)
     
     @Test
     public void testCellStartEditWithoutView() {
@@ -154,15 +215,32 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     
     @Before
     public void setup() {
+        Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
+            if (throwable instanceof RuntimeException) {
+                throw (RuntimeException)throwable;
+            } else {
+                Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
+            }
+        });
+
         editableView = createEditableView(true);
         // convenience caching
         cell = editableView.cell;
         view = editableView.view;
         assertNotNull(editableView);
     }
-    
+
+    @After
+    public void cleanup() {
+        Thread.currentThread().setUncaughtExceptionHandler(null);
+    }
+
+
     protected abstract EditableView<C, V> createEditableView(boolean prepareEditable);
     
+    /**
+     * Facade for editable virtualized controls.
+     */
     public static abstract class EditableView<C extends IndexedCell, V extends Control> {
         protected V view;
         protected C cell;
@@ -187,6 +265,41 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         
         public abstract List<?> startCellEdit();
         
+        /**
+         * asserts that the event is a startEdit event at location index.
+         * 
+         * @param event and object representing a editEvent in the view, must not be null
+         * @param index the expected editing location of the editEvent, must be valid
+         */
+        public void assertStartEditEvent(Object event, int index) {
+            fail("subclasses must implement the assert");
+        };
+        
+        public abstract List<?> commitCellEdit(Object value);
+        /**
+         * asserts that the event is a commitEdit event at location index with value.
+         * 
+         * @param event and object representing a editEvent in the view, must not be null
+         * @param index the expected editing location of the editEvent, must be valid
+         * @param value the new value
+         */
+        public void assertCommitEditEvent(Object event, int index, Object value) {
+            fail("subclasses must implement the assert");
+        }
+        
+        public abstract List<?> cancelCellEdit();
+        
+        /**
+         * asserts that the event is a startEdit event at location index.
+         * 
+         * @param event and object representing a editEvent in the view, must not be null
+         * @param index the expected editing location of the editEvent, must be valid
+         */
+        public void assertCancelEditEvent(Object event, int index) {
+            fail("subclasses must implement the assert");
+        }
+        
+        
         // view state
         protected abstract boolean isViewEditable();
         protected abstract void setViewEditable(boolean editable);
@@ -199,6 +312,11 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         public abstract void editView(int index);
         public abstract boolean isViewEditing();
         public abstract int getViewEditingIndex();
+        
+        /**
+         * Model state.
+         */
+        public abstract Object getItem(int index);
         
         /**
          *  
@@ -219,12 +337,4 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
         
     }
     
-    public static class EventCollector<T extends Event> implements Consumer<T> {
-        List<Event> events = new ArrayList<>();
-
-        @Override
-        public void accept(T t) {
-            events.add(t);
-        }
-    }
 }

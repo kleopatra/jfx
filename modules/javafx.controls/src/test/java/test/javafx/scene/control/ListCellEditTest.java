@@ -28,8 +28,6 @@ package test.javafx.scene.control;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 import javafx.collections.FXCollections;
@@ -43,12 +41,6 @@ import javafx.scene.control.ListView.EditEvent;
  */
 public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
 
- 
-    @Test
-    public void test() {
-        assertTrue(editableView.isViewEditable());
-    }
-    
     @Override
     protected EditableView<ListCell, ListView> createEditableView(boolean prepareEditing) {
         return new EditableListView(prepareEditing);
@@ -84,6 +76,7 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
 
         @Override
         protected void prepareEditableState() {
+            view.getFocusModel().focus(-1);
             view.setEditable(true);
             cell.updateListView(view);
         }
@@ -114,6 +107,50 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
             view.setOnEditStart(collector::add);
             cell.startEdit();
             return collector;
+        }
+
+        @Override
+        public void assertStartEditEvent(Object event, int index) {
+            EditEvent editEvent = (EditEvent) event;
+            assertEquals(ListView.editStartEvent(), editEvent.getEventType());
+            assertEquals(index, editEvent.getIndex());
+        }
+
+        @Override
+        public List<?> commitCellEdit(Object value) {
+            List<Object> collector = new ArrayList<>();
+            view.setOnEditCommit(collector::add);
+            cell.commitEdit(value);
+            return collector;
+        }
+        
+        @Override
+        public void assertCommitEditEvent(Object event, int index, Object value) {
+            EditEvent editEvent = (EditEvent) event;
+            assertEquals(ListView.editCommitEvent(), editEvent.getEventType());
+            assertEquals(index, editEvent.getIndex());
+            assertEquals(value, editEvent.getNewValue());
+        }
+ 
+        @Override
+        public List<?> cancelCellEdit() {
+            List<Object> collector = new ArrayList<>();
+            view.setOnEditCancel(collector::add);
+            cell.cancelEdit();
+            return collector;
+        }
+
+        @Override
+        public void assertCancelEditEvent(Object event, int index) {
+            EditEvent editEvent = (EditEvent) event;
+            assertEquals(ListView.editCancelEvent(), editEvent.getEventType());
+            assertEquals(index, editEvent.getIndex());
+        }
+
+
+        @Override
+        public Object getItem(int index) {
+            return view.getItems().get(index);
         }
         
     }
