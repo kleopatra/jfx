@@ -113,7 +113,8 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
     public void testCellCommitEditFiresEditCommit() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+//        cell.startEdit();
+        editableView.editView(cellIndex);
         String value = "edited";
         List<?> events = editableView.commitCellEdit(value);
         assertNotNull(events);
@@ -128,7 +129,8 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
     public void testCellCancelTerminatesViewEditing() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+        editableView.editView(cellIndex);
+//        cell.startEdit();
         cell.cancelEdit();
         assertFalse(cell.isEditing());
         assertFalse(editableView.isViewEditing());
@@ -196,8 +198,10 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
 
         @Override
         public void assertCancelEditEvent(Object event, int index) {
-            fail("tbd");
-            
+            EditEvent editEvent = (EditEvent) event;
+            assertEquals(TreeView.editCancelEvent(), editEvent.getEventType());
+            TreeItem itemAtIndex = view.getTreeItem(index);
+            assertEquals(itemAtIndex, editEvent.getTreeItem());
         }
 
         @Override

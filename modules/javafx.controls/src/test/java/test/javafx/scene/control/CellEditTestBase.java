@@ -49,6 +49,7 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     protected V view;
     
 // ------------ testing basics: manage editing on cell
+//------------ note: testing commit/cancel should start editing on view    
     
     
     //----- cancelEdit
@@ -56,7 +57,8 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     public void testCellCancelEditFiresEditCancel() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+//        cell.startEdit();
+        editableView.editView(cellIndex);
         List<?> events = editableView.cancelCellEdit();
         assertNotNull(events);
         assertEquals(1, events.size());
@@ -67,7 +69,8 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     public void testCellCancelTerminatesViewEditing() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+//        cell.startEdit();
+        editableView.editView(cellIndex);
         cell.cancelEdit();
         assertFalse(cell.isEditing());
         assertFalse(editableView.isViewEditing());
@@ -78,7 +81,8 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     public void testCellCommitEditFiresEditCommit() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+        editableView.editView(cellIndex);
+//        cell.startEdit();
         String value = "edited";
         List<?> events = editableView.commitCellEdit(value);
         assertNotNull(events);
@@ -91,7 +95,8 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     public void testCellCommitEditUpdatesItems() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+        editableView.editView(cellIndex);
+//        cell.startEdit();
         Object edited = "edited";
         cell.commitEdit(edited);
         assertEquals(edited, editableView.getItem(cellIndex));
@@ -101,7 +106,8 @@ public abstract class CellEditTestBase<C extends IndexedCell, V extends Control>
     public void testCellCommitTerminatesViewEditing() {
         int cellIndex = 0;
         cell.updateIndex(cellIndex);
-        cell.startEdit();
+        editableView.editView(cellIndex);
+//        cell.startEdit();
         Object edited = "edited";
         cell.commitEdit(edited);
         assertFalse(cell.isEditing());
