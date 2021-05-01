@@ -180,6 +180,9 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8187307
      *
+     * This fails for ListView in scenegraph, passes with raw cell .. test error?
+     * maybe because there is no other cell that could fire?
+     * 
      * Note: can't commit on control, missing api
      */
     @Test

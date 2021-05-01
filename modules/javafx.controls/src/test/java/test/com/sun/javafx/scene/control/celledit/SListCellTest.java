@@ -13,9 +13,6 @@ import com.sun.javafx.tk.Toolkit;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;

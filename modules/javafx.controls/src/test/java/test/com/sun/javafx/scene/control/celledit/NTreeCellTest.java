@@ -21,32 +21,32 @@ import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
+ * Test editing in TreeCell (no scenegraph)
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
+public class NTreeCellTest extends AbstractNCellTest<TreeView, TreeCell> {
 
     @Test
     public void testCommitEditRespectHandler() {
-        EditableControl<TreeView, TreeCell> control = createEditableControl();
-        new StageLoader(control.getControl());
+        EditableControl<TreeView, TreeCell> tree = control;//createEditableControl();
+//        new StageLoader(control.getControl());
         int editIndex = 1;
-        IndexedCell cell = getCellAt(control, editIndex);
-        TreeItem<String> editItem = control.getControl().getTreeItem(editIndex);
+        IndexedCell cell = getCellAt(tree, editIndex);
+        TreeItem<String> editItem = tree.getControl().getTreeItem(editIndex);
         String oldValue = editItem.getValue();
         // do nothing
-        control.setOnEditCommit(e -> new String("dummy"));
+        tree.setOnEditCommit(e -> new String("dummy"));
         // start edit on control
-        control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        tree.edit(editIndex);
+        AbstractEditReport report = createEditReport(tree);
         String editedValue = "edited";
         // commit edit on cell
         cell.commitEdit(editedValue);
         // test data
-        assertEquals("value must not be changed", oldValue, control.getControl().getTreeItem(editIndex).getValue());
+        assertEquals("value must not be changed", oldValue, tree.getControl().getTreeItem(editIndex).getValue());
         assertEquals(1, report.getEditEventSize());
     }
     

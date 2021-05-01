@@ -8,13 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-//import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
 
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.util.Callback;
-//import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
-//import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 /**
  * 
  * Base tests that are same/similar to all cell types. Initially copied all from 
@@ -26,13 +23,14 @@ import javafx.util.Callback;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell> {
+    
+    protected EditableControl control;
 
     /**
      * Must not fire null events.
      */
     @Test (expected = NullPointerException.class)
     public void testNullEventFire() {
-//        EditableControl control = createEditableControl();
         control.fireEvent(null);
     }
     /**
@@ -72,8 +70,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditStartOnCellTwice() {
-//        EditableControl control = createEditableControl();
-//        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         AbstractEditReport report = createEditReport(control);
@@ -87,9 +83,9 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
     
     @Test
     public void testEditStartOnControlTwice() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
+        // need a cell that will fire
+        IndexedCell cell = getCellAt(control, editIndex);
         AbstractEditReport report = createEditReport(control);
         // start edit on control
         control.edit(editIndex);
@@ -142,8 +138,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
     }
     
     protected void assertChangeEdit(int editIndex, int secondEditIndex) {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         // initial editing index
         IndexedCell editingCell = getCellAt(control, editIndex);
         IndexedCell secondEditingCell = getCellAt(control, secondEditIndex);
@@ -178,12 +172,13 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8187307
      *
+     * This fails for ListView in scenegraph, passes with raw cell .. test error?
+     * maybe because there is no other cell that could fire?
+     * 
      * Note: can't commit on control, missing api
      */
     @Test
     public void testEditCommitOnCell() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         // start edit on control
@@ -207,8 +202,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditCancelNotEditing() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         Object value = cell.getItem();
@@ -229,8 +222,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditCommitNotEditing() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         Object value = cell.getItem();
@@ -259,8 +250,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditCancelOnCell() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         // start edit on control
@@ -286,8 +275,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditCancelOnControl() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         // start edit on control
@@ -312,8 +299,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditStartOnCell() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         AbstractEditReport report = createEditReport(control);
@@ -332,8 +317,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
     
     @Test
     public void testEditStartOnControl() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         AbstractEditReport report = createEditReport(control);
@@ -356,8 +339,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditCommitOnCellResetEditingIndex() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         control.edit(editIndex);
@@ -372,8 +353,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditCancelOnCellResetEditingIndex() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         control.edit(editIndex);
@@ -388,8 +367,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditStartOnCellHasEditingIndex() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell =  getCellAt(control, editIndex);
         // start edit on cell
@@ -423,8 +400,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditHandler() {
-//        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
         assertNull(control.getOnEditCancel());
         assertNull(control.getOnEditStart());
         assertNotNull("listView must have default commit handler", control.getOnEditCommit());
@@ -440,8 +415,6 @@ public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell
     protected abstract Callback<C, I> createTextFieldCellFactory();
     
 //----------------- setup initial/state
-    
-    protected EditableControl control;
     
     @Before
     public void setup() {
