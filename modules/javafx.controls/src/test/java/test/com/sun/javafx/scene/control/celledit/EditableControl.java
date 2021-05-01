@@ -21,6 +21,14 @@ import javafx.util.Callback;
 public interface EditableControl<C extends Control, I extends IndexedCell> {
     void setEditable(boolean editable);
     void setCellFactory(Callback<C, I> factory);
+//    Callback<C, I> getCellFactory();
+    /**
+     * Creates and returns a cell that's fully configured to allow switching into 
+     * editing state. It does use the control's cellFactory.
+     * 
+     * @return
+     */
+    I createEditableCell();
     void fireEvent(Event ev);
     EventHandler getOnEditCommit();
     EventHandler getOnEditCancel();

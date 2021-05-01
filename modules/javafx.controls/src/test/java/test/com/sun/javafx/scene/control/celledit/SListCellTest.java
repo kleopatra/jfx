@@ -37,97 +37,97 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 
-    @Test
-    public void standaloneListEditStartOnBaseCellTwiceStandalone() {
-        ListView<String> control = new ListView<>(FXCollections
-                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
-        control.setEditable(true);
+//    @Test
+//    public void standaloneListEditStartOnBaseCellTwiceStandalone() {
+//        ListView<String> control = new ListView<>(FXCollections
+//                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
+//        control.setEditable(true);
+////        control.setCellFactory(TextFieldListCell.forListView());
+//        new StageLoader(control);
+//        int editIndex = 1;
+//        IndexedCell cell = getCell(control, editIndex);
+//        SimpleIntegerProperty counter = new SimpleIntegerProperty(0);
+//        control.addEventHandler(ListView.editStartEvent(), e -> counter.set(counter.get() + 1));
+//        
+//        // start edit on control
+//        cell.startEdit();
+//        // start again -> nothing changed, no event
+//        cell.startEdit();
+//        // test editEvent
+//        assertEquals("second start on same must not fire event", 1, counter.get());
+//    }
+//    
+//    /**
+//     * Must not fire editStartEvent if editing
+//     * reported: https://bugs.openjdk.java.net/browse/JDK-8188027
+//     */
+//    @Test
+//    public void standaloneListEditStartOnCellTwice() {
+//        ListView<String> control = new ListView<>(FXCollections
+//                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
+//        control.setEditable(true);
 //        control.setCellFactory(TextFieldListCell.forListView());
-        new StageLoader(control);
-        int editIndex = 1;
-        IndexedCell cell = getCell(control, editIndex);
-        SimpleIntegerProperty counter = new SimpleIntegerProperty(0);
-        control.addEventHandler(ListView.editStartEvent(), e -> counter.set(counter.get() + 1));
-        
-        // start edit on control
-        cell.startEdit();
-        // start again -> nothing changed, no event
-        cell.startEdit();
-        // test editEvent
-        assertEquals("second start on same must not fire event", 1, counter.get());
-    }
-    
-    /**
-     * Must not fire editStartEvent if editing
-     * reported: https://bugs.openjdk.java.net/browse/JDK-8188027
-     */
-    @Test
-    public void standaloneListEditStartOnCellTwice() {
-        ListView<String> control = new ListView<>(FXCollections
-                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
-        control.setEditable(true);
-        control.setCellFactory(TextFieldListCell.forListView());
-        new StageLoader(control);
-        int editIndex = 1;
-        IndexedCell cell = getCell(control, editIndex);
-        SimpleIntegerProperty counter = new SimpleIntegerProperty(0);
-        control.addEventHandler(ListView.editStartEvent(), e -> counter.set(counter.get() + 1));
-       
-        // start edit on control
-        cell.startEdit();
-        // start again -> nothing changed, no event
-        cell.startEdit();
-        // test editEvent
-        assertEquals("second start on same must not fire event", 1, counter.get());
-    }
-    
-    /**
-     * NPE on all TextFieldXXCell (not with base XXCell!)
-     * reported: https://bugs.openjdk.java.net/browse/JDK-8188026
-     */
-    @Test
-    public void standaloneTextFieldCellNullControlOnStartEdit() {
-        ListCell cell = TextFieldListCell.forListView().call(null);
-        cell.startEdit();
-    }
-
-    /**
-     * NPE on all TextFieldXXCell (not with base XXCell!)
-     */
-    @Test
-    public void standaloneBaseNullControlOnStartEdit() {
-        ListCell cell = new ListCell();
-        cell.startEdit();
-    }
-
-    /**
-     * Incorrect index in editStart event when edit started on cell
-     * 
-     * reported as
-     * https://bugs.openjdk.java.net/browse/JDK-8187432
-     */
-    @Test
-    public void standaloneListEditStartOnCell() {
-        ListView<String> control = new ListView<>(FXCollections
-                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
-        control.setEditable(true);
-        control.setCellFactory(TextFieldListCell.forListView());
-        new StageLoader(control);
-        int editIndex = 1;
-        IndexedCell cell = getCell(control, editIndex);
-        ObjectProperty<ListView.EditEvent> editEvent = new SimpleObjectProperty<>();
-        control.addEventHandler(ListView.editStartEvent(), e -> editEvent.set(e));
-        // start edit on cell
-        cell.startEdit();
-        // test cell state
-        assertTrue(cell.isEditing());
-        assertEquals(editIndex, cell.getIndex());
-        // test editEvent
-        assertNotNull(editEvent.get());
-        assertEquals("type is startEdit", ListView.editStartEvent(), editEvent.get().getEventType());
-        assertEquals("index on start event", editIndex, editEvent.get().getIndex());
-    }
-
+//        new StageLoader(control);
+//        int editIndex = 1;
+//        IndexedCell cell = getCell(control, editIndex);
+//        SimpleIntegerProperty counter = new SimpleIntegerProperty(0);
+//        control.addEventHandler(ListView.editStartEvent(), e -> counter.set(counter.get() + 1));
+//       
+//        // start edit on control
+//        cell.startEdit();
+//        // start again -> nothing changed, no event
+//        cell.startEdit();
+//        // test editEvent
+//        assertEquals("second start on same must not fire event", 1, counter.get());
+//    }
+//    
+//    /**
+//     * NPE on all TextFieldXXCell (not with base XXCell!)
+//     * reported: https://bugs.openjdk.java.net/browse/JDK-8188026
+//     */
+//    @Test
+//    public void standaloneTextFieldCellNullControlOnStartEdit() {
+//        ListCell cell = TextFieldListCell.forListView().call(null);
+//        cell.startEdit();
+//    }
+//
+//    /**
+//     * NPE on all TextFieldXXCell (not with base XXCell!)
+//     */
+//    @Test
+//    public void standaloneBaseNullControlOnStartEdit() {
+//        ListCell cell = new ListCell();
+//        cell.startEdit();
+//    }
+//
+//    /**
+//     * Incorrect index in editStart event when edit started on cell
+//     * 
+//     * reported as
+//     * https://bugs.openjdk.java.net/browse/JDK-8187432
+//     */
+//    @Test
+//    public void standaloneListEditStartOnCell() {
+//        ListView<String> control = new ListView<>(FXCollections
+//                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
+//        control.setEditable(true);
+//        control.setCellFactory(TextFieldListCell.forListView());
+//        new StageLoader(control);
+//        int editIndex = 1;
+//        IndexedCell cell = getCell(control, editIndex);
+//        ObjectProperty<ListView.EditEvent> editEvent = new SimpleObjectProperty<>();
+//        control.addEventHandler(ListView.editStartEvent(), e -> editEvent.set(e));
+//        // start edit on cell
+//        cell.startEdit();
+//        // test cell state
+//        assertTrue(cell.isEditing());
+//        assertEquals(editIndex, cell.getIndex());
+//        // test editEvent
+//        assertNotNull(editEvent.get());
+//        assertEquals("type is startEdit", ListView.editStartEvent(), editEvent.get().getEventType());
+//        assertEquals("index on start event", editIndex, editEvent.get().getIndex());
+//    }
+//
     /**
      * Experiments around focus
      */
@@ -254,6 +254,13 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
         public <T extends Event> void addEditEventHandler(EventType<T> type,
                 EventHandler<? super T> handler) {
             addEventHandler(type, handler);
+        }
+
+        @Override
+        public ListCell createEditableCell() {
+            ListCell cell = (ListCell) getCellFactory().call(this);
+            cell.updateListView(getControl());
+            return cell;
         }
         
         

@@ -4,37 +4,35 @@
  */
 package test.com.sun.javafx.scene.control.celledit;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import static org.junit.Assert.*;
-import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
+//import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
 
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
+//import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
+//import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 /**
  * 
  * Base tests that are same/similar to all cell types. Initially copied all from 
  * CellTest, then deleted all tests that are not listCell
  * 
- * Note: S in the name denotes testing in scenegraph (with StageLoader)
- * Note: implementing subs are setting editable control's cellFactory to TextFieldXXCell
+ * Note: N in the name denotes testing without StageLoader
  * 
  * @author Jeanette Winzenburg, Berlin
  */
-@RunWith(JUnit4.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell> {
+public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell> {
 
     /**
      * Must not fire null events.
      */
     @Test (expected = NullPointerException.class)
     public void testNullEventFire() {
-        EditableControl control = createEditableControl();
+//        EditableControl control = createEditableControl();
         control.fireEvent(null);
     }
     /**
@@ -74,8 +72,8 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditStartOnCellTwice() {
-        EditableControl control = createEditableControl();
-        new StageLoader(control.getControl());
+//        EditableControl control = createEditableControl();
+//        new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         AbstractEditReport report = createEditReport(control);
@@ -401,12 +399,16 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
     }
 
     /**
+     * Creates and configures a cell with the given index.
+     * 
      * @param control
      * @param editIndex
      * @return
      */
     protected IndexedCell getCellAt(EditableControl<C,I> control, int editIndex) {
-        return getCell(control.getControl(), editIndex);
+        IndexedCell cell = control.createEditableCell();
+        cell.updateIndex(editIndex);
+        return cell;
     }
 
 //----------------------- focus state
@@ -421,7 +423,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
      */
     @Test
     public void testEditHandler() {
-        EditableControl control = createEditableControl();
+//        EditableControl control = createEditableControl();
         new StageLoader(control.getControl());
         assertNull(control.getOnEditCancel());
         assertNull(control.getOnEditStart());
@@ -436,5 +438,14 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
     protected abstract EditableControl<C, I> createEditableControl();
     
     protected abstract Callback<C, I> createTextFieldCellFactory();
+    
+//----------------- setup initial/state
+    
+    protected EditableControl control;
+    
+    @Before
+    public void setup() {
+        control = createEditableControl();
+    }
     
 }
