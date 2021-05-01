@@ -8,14 +8,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-//import static de.swingempire.fx.util.VirtualFlowTestUtils.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
 
-//import de.swingempire.fx.junit.JavaFXThreadingRule;
-//import de.swingempire.fx.util.AbstractEditReport;
-//import de.swingempire.fx.util.EditableControl;
-//import de.swingempire.fx.util.StageLoader;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.util.Callback;
@@ -25,18 +20,14 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
  * Base tests that are same/similar to all cell types. Initially copied all from 
  * CellTest, then deleted all tests that are not listCell
  * 
+ * Note: S in the name denotes testing in scenegraph (with StageLoader)
+ * 
  * @author Jeanette Winzenburg, Berlin
  */
 @RunWith(JUnit4.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public abstract class AbstractCellTest<C extends Control, I extends IndexedCell> {
+public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell> {
 
-//    @Rule
-//    public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
-//
-//    @ClassRule
-//    public static TestRule classRule = new JavaFXThreadingRule();
-//
     /**
      * Must not fire null events.
      */

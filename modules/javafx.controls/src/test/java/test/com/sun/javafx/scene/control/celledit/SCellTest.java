@@ -53,7 +53,7 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
  */
 //@RunWith(JUnit4.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class CellTest {
+public class SCellTest {
 
 //----------- test editEvents and cell/control state on Tree
     

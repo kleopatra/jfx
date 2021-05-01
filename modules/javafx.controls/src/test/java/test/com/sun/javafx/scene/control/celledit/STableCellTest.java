@@ -44,7 +44,7 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class TableCellTest extends AbstractCellTest<TableView, TableCell> {
+public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
 
     protected boolean cellSelectionEnabled; 
     
@@ -56,7 +56,7 @@ public class TableCellTest extends AbstractCellTest<TableView, TableCell> {
     /**
      * 
      */
-    public TableCellTest(boolean cellSelection) {
+    public STableCellTest(boolean cellSelection) {
         this.cellSelectionEnabled = cellSelection;
     }
     

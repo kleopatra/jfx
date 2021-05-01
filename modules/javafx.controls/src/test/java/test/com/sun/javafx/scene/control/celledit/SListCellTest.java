@@ -35,7 +35,7 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ListCellTest extends AbstractCellTest<ListView, ListCell> {
+public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 
     @Test
     public void standaloneListEditStartOnBaseCellTwiceStandalone() {

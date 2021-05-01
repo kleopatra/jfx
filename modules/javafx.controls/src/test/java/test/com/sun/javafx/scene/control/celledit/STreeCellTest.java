@@ -27,7 +27,7 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class TreeCellTest extends AbstractCellTest<TreeView, TreeCell> {
+public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
 
     @Test
     public void testCommitEditRespectHandler() {
