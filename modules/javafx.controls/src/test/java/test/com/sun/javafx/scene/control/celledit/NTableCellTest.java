@@ -9,9 +9,12 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import static org.junit.Assert.*;
+import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
 
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
@@ -38,6 +41,7 @@ import javafx.util.Callback;
  * 
  * @author Jeanette Winzenburg, Berlin
  */
+@RunWith(Parameterized.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NTableCellTest extends AbstractNCellTest<TableView, TableCell> {
 
@@ -62,7 +66,7 @@ public class NTableCellTest extends AbstractNCellTest<TableView, TableCell> {
         assertEquals(cellSelectionEnabled, table.getSelectionModel().isCellSelectionEnabled());
         int editIndex = 1;
 //        IndexedCell cell =  getCell(control, editIndex, 0);
-        IndexedCell cell =  getCellAt(table, editIndex);
+        IndexedCell cell =  createEditableCellAt(table, editIndex);
         // start edit on control
         table.edit(editIndex, column);
         AbstractEditReport report = createEditReport(table);
@@ -81,7 +85,7 @@ public class NTableCellTest extends AbstractNCellTest<TableView, TableCell> {
         TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) table.getColumns().get(0);
         int editIndex = 1;
 //        IndexedCell cell =  getCell(control, editIndex, 0);
-        IndexedCell cell =  getCellAt(table, editIndex);
+        IndexedCell cell =  createEditableCellAt(table, editIndex);
         // start edit on control
         table.edit(editIndex, column);;
         AbstractEditReport report = createEditReport(table);
@@ -145,6 +149,12 @@ public class NTableCellTest extends AbstractNCellTest<TableView, TableCell> {
         assertEquals("index on commit event", index, e.get().getTablePosition().getRow());
         assertEquals("column on commit event", first, e.get().getTablePosition().getTableColumn());
         assertEquals("new value on commit event", value, e.get().getNewValue());
+    }
+
+    @Override
+    protected IndexedCell getCellAt(
+            EditableControl<TableView, TableCell> control, int editIndex) {
+        return getCell(control.getControl(), editIndex, 0);
     }
 
 

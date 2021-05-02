@@ -34,7 +34,7 @@ public class NTreeCellTest extends AbstractNCellTest<TreeView, TreeCell> {
         EditableControl<TreeView, TreeCell> tree = control;//createEditableControl();
 //        new StageLoader(control.getControl());
         int editIndex = 1;
-        IndexedCell cell = getCellAt(tree, editIndex);
+        IndexedCell cell = createEditableCellAt(tree, editIndex);
         TreeItem<String> editItem = tree.getControl().getTreeItem(editIndex);
         String oldValue = editItem.getValue();
         // do nothing

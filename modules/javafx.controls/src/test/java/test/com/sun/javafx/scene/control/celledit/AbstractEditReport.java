@@ -9,6 +9,7 @@ import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.event.EventType;
 /**
  * @author Jeanette Winzenburg, Berlin
  */
@@ -20,8 +21,8 @@ public abstract class AbstractEditReport<E extends Event> {
     
     protected ObservableList<E> editEvents = FXCollections.<E>observableArrayList();
     
-    public AbstractEditReport(EditableControl listView) {
-        this.source = listView;
+    public AbstractEditReport(EditableControl editableControl) {
+        this.source = editableControl;
     }
     
     public EditableControl getSource() {
@@ -41,8 +42,20 @@ public abstract class AbstractEditReport<E extends Event> {
         editEvents.clear();
     }
     
+    /**
+     * Returns # of all events.
+     */
     public int getEditEventSize() {
         return editEvents.size();
+    }
+    
+    /**
+     * Returns # of events of given type.
+     */
+    public int getEventTypeSize(EventType type) {
+        return (int) editEvents.stream()
+                .filter(e -> e.getEventType().equals(type))
+                .count();
     }
     
     public Optional<E> getLastEditStart() {
@@ -97,17 +110,17 @@ public abstract class AbstractEditReport<E extends Event> {
         return !editEvents.isEmpty();
     }
     
-    
+    /**
+     * Adds the given event.
+     * 
+     * Impl. note: adds at 0.
+     */
     protected void addEvent(E event) {
         editEvents.add(0, event);
     }
     
     /**
-     * Returns the enhanced edit text of all events received, most 
-     * recent first.
-     * 
-     * @param message
-     * @return
+     * Returns the enhanced edit text of all events received, last received first. 
      */
     public String getAllEditEventTexts(String message) {
         if (!hasEditEvents()) return "noEvents";

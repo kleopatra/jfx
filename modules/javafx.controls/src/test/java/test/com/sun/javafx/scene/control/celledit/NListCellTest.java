@@ -44,7 +44,7 @@ import javafx.scene.control.skin.ListCellSkin;
 import javafx.util.Callback;
 
 /**
- * Test core list cell (not in scenegraph)
+ * Test core list cell (not in scenegraph by default, can be added though)
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NListCellTest extends AbstractNCellTest<ListView, ListCell> {
@@ -58,14 +58,14 @@ public class NListCellTest extends AbstractNCellTest<ListView, ListCell> {
     protected void assertLastStartIndex(AbstractEditReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditStart();
         assertTrue(e.isPresent());
-        assertEquals("index on start event", index, e.get().getIndex());
+        assertEquals(report.getAllEditEventTexts("index on start event"), index, e.get().getIndex());
     }
     
     @Override
     protected void assertLastCancelIndex(AbstractEditReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditCancel();
         assertTrue(e.isPresent());
-        assertEquals("index on cancel event", index, e.get().getIndex());
+        assertEquals(report.getAllEditEventTexts("index on cancel event"), index, e.get().getIndex());
     }
     
     @Override
@@ -74,7 +74,8 @@ public class NListCellTest extends AbstractNCellTest<ListView, ListCell> {
         assertTrue(commit.isPresent());
         assertEquals("index on commit event", index, commit.get().getIndex());
         assertEquals("newValue on commit event", value, commit.get().getNewValue());
-        assertEquals("commit must fire a single event", 1, report.getEditEventSize());
+        assertEquals(report.getAllEditEventTexts("commit must fire a single event "), 
+                1, report.getEditEventSize());
     }
 
     //--------------------- old bugs, fixed in fx9    
@@ -96,6 +97,7 @@ public class NListCellTest extends AbstractNCellTest<ListView, ListCell> {
                 .observableArrayList("Item1", "Item2", "Item3", "Item4"));
         control.setEditable(true);
         control.setCellFactory(createTextFieldCellFactory());
+        control.getFocusModel().focus(-1);
         return control;
     }
 
