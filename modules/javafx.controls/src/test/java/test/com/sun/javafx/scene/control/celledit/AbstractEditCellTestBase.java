@@ -54,28 +54,26 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
      */
 //    @Ignore("JDK-8188026")
     @Test
-    public void nullControlOnStartEditMustNotThrow() {
+    public void nullControlOnStartMustNotThrow() {
         I cell = createTextFieldCellFactory().call(null);
         cell.startEdit();
         assertFalse("cell without control must not be editing", cell.isEditing());
     }
     
     /**
-     * Test cancel with null control
-     */
-//  @Ignore("JDK-8188026")
+     * Sanity: contract violation of cancel
+     */ 
     @Test
-    public void nullControlOnCancelEditMustNotThrow() {
+    public void nullControlOnCancelMustNotThrow() {
         I cell = createTextFieldCellFactory().call(null);
         cell.cancelEdit();
     }
     
     /**
-     * Test cancel with null control
+     * Sanity: contract violation of commit
      */
-//  @Ignore("JDK-8188026")
     @Test
-    public void nullControlOnCommitEditMustNotThrow() {
+    public void nullControlOnCommitMustNotThrow() {
         I cell = createTextFieldCellFactory().call(null);
         cell.commitEdit("dummy");
     }
@@ -84,7 +82,10 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
     
     /**
      * FIXME: report
+     * 
+     * fails for ListCell
      */
+//    @Ignore("FIXME")
     @Test
     public void startOnCellTwiceMustFireSingleEvent() {
         int editIndex = 1;
@@ -218,6 +219,9 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         assertLastCommitIndex(report, editIndex, control.getTargetColumn(), editedValue);
     }
     
+    /**
+     * Fails for ListCell, 
+     */
 //  @Ignore("JDK-8187307")
     @Test
     public void commitOnCellMustNotFireCancelInSceneGraph() {
@@ -315,7 +319,10 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
      * 
      * reported: https://bugs.openjdk.java.net/browse/JDK-8187226
      * 
+     * fails for ListCell, 
+     * 
      */
+//    @Ignore("JDK-8187226")
     @Test
     public void cancelOnControlEvent() {
         int editIndex = 1;
@@ -371,6 +378,73 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         // test editEvent
         assertEquals(1, report.getEditEventSize());
         assertLastStartIndex(report, editIndex, control.getTargetColumn());
+    }
+    
+    @Test
+    public void updateCellIndexToEditing() {
+        int cellIndex = 0;
+        int editIndex = 1;
+        IndexedCell cell = createEditableCellAt(control, cellIndex);
+        control.edit(editIndex);
+        AbstractEditReport report = createEditReport(control);
+        assertFalse("sanity: ", cell.isEditing());
+        cell.updateIndex(editIndex);
+        assertTrue("cell must be editing on updateIndex from " + cellIndex 
+                + " to editing index " + cell.getIndex(), cell.isEditing());
+        assertEquals(1, report.getEditEventSize());
+        assertLastStartIndex(report, editIndex, control.getTargetColumn());
+    }
+    
+    @Test
+    public void updateCellIndexNegativeToEditing() {
+        int cellIndex = -1;
+        int editIndex = 1;
+        IndexedCell cell = createEditableCellAt(control, cellIndex);
+        control.edit(editIndex);
+        AbstractEditReport report = createEditReport(control);
+        assertFalse("sanity: ", cell.isEditing());
+        cell.updateIndex(editIndex);
+        assertTrue("cell must be editing on updateIndex from " + cellIndex 
+                + " to editing index " + cell.getIndex(), cell.isEditing());
+        assertEquals(1, report.getEditEventSize());
+        assertLastStartIndex(report, editIndex, control.getTargetColumn());
+    }
+    
+    @Test
+    public void updateCellIndexOffEditing() {
+        int cellIndex = 0;
+        int editIndex = 1;
+        IndexedCell cell = createEditableCellAt(control, editIndex);
+        control.edit(editIndex);
+        AbstractEditReport report = createEditReport(control);
+        assertTrue("sanity: cell must be editing", cell.isEditing());
+        cell.updateIndex(cellIndex);
+        assertFalse("cell must not be editing after index change from editIndex: " + editIndex 
+                + " to " + cell.getIndex(), cell.isEditing());
+        assertEquals("control editing unchanged", editIndex, control.getEditingIndex());
+        assertEquals(1, report.getEditEventSize());
+        assertLastCancelIndex(report, editIndex, control.getTargetColumn());
+    }
+    
+    @Test
+    public void updateCellIndexNegativeOffEditing() {
+        int cellIndex = -1;
+        int editIndex = 1;
+        IndexedCell cell = createEditableCellAt(control, editIndex);
+        control.edit(editIndex);
+        AbstractEditReport report = createEditReport(control);
+        assertTrue("sanity: cell must be editing", cell.isEditing());
+        cell.updateIndex(cellIndex);
+        assertFalse("cell must not be editing after index change from editIndex: " + editIndex 
+                + " to " + cell.getIndex(), cell.isEditing());
+        assertEquals("control editing unchanged", editIndex, control.getEditingIndex());
+        assertEquals(1, report.getEditEventSize());
+        assertLastCancelIndex(report, editIndex, control.getTargetColumn());
+    }
+    
+    @Test
+    public void testUpdateCellIndexOffEditing() {
+        
     }
     
     protected abstract void assertLastCancelIndex(AbstractEditReport report, int index, Object column);
