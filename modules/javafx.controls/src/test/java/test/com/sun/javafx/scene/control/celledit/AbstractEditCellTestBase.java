@@ -28,7 +28,7 @@ import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public abstract class AbstractNCellTest<C extends Control, I extends IndexedCell> {
+public abstract class AbstractEditCellTestBase<C extends Control, I extends IndexedCell> {
     
     protected StageLoader stageLoader;
     protected EditableControl control;

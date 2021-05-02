@@ -27,7 +27,7 @@ import javafx.util.Callback;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NTreeCellTest extends AbstractNCellTest<TreeView, TreeCell> {
+public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCell> {
 
     @Test
     public void testCommitEditRespectHandler() {

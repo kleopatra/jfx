@@ -43,7 +43,7 @@ import javafx.util.Callback;
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NTableCellTest extends AbstractNCellTest<TableView, TableCell> {
+public class EditTableCellTest extends AbstractEditCellTestBase<TableView, TableCell> {
 
     protected boolean cellSelectionEnabled; 
     
@@ -55,7 +55,7 @@ public class NTableCellTest extends AbstractNCellTest<TableView, TableCell> {
     /**
      * 
      */
-    public NTableCellTest(boolean cellSelection) {
+    public EditTableCellTest(boolean cellSelection) {
         this.cellSelectionEnabled = cellSelection;
     }
     

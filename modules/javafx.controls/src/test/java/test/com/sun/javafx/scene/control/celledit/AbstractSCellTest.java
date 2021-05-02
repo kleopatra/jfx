@@ -15,13 +15,16 @@ import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
+
 /**
- * 
+ * Note: this is outdated, kept for now just to see nothing was missed on refactored
+ * ----
  * Base tests that are same/similar to all cell types. Initially copied all from 
  * CellTest, then deleted all tests that are not listCell
  * 
  * Note: S in the name denotes testing in scenegraph (with StageLoader)
  * Note: implementing subs are setting editable control's cellFactory to TextFieldXXCell
+ * 
  * 
  * @author Jeanette Winzenburg, Berlin
  */

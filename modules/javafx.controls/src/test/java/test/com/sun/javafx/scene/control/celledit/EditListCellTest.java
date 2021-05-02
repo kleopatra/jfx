@@ -47,7 +47,7 @@ import javafx.util.Callback;
  * Test core list cell (not in scenegraph by default, can be added though)
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NListCellTest extends AbstractNCellTest<ListView, ListCell> {
+public class EditListCellTest extends AbstractEditCellTestBase<ListView, ListCell> {
 
     @Override
     protected void assertValueAt(int index, Object editedValue, EditableControl<ListView, ListCell> control) {
