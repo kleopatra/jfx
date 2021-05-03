@@ -32,10 +32,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ListView.EditEvent;
@@ -93,7 +89,7 @@ public class EditListCellTest extends AbstractEditCellTestBase<ListView, ListCel
      */
     @Override
     protected EditableControl createEditableControl() {
-        EListView control = new EListView(FXCollections
+        EditableControl.EListView control = new EditableControl.EListView(FXCollections
                 .observableArrayList("Item1", "Item2", "Item3", "Item4"));
         control.setEditable(true);
         control.setCellFactory(createTextFieldCellFactory());
@@ -110,59 +106,6 @@ public class EditListCellTest extends AbstractEditCellTestBase<ListView, ListCel
     @Override
     protected AbstractEditReport createEditReport(EditableControl control) {
         return new ListViewEditReport(control);
-    }
-
-    public static class EListView extends ListView 
-        implements EditableControl<ListView, ListCell> {
-
-        
-        @Override
-        public ListView getControl() {
-            return this;
-        }
-
-        public EListView() {
-            super();
-        }
-
-        public EListView(ObservableList arg0) {
-            super(arg0);
-        }
-
-        @Override
-        public EventType editAny() {
-            return editAnyEvent();
-        }
-
-        @Override
-        public EventType editCommit() {
-            return editCommitEvent();
-        }
-
-        @Override
-        public EventType editCancel() {
-            return editCancelEvent();
-        }
-
-        @Override
-        public EventType editStart() {
-            return editStartEvent();
-        }
-
-        @Override
-        public <T extends Event> void addEditEventHandler(EventType<T> type,
-                EventHandler<? super T> handler) {
-            addEventHandler(type, handler);
-        }
-
-        @Override
-        public ListCell createEditableCell() {
-            ListCell cell = (ListCell) getCellFactory().call(this);
-            cell.updateListView(getControl());
-            return cell;
-        }
-        
-        
     }
 
 }

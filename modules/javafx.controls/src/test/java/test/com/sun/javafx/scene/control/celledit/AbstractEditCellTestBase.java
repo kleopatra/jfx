@@ -432,7 +432,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        AbstractEditReport report = null; //createEditReport(control);
         assertTrue("sanity: cell must be editing", cell.isEditing());
         cell.updateIndex(cellIndex);
         assertFalse("cell must not be editing after index change from editIndex: " + editIndex 
@@ -530,7 +530,9 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
     public void testEditHandler() {
         assertNull(control.getOnEditCancel());
         assertNull(control.getOnEditStart());
-        assertNotNull("listView must have default commit handler", control.getOnEditCommit());
+        assertNotNull(control.getControl().getClass().getSimpleName().substring(1) 
+                + " must have default commit handler", 
+                control.getOnEditCommit());
     }
     
     

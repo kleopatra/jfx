@@ -25,6 +25,7 @@ import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.skin.ListCellSkin;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.EditableControl.EListView;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -208,59 +209,6 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
     @Override
     protected AbstractEditReport createEditReport(EditableControl control) {
         return new ListViewEditReport(control);
-    }
-
-    public static class EListView extends ListView 
-        implements EditableControl<ListView, ListCell> {
-
-        
-        @Override
-        public ListView getControl() {
-            return this;
-        }
-
-        public EListView() {
-            super();
-        }
-
-        public EListView(ObservableList arg0) {
-            super(arg0);
-        }
-
-        @Override
-        public EventType editAny() {
-            return editAnyEvent();
-        }
-
-        @Override
-        public EventType editCommit() {
-            return editCommitEvent();
-        }
-
-        @Override
-        public EventType editCancel() {
-            return editCancelEvent();
-        }
-
-        @Override
-        public EventType editStart() {
-            return editStartEvent();
-        }
-
-        @Override
-        public <T extends Event> void addEditEventHandler(EventType<T> type,
-                EventHandler<? super T> handler) {
-            addEventHandler(type, handler);
-        }
-
-        @Override
-        public ListCell createEditableCell() {
-            ListCell cell = (ListCell) getCellFactory().call(this);
-            cell.updateListView(getControl());
-            return cell;
-        }
-        
-        
     }
 
 }

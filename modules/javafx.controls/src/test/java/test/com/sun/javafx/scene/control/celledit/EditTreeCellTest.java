@@ -10,9 +10,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -108,79 +105,16 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
                 new TreeItem<>("three")
                 
                 );
-        ETreeView treeView = new ETreeView(rootItem);
+        EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
         treeView.setShowRoot(false);
         treeView.setEditable(true);
-        treeView.setCellFactory(createTextFieldCellFactory());
+        treeView.setCellFactory(TextFieldTreeCell.forTreeView()); //createTextFieldCellFactory());
+        treeView.getFocusModel().focus(-1);
         return treeView;
     }
 
     @Override
     protected Callback<TreeView, TreeCell> createTextFieldCellFactory() {
         return e -> new TextFieldTreeCell();
-    }
-
-    public static class ETreeView extends TreeView 
-         implements EditableControl<TreeView, TreeCell> {
-
-        public ETreeView() {
-            super();
-        }
-
-        public ETreeView(TreeItem root) {
-            super(root);
-        }
-
-        @Override
-        public <T extends Event> void addEditEventHandler(EventType<T> type,
-                EventHandler<? super T> handler) {
-            addEventHandler(type, handler);
-            
-        }
-
-        @Override
-        public EventType editCommit() {
-            return editCommitEvent();
-        }
-
-        @Override
-        public EventType editCancel() {
-            return editCancelEvent();
-        }
-
-        @Override
-        public EventType editStart() {
-            return editStartEvent();
-        }
-
-        @Override
-        public EventType editAny() {
-            return editAnyEvent();
-        }
-
-        @Override
-        public TreeView getControl() {
-            return this;
-        }
-
-        @Override
-        public int getEditingIndex() {
-            TreeItem item = getEditingItem();
-            return getRow(item);
-        }
-
-        @Override
-        public void edit(int index) {
-            TreeItem item = getTreeItem(index);
-            edit(item);
-        }
-
-        @Override
-        public TreeCell createEditableCell() {
-            TreeCell cell = (TreeCell) getCellFactory().call(this);
-            cell.updateTreeView(this);
-            return cell;
-        }
-        
     }
 }

@@ -22,7 +22,7 @@ import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
-
+import test.com.sun.javafx.scene.control.celledit.EditableControl.ETreeView;;
 /**
  * @author Jeanette Winzenburg, Berlin
  */
@@ -120,67 +120,4 @@ public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
         return e -> new TextFieldTreeCell();
     }
 
-    public static class ETreeView extends TreeView 
-         implements EditableControl<TreeView, TreeCell> {
-
-        public ETreeView() {
-            super();
-        }
-
-        public ETreeView(TreeItem root) {
-            super(root);
-        }
-
-        @Override
-        public <T extends Event> void addEditEventHandler(EventType<T> type,
-                EventHandler<? super T> handler) {
-            addEventHandler(type, handler);
-            
-        }
-
-        @Override
-        public EventType editCommit() {
-            return editCommitEvent();
-        }
-
-        @Override
-        public EventType editCancel() {
-            return editCancelEvent();
-        }
-
-        @Override
-        public EventType editStart() {
-            return editStartEvent();
-        }
-
-        @Override
-        public EventType editAny() {
-            return editAnyEvent();
-        }
-
-        @Override
-        public TreeView getControl() {
-            return this;
-        }
-
-        @Override
-        public int getEditingIndex() {
-            TreeItem item = getEditingItem();
-            return getRow(item);
-        }
-
-        @Override
-        public void edit(int index) {
-            TreeItem item = getTreeItem(index);
-            edit(item);
-        }
-
-        @Override
-        public TreeCell createEditableCell() {
-            TreeCell cell = (TreeCell) getCellFactory().call(this);
-            cell.updateTreeView(this);
-            return cell;
-        }
-        
-    }
 }

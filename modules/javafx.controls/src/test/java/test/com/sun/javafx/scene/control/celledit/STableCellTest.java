@@ -33,6 +33,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.skin.TreeTableRowSkin;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.EditableControl.ETableView;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -218,121 +219,4 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
         return new TableViewEditReport(control);
     }
 
-    /**
-     * A TableView decorated as EditableControl. Note that the table
-     * must be instantiated with at least one column and all
-     * column related edit api is passed to the target column.
-     * 
-     * @author Jeanette Winzenburg, Berlin
-     */
-    public static class ETableView extends TableView
-         implements EditableControl<TableView, TableCell> {
-
-        public ETableView() {
-            super();
-        }
-
-        public ETableView(ObservableList items) {
-            super(items);
-        }
-
-        @Override
-        public void setCellFactory(Callback<TableView, TableCell> factory) {
-            getTargetColumn().setCellFactory(factory);
-        }
-
-        @Override
-        public TableColumn getTargetColumn() {
-            return (TableColumn) getColumns().get(0);
-        }
-
-        
-//        @Override
-//        public Object getValueAt(int index) {
-//            TableColumn column = getTargetColumn();
-//            return column.getCellObservableValue(index);
-//        }
-
-        @Override
-        public EventHandler getOnEditCommit() {
-            return getTargetColumn().getOnEditCommit();
-        }
-
-        @Override
-        public EventHandler getOnEditCancel() {
-            return getTargetColumn().getOnEditCancel();
-        }
-
-        @Override
-        public EventHandler getOnEditStart() {
-            return getTargetColumn().getOnEditStart();
-        }
-
-        @Override
-        public void setOnEditCommit(EventHandler handler) {
-            getTargetColumn().setOnEditCommit(handler);
-        }
-
-        @Override
-        public void setOnEditCancel(EventHandler handler) {
-            getTargetColumn().setOnEditCancel(handler);
-        }
-
-        @Override
-        public void setOnEditStart(EventHandler handler) {
-            getTargetColumn().setOnEditStart(handler);
-        }
-
-        @Override
-        public EventType editCommit() {
-            return TableColumn.editCommitEvent();
-        }
-
-        @Override
-        public EventType editCancel() {
-            return TableColumn.editCancelEvent();
-        }
-
-        @Override
-        public EventType editStart() {
-            return TableColumn.editStartEvent();
-        }
-
-        @Override
-        public EventType editAny() {
-            return TableColumn.editAnyEvent();
-        }
-
-        @Override
-        public TableView getControl() {
-            return this;
-        }
-
-        @Override
-        public int getEditingIndex() {
-            TablePosition pos = getEditingCell();
-            return pos != null ? pos.getRow() : -1;
-        }
-
-        @Override
-        public void edit(int index) {
-            TableColumn column = index < 0 ? null : getTargetColumn();
-            edit(index, column);
-        }
-
-        @Override
-        public <T extends Event> void addEditEventHandler(EventType<T> type,
-                EventHandler<? super T> handler) {
-            getTargetColumn().addEventHandler(type, handler);
-        }
-
-        @Override
-        public TableCell createEditableCell() {
-            TableCell cell = (TableCell) getTargetColumn().getCellFactory().call(this);
-            cell.updateTableColumn(getTargetColumn());
-            cell.updateTableView(getControl());
-            return cell;
-        }
-        
-    }
 }
