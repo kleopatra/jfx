@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -128,10 +127,7 @@ public class TreeCellEditingTest {
         cell.updateIndex(editingIndex);
         assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex, 
                 1, events.size());
-        TreeItem<String> oldItem = events.get(0).getTreeItem();
-        assertEquals("treeItem of cancel event ", editingItem, oldItem);
-//        assertEquals("start event index must be same as editingIndex", editingIndex, 
-//                events.get(0).getTreeTablePosition().getRow());
+        assertEquals("treeItem of start event ", editingItem, (TreeItem<String>) events.get(0).getTreeItem());
     }
     
 //------------- parameterized
