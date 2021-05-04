@@ -333,11 +333,15 @@ public class ListCell<T> extends IndexedCell<T> {
             // appear that a cell is uneditable as, despite being clicked, it
             // will not change to the editing state as a layout of VirtualFlow
             // is immediately invoked, which forces all cells to be updated.
+            System.out.println("in indexChanged while editing and same old/new index: " + oldIndex);
+            if (oldIndex == -1) 
+                throw new IllegalStateException("cell index must not be -1 while editing");
         } else {
             updateItem(oldIndex);
             updateSelection();
             updateFocus();
         }
+        
     }
 
     /** {@inheritDoc} */

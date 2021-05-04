@@ -72,7 +72,7 @@ public class TreeCellEditingTest {
         assertTrue("sanity: cell is editing", cell.isEditing());
         cell.updateIndex(cellIndex);
         assertEquals("sanity: cell index changed", cellIndex, cell.getIndex());
-        assertFalse("cell must not be editing on update from editingIndex" + editingIndex 
+        assertFalse("cell must not be editing on update from editingIndex " + editingIndex 
                 + " to cellIndex " + cellIndex, cell.isEditing());
     }
     
@@ -92,7 +92,7 @@ public class TreeCellEditingTest {
 //        System.out.println("editingItem" + editingItem + " / cancelEvent: " + asString(events.get(0)));
         assertEquals("treeView editingItem unchanged", editingItem, tree.getEditingItem());
         TreeItem<String> oldItem = events.get(0).getTreeItem();
-        assertEquals("treeItem of cancel event ", editingItem, oldItem);
+        assertEquals("cancel on updateIndex from " + editingIndex + " to " + cellIndex + "\n  ", editingItem, oldItem);
     }
     
     private String asString(EditEvent ev) {
@@ -210,8 +210,8 @@ public class TreeCellEditingTest {
     
     @Before public void setup() {
         cell = new TreeCell<String>();
-        model = FXCollections.observableArrayList(new TreeItem<>("Four"), 
-                new TreeItem<>("Five"), new TreeItem<>("Fear")); // "Flop", "Food", "Fizz"
+        model = FXCollections.observableArrayList(new TreeItem<>("zero"), 
+                new TreeItem<>("one"), new TreeItem<>("two")); // "Flop", "Food", "Fizz"
         TreeItem<String> root = new TreeItem<>("root");
         root.getChildren().addAll(model);
         root.setExpanded(true);

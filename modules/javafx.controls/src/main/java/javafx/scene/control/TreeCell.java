@@ -483,12 +483,15 @@ public class TreeCell<T> extends IndexedCell<T> {
             // appear that a cell is uneditable as, despite being clicked, it
             // will not change to the editing state as a layout of VirtualFlow
             // is immediately invoked, which forces all cells to be updated.
+            System.out.println("editing and same index: " + newIndex);
+            // there's a test in TreeViewTest.test_rt31165 which does not
+            // fail (fx16+) when updating all unconditonally
         } else {
             updateItem(oldIndex);
             updateSelection();
             updateFocus();
+            updateEditing();
         }
-        updateEditing();
     }
 
     private boolean isFirstRun = true;
@@ -579,7 +582,13 @@ public class TreeCell<T> extends IndexedCell<T> {
         final TreeItem<T> editItem = tree == null ? null : tree.getEditingItem();
         final boolean editing = isEditing();
 
-        if (index == -1 || tree == null || treeItem == null) return;
+        if (index == -1 || tree == null || treeItem == null) {
+            if (editing) {
+                // JDK-8265210: must cancel edit if index changed to -1 by re-use
+//                doCancelEditing();
+            }
+            return;
+        }
 
         final boolean match = treeItem.equals(editItem);
 
@@ -588,16 +597,20 @@ public class TreeCell<T> extends IndexedCell<T> {
         if (match && !editing) {
             startEdit();
         } else if (! match && editing) {
-            // If my tree item is not the one being edited then I need to cancel
-            // the edit. The tricky thing here is that as part of this call
-            // I cannot end up calling tree.edit(null) the way that the standard
-            // cancelEdit method would do. Yet, I need to call cancelEdit
-            // so that subclasses which override cancelEdit can execute. So,
-            // I have to use a kind of hacky flag workaround.
-            updateEditingIndex = false;
-            cancelEdit();
-            updateEditingIndex = true;
+            doCancelEditing();
         }
+    }
+
+    private void doCancelEditing() {
+        // If my tree item is not the one being edited then I need to cancel
+        // the edit. The tricky thing here is that as part of this call
+        // I cannot end up calling tree.edit(null) the way that the standard
+        // cancelEdit method would do. Yet, I need to call cancelEdit
+        // so that subclasses which override cancelEdit can execute. So,
+        // I have to use a kind of hacky flag workaround.
+        updateEditingIndex = false;
+        cancelEdit();
+        updateEditingIndex = true;
     }
 
 

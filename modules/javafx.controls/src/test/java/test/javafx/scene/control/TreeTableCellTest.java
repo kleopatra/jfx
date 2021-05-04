@@ -257,13 +257,26 @@ public class TreeTableCellTest {
      ********************************************************************/
 
     // startEdit()
+     /**
+      * Test error? without column, cell updateItem(int) keeps the cell as empty
+      * which leads to cell.startEdit to not switch into editing state
+      * 
+      * Fully configuring the cell (note: edit must be started with editingColumn)
+      */
 //    @Ignore // TODO file bug!
     @Test public void editOnTreeTableViewResultsInEditingInCell() {
         tree.setEditable(true);
+        // table
+        TreeTableColumn<String, String> editingColumn = new TreeTableColumn<>("TEST");
+        tree.getColumns().add(editingColumn);
+        cell.updateTreeTableColumn(editingColumn);
         cell.updateTreeTableView(tree);
         cell.updateIndex(1);
-        tree.edit(1, null);
+        // was failing ..
+//        tree.edit(1, null);
+        tree.edit(1, editingColumn);
         assertTrue(cell.isEditing());
+        fail("FIXME - was ignored, now passing with experimental cell setup");
     }
 
     @Test public void editOnTreeTableViewResultsInNotEditingInCellWhenDifferentIndex() {
@@ -292,6 +305,10 @@ public class TreeTableCellTest {
 //    @Ignore("JDK-8187474") 
     @Test public void editCellWithTreeResultsInUpdatedEditingIndexProperty() {
         tree.setEditable(true);
+        TreeTableColumn<String, String> editingColumn = new TreeTableColumn<>("TEST");
+        editingColumn.setCellValueFactory(param -> null);
+        tree.getColumns().add(editingColumn);
+        cell.updateTreeTableColumn(editingColumn);
         cell.updateTreeTableView(tree);
         cell.updateIndex(1);
         cell.startEdit();
