@@ -125,6 +125,9 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
      * new edit position.
      * Here the incorrect index is fired before the start event.
      * 
+     * reported 2016 for ListView
+     * https://bugs.openjdk.java.net/browse/JDK-8165214
+     * 
      * Here: 
      * edit(1)
      * edit(0)
@@ -136,12 +139,16 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
     }
     
     /**
+     * 
+     * 
      * Test notification/cell/table state with multiple edits
      * 
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
      * 
+     * reported 2016 for ListView
+     * https://bugs.openjdk.java.net/browse/JDK-8165214
      * 
      * Here: 
      * edit(0)

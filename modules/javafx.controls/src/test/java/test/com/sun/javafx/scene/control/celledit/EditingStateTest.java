@@ -57,8 +57,7 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
  * Test editing state of cell (and control?) after transitions.
- * 
- * TBD: parameterize in supplier of test target to fully re-use for all cell types.
+ * TBD: Test notifications on editing transitions - either here or in a separate test?.
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @RunWith(Parameterized.class)
@@ -128,7 +127,7 @@ public class EditingStateTest {
     }
     
     @Test
-    public void testToggleEditOnControl() {
+    public void testCancelEditOnControl() {
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(editingIndex);
         editableControl.edit(editingIndex);
@@ -136,6 +135,23 @@ public class EditingStateTest {
         editableControl.edit(-1);
         assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
         assertFalse("cell must not be editing", cell.isEditing());
+    }
+    
+    @Test
+    public void testToggleEditOnControl() {
+        int editingIndex = 1;
+        int nextEditingIndex = 2;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        IndexedCell nextCell = createEditableCellAt(nextEditingIndex);
+        editableControl.edit(editingIndex);
+        assertEditingCellInvariant(editableControl, cell, editingIndex);
+        editableControl.edit(nextEditingIndex);
+        // first cell state: must be not editing
+        assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
+        assertFalse("cell must not be editing", cell.isEditing());
+        // next cell state: must be editing
+        assertEquals("sanity: cell index unchanged", nextEditingIndex, nextCell.getIndex());
+        assertTrue("cell must not be editing", nextCell.isEditing());
     }
 
     private void assertEditingCellInvariant(EditableControl eControl, IndexedCell cell, int editingIndex) {
