@@ -90,7 +90,7 @@ import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
 import test.com.sun.javafx.scene.control.test.Person;
 import test.com.sun.javafx.scene.control.test.RT_22463_Person;
 
-public class ListViewTest {
+public class AnnotatedListViewTest {
     private ListView<String> listView;
     private MultipleSelectionModel<String> sm;
     private FocusModel<String> fm;
@@ -706,11 +706,14 @@ public class ListViewTest {
         listView.setEditable(true);
         listView.setCellFactory(ComboBoxListCell.forListView(names));
 
+        StageLoader stageLoader = new StageLoader(listView);
         IndexedCell cell = VirtualFlowTestUtils.getCell(listView, 1);
+        System.out.println("cell? " + cell);
         assertEquals("1", cell.getText());
         assertFalse(cell.isEditing());
 
         listView.edit(1);
+        System.out.println("cell? " + cell);
 
         assertEquals(1, listView.getEditingIndex());
         assertTrue(cell.isEditing());
@@ -720,6 +723,7 @@ public class ListViewTest {
 
         assertEquals(1, listView.getEditingIndex());
         assertTrue(cell.isEditing());
+        System.out.println("cell? " + cell);
     }
 
     @Test public void test_rt31471() {

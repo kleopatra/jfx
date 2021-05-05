@@ -43,7 +43,7 @@ import static javafx.scene.control.ControlShim.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.*;
 import static org.junit.Assert.*;
 
-public class TreeCellTest {
+public class AnnotatedTreeCellTest {
     private TreeCell<String> cell;
     private TreeView<String> tree;
 
@@ -581,7 +581,7 @@ public class TreeCellTest {
         assertNull(tree.getEditingItem());
     }
 
-    @Ignore // TODO file bug!
+//    @Ignore("JDK-8187474") 
     @Test public void editCellWithTreeResultsInUpdatedEditingIndexProperty() {
         tree.setEditable(true);
         cell.updateTreeView(tree);
@@ -618,6 +618,9 @@ public class TreeCellTest {
         assertEquals("Watermelon", tree.getRoot().getChildren().get(0).getValue());
     }
 
+    /**
+     * FIXME: missing test of state of commit event
+     */
     @Test public void commitSendsEventToTree() {
         tree.setEditable(true);
         cell.updateTreeView(tree);
@@ -631,12 +634,24 @@ public class TreeCellTest {
         assertTrue(called[0]);
     }
 
+    /**
+     * FIXME: incomplete test - due to JDK-8187474 the startEdit has no effect on tree
+     * better start edit on control when testing cancel/commit
+     */
     @Test public void afterCommitTreeViewEditingIndexIsNegativeOne() {
         tree.setEditable(true);
         cell.updateTreeView(tree);
         cell.updateIndex(1);
-        cell.startEdit();
+        TreeItem<String> editingItem = tree.getTreeItem(1);
+        tree.edit(editingItem);
+        // cell.startEdit();
+        // FIXME: JDK-8187474 startEdit doesn't update tree editing item
+        assertNotNull("sanity", tree.getEditingItem());
+        assertTrue(cell.isEditing());
         cell.commitEdit("Watermelon");
+        // FIXME: 
+        // when starting edit on cell, 
+        // testing editingItem is a no-op - due to JDK-8187474 the editingItem was never !=null
         assertNull(tree.getEditingItem());
         assertFalse(cell.isEditing());
     }
@@ -665,7 +680,12 @@ public class TreeCellTest {
         tree.setEditable(true);
         cell.updateTreeView(tree);
         cell.updateIndex(1);
-        cell.startEdit();
+        TreeItem treeItem = tree.getTreeItem(1);
+        //cell.startEdit();
+        // FIXME: testing editingItem is a no-op - due to JDK-8187474 the editingItem was never !=null
+        // assertNotNull(tree.getEditingItem());
+        tree.edit(treeItem);
+        assertNotNull(tree.getEditingItem());
         cell.cancelEdit();
         assertNull(tree.getEditingItem());
         assertFalse(cell.isEditing());
