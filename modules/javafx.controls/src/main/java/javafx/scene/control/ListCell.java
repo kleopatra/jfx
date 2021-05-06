@@ -342,6 +342,7 @@ public class ListCell<T> extends IndexedCell<T> {
             updateFocus();
         }
         
+        updateEditing();
     }
 
     /** {@inheritDoc} */
@@ -545,23 +546,31 @@ public class ListCell<T> extends IndexedCell<T> {
         final boolean editing = isEditing();
 
         // Check that the list is specified, and my index is not -1
-        if (index != -1 && list != null) {
+        if (index == -1 || list == null) {
+            if(isEditing()) {
+                doCancelEdit();
+            }
+        } else {
             // If my index is the index being edited and I'm not currently in
             // the edit mode, then I need to enter the edit mode
             if (index == editIndex && !editing) {
                 startEdit();
             } else if (index != editIndex && editing) {
-                // If my index is not the one being edited then I need to cancel
-                // the edit. The tricky thing here is that as part of this call
-                // I cannot end up calling list.edit(-1) the way that the standard
-                // cancelEdit method would do. Yet, I need to call cancelEdit
-                // so that subclasses which override cancelEdit can execute. So,
-                // I have to use a kind of hacky flag workaround.
-                updateEditingIndex = false;
-                cancelEdit();
-                updateEditingIndex = true;
+                doCancelEdit();
             }
         }
+    }
+    
+    private void doCancelEdit() {
+        // If my index is not the one being edited then I need to cancel
+        // the edit. The tricky thing here is that as part of this call
+        // I cannot end up calling list.edit(-1) the way that the standard
+        // cancelEdit method would do. Yet, I need to call cancelEdit
+        // so that subclasses which override cancelEdit can execute. So,
+        // I have to use a kind of hacky flag workaround.
+        updateEditingIndex = false;
+        cancelEdit();
+        updateEditingIndex = true;
     }
 
 

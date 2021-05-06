@@ -68,6 +68,8 @@ public class EditingStateTest {
     private Supplier<EditableControl> controlSupplier;
     private String typeMessage;
 
+//----------------- test editEvents    
+    
 //----------------- test state transitions
     
     @Test

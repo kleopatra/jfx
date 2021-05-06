@@ -41,6 +41,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.ListView.EditEvent;
 
 /**
@@ -144,7 +145,29 @@ public class ListCellEditingTest {
         list.edit(editingIndex);
         assertTrue("sanity: cell must be editing", cell.isEditing());
     }
+
+    /**
+     * https://bugs.openjdk.java.net/browse/JDK-8165214
+     * index of cancel is incorrect
+     * 
+     * also related: 
+     * https://bugs.openjdk.java.net/browse/JDK-8187226
+     */
+    @Test
+    public void testCancelEditOnControl() {
+        cell.updateIndex(editingIndex);
+        list.edit(editingIndex);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        list.setOnEditCancel(e -> {
+            events.add(e);
+        });
+        list.edit(-1);
+        assertEquals(1, events.size());
+        EditEvent cancelEvent = events.get(0);
+        assertEquals(editingIndex, cancelEvent.getIndex());
+    }
     
+
     /**
      * Sanity: cell editing state unchanged when off editing index.
      */

@@ -437,8 +437,11 @@ public class TreeCell<T> extends IndexedCell<T> {
         if (tree != null) {
             // FIXME: trying to fix incorrect event state - is wrong:
             // this causes a NPE when cancel is triggered from tree.edit(null)
+            // guarding against null doesn't help:
+            // when reacting to changes of editingItem, the TreeItem of this
+            // is the correct value to send!
 //            TreeItem<T> editingItem = tree.getEditingItem();
-//            T value = editingItem.getValue();
+//            T value = editingItem != null ? editingItem.getValue() : null;
             // reset the editing index on the TreeView
             if (updateEditingIndex) tree.edit(null);
 
@@ -585,7 +588,7 @@ public class TreeCell<T> extends IndexedCell<T> {
         if (index == -1 || tree == null || treeItem == null) {
             if (editing) {
                 // JDK-8265210: must cancel edit if index changed to -1 by re-use
-//                doCancelEditing();
+                doCancelEditing();
             }
             return;
         }

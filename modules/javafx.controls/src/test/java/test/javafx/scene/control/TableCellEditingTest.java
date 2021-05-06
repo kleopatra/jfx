@@ -42,7 +42,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ListView.EditEvent;
 
 /**
  * Test TableCell editing state updated on re-use (aka after updateIndex(old, new)).
@@ -149,6 +151,33 @@ public class TableCellEditingTest {
         table.edit(editingIndex, editingColumn);
         assertTrue("sanity: cell must be editing", cell.isEditing());
     }
+
+    /**
+     * https://bugs.openjdk.java.net/browse/JDK-8165214
+     * index of cancel is incorrect
+     * 
+     * also related: 
+     * https://bugs.openjdk.java.net/browse/JDK-8187226
+     * 
+     * Tree/TableCell specific: https://bugs.openjdk.java.net/browse/JDK-8187229
+     * fires NPE on accessing the row
+     */
+    @Test
+    public void testCancelEditOnControl() {
+        cell.updateIndex(editingIndex);
+        table.edit(editingIndex, editingColumn);
+        TablePosition editingCell = table.getEditingCell();
+        List<CellEditEvent> events = new ArrayList<CellEditEvent>();
+        editingColumn.setOnEditCancel(e -> {
+            events.add(e);
+        });
+        table.edit(-1, null);
+        assertEquals(1, events.size());
+        CellEditEvent cancelEvent = events.get(0);
+        assertEquals("editingCell must be same", editingCell, cancelEvent.getTablePosition());
+        assertEquals(editingIndex, cancelEvent.getTablePosition().getRow());
+    }
+    
 
     /**
      * Sanity: cell editing state unchanged when off editing index.
