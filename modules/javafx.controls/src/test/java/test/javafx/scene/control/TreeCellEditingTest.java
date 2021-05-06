@@ -88,7 +88,6 @@ public class TreeCellEditingTest {
         assertEquals("sanity: tree editing unchanged", editingItem, tree.getEditingItem());
         assertEquals("sanity: editingIndex unchanged", editingIndex, tree.getRow(editingItem));
         assertEquals("cell must have fired edit cancel", 1, events.size());
-        assertEquals("treeView editingItem unchanged", editingItem, tree.getEditingItem());
         TreeItem<String> oldItem = events.get(0).getTreeItem();
         assertEquals("cancel on updateIndex from " + editingIndex + " to " + cellIndex + "\n  ", editingItem, oldItem);
     }
