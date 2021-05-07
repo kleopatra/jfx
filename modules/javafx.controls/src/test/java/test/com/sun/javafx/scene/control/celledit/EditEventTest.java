@@ -56,8 +56,13 @@ import javafx.scene.control.cell.TextFieldTreeCell;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
- * Test editing state of cell (and control?) after transitions.
- * TBD: Test notifications on editing transitions - either here or in a separate test?.
+ * Test editEvent state after transitions.
+ * 
+ * The general test setup:
+ * 
+ * - init editableCell and editing state on control
+ * - install report
+ * - test expected event state
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @RunWith(Parameterized.class)
@@ -70,15 +75,13 @@ public class EditEventTest {
 
 //----------------- test editEvents    
     
-//----------------- test state transitions
-    
     @Test
     public void testUpdateIndexOffEditing() {
         int cellIndex = -1;
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(editingIndex);
-        EditEventReport report = editableControl.createEditReport();
         editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         cell.updateIndex(cellIndex);
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
@@ -113,7 +116,6 @@ public class EditEventTest {
         editableControl.edit(editingIndex);
         EditEventReport report = editableControl.createEditReport();
         cell.cancelEdit();
-        // test editEvent
         assertEquals(1, report.getEditEventSize());
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
@@ -136,7 +138,6 @@ public class EditEventTest {
         assertEditingCellInvariant(editableControl, cell, editingIndex);
         EditEventReport report = editableControl.createEditReport();
         editableControl.edit(-1);
-        // test editEvent
         assertEquals(1, report.getEditEventSize());
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
