@@ -454,9 +454,15 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         
     }
     
-    protected abstract void assertLastCancelIndex(EditEventReport report, int index, Object column);
-    protected abstract void assertLastStartIndex(EditEventReport report, int index, Object column);
-    protected abstract void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value);
+    protected void assertLastCancelIndex(EditEventReport report, int index, Object column) {
+        report.assertLastCancelIndex(index, column);
+    }
+    protected void assertLastStartIndex(EditEventReport report, int index, Object column) {
+        report.assertLastStartIndex(index, column);
+    }
+    protected void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value) {
+        report.assertLastCommitIndex(index, target, value);
+    }
 
     /**
      * Test update of editing location on control

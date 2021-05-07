@@ -4,7 +4,10 @@
  */
 package test.com.sun.javafx.scene.control.celledit;
 
+import java.util.Optional;
+
 import static javafx.scene.control.TableColumn.*;
+import static org.junit.Assert.*;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
@@ -15,6 +18,37 @@ import javafx.scene.control.TablePosition;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TableViewEditReport extends EditEventReport<CellEditEvent> {
+
+    @Override
+    public void assertLastStartIndex(int index, Object first) {
+        Optional<CellEditEvent> e = getLastEditStart();
+        assertTrue(e.isPresent());
+        assertNotNull("position on event must not be null", e.get().getTablePosition());
+        assertEquals(getAllEditEventTexts("index on start event"), index, e.get().getTablePosition().getRow());
+        assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
+        
+    }
+    
+    @Override
+    public void assertLastCancelIndex(int index, Object first) {
+        Optional<CellEditEvent> e = getLastEditCancel();
+        assertTrue(e.isPresent());
+        assertNotNull("position on event must not be null", e.get().getTablePosition());
+        assertEquals(getAllEditEventTexts("index on cancel event"), index, e.get().getTablePosition().getRow());
+        assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
+        
+    }
+    
+    @Override
+    public void assertLastCommitIndex(int index, Object first, Object value) {
+        Optional<CellEditEvent> e = getLastEditCommit();
+        assertTrue(e.isPresent());
+        assertNotNull("position on event must not be null", e.get().getTablePosition());
+        assertEquals(getAllEditEventTexts("index on commit event"), index, e.get().getTablePosition().getRow());
+        assertEquals("column on commit event", first, e.get().getTablePosition().getTableColumn());
+        assertEquals("new value on commit event", value, e.get().getNewValue());
+    }
+
 
     /**
      * @param listView

@@ -114,39 +114,39 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
                 column.getCellObservableValue(index).getValue());
     }
     
-    @Override
-    protected void assertLastStartIndex(EditEventReport report, int index, Object first) {
-        Optional<CellEditEvent> e = report.getLastEditStart();
-        assertTrue(e.isPresent());
-//        LOG.info("what do we get?" + report.getEditText(e.get()));
-        assertNotNull("position on event must not be null", e.get().getTablePosition());
-        assertEquals("index on start event", index, e.get().getTablePosition().getRow());
-        assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
-        
-    }
-    
-    @Override
-    protected void assertLastCancelIndex(EditEventReport report, int index, Object first) {
-        Optional<CellEditEvent> e = report.getLastEditCancel();
-        assertTrue(e.isPresent());
-//        LOG.info("what do we get?" + report.getEditText(e.get()));
-        assertNotNull("position on event must not be null", e.get().getTablePosition());
-        assertEquals("index on cancel event", index, e.get().getTablePosition().getRow());
-        assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
-        
-    }
-    
-    @Override
-    protected void assertLastCommitIndex(EditEventReport report, int index, Object first, Object value) {
-        Optional<CellEditEvent> e = report.getLastEditCommit();
-        assertTrue(e.isPresent());
-//        LOG.info("what do we get?" + report.getEditText(e.get()));
-        assertNotNull("position on event must not be null", e.get().getTablePosition());
-        assertEquals("index on commit event", index, e.get().getTablePosition().getRow());
-        assertEquals("column on commit event", first, e.get().getTablePosition().getTableColumn());
-        assertEquals("new value on commit event", value, e.get().getNewValue());
-    }
-
+//    @Override
+//    protected void assertLastStartIndex(EditEventReport report, int index, Object first) {
+//        Optional<CellEditEvent> e = report.getLastEditStart();
+//        assertTrue(e.isPresent());
+////        LOG.info("what do we get?" + report.getEditText(e.get()));
+//        assertNotNull("position on event must not be null", e.get().getTablePosition());
+//        assertEquals("index on start event", index, e.get().getTablePosition().getRow());
+//        assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
+//        
+//    }
+//    
+//    @Override
+//    protected void assertLastCancelIndex(EditEventReport report, int index, Object first) {
+//        Optional<CellEditEvent> e = report.getLastEditCancel();
+//        assertTrue(e.isPresent());
+////        LOG.info("what do we get?" + report.getEditText(e.get()));
+//        assertNotNull("position on event must not be null", e.get().getTablePosition());
+//        assertEquals("index on cancel event", index, e.get().getTablePosition().getRow());
+//        assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
+//        
+//    }
+//    
+//    @Override
+//    protected void assertLastCommitIndex(EditEventReport report, int index, Object first, Object value) {
+//        Optional<CellEditEvent> e = report.getLastEditCommit();
+//        assertTrue(e.isPresent());
+////        LOG.info("what do we get?" + report.getEditText(e.get()));
+//        assertNotNull("position on event must not be null", e.get().getTablePosition());
+//        assertEquals("index on commit event", index, e.get().getTablePosition().getRow());
+//        assertEquals("column on commit event", first, e.get().getTablePosition().getTableColumn());
+//        assertEquals("new value on commit event", value, e.get().getNewValue());
+//    }
+//
     @Override
     protected IndexedCell getCellAt(
             EditableControl<TableView, TableCell> control, int editIndex) {

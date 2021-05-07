@@ -77,13 +77,10 @@ public class EditEventTest {
         int cellIndex = -1;
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         editableControl.edit(editingIndex);
-        assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
-        assertTrue("sanity: cell must be editing", cell.isEditing());
         cell.updateIndex(cellIndex);
-        assertEquals("sanity: cell index changed", cellIndex, cell.getIndex());
-        assertFalse("cell must not be editing", cell.isEditing());
-        assertEquals("control editing must be unchanged", editingIndex, editableControl.getEditingIndex());
+        report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
     
     @Test
@@ -92,8 +89,9 @@ public class EditEventTest {
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(cellIndex);
         editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         cell.updateIndex(editingIndex);
-        assertEditingCellInvariant(editableControl, cell, editingIndex);
+        report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
     }
     
     @Test
@@ -102,11 +100,10 @@ public class EditEventTest {
         String edited = "edited";
         IndexedCell cell = createEditableCellAt(editingIndex);
         editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         cell.commitEdit(edited);
-        assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
-        assertFalse("sanity: cell must not be editing", cell.isEditing());
-        assertEquals("control editingIndex must be reset", -1, editableControl.getEditingIndex());
-        assertEquals("edited value must be committed", edited, editableControl.getValueAt(editingIndex));
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastCommitIndex(editingIndex, editableControl.getTargetColumn(), edited);
     }
     
     @Test
@@ -114,18 +111,21 @@ public class EditEventTest {
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(editingIndex);
         editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         cell.cancelEdit();
-        assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
-        assertFalse("sanity: cell must not be editing", cell.isEditing());
-        assertEquals("control editingIndex must be reset", -1, editableControl.getEditingIndex());
+        // test editEvent
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
     
     @Test
     public void testStartEditOnCell() {
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         cell.startEdit();
-        assertEditingCellInvariant(editableControl, cell, editingIndex);
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
     }
     
     @Test
@@ -143,20 +143,17 @@ public class EditEventTest {
     
     @Test
     public void testToggleEditOnControl() {
-        fail("TBD");
         int editingIndex = 1;
         int nextEditingIndex = 2;
         IndexedCell cell = createEditableCellAt(editingIndex);
         IndexedCell nextCell = createEditableCellAt(nextEditingIndex);
         editableControl.edit(editingIndex);
         assertEditingCellInvariant(editableControl, cell, editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         editableControl.edit(nextEditingIndex);
-        // first cell state: must be not editing
-        assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
-        assertFalse("cell must not be editing", cell.isEditing());
-        // next cell state: must be editing
-        assertEquals("sanity: cell index unchanged", nextEditingIndex, nextCell.getIndex());
-        assertTrue("cell must not be editing", nextCell.isEditing());
+        report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
+        report.assertLastStartIndex(nextEditingIndex, editableControl.getTargetColumn());
+        assertEquals(report.getAllEditEventTexts(typeMessage), 2, report.getEditEventSize());
     }
 
     private void assertEditingCellInvariant(EditableControl eControl, IndexedCell cell, int editingIndex) {
@@ -224,9 +221,9 @@ public class EditEventTest {
     public static EditableControl<TreeView, TreeCell> createEditableTreeView() {
         TreeItem rootItem = new TreeItem<>("root");
         rootItem.getChildren().addAll(
+                new TreeItem<>("zero"),
                 new TreeItem<>("one"),
-                new TreeItem<>("two"),
-                new TreeItem<>("three")
+                new TreeItem<>("two")
                 
                 );
         EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);

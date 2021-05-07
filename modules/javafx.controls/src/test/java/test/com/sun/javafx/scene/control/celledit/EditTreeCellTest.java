@@ -4,8 +4,6 @@
  */
 package test.com.sun.javafx.scene.control.celledit;
 
-import java.util.Optional;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -14,7 +12,6 @@ import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
@@ -63,39 +60,6 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
         assertEquals("value must be committed", editedValue, item.getValue());
     }
 
-    @Override
-    protected void assertLastCancelIndex(EditEventReport report, int index,
-            Object column) {
-        Optional<EditEvent> e = report.getLastEditCancel();
-        assertTrue(e.isPresent());
-        TreeItem item = e.get().getSource().getTreeItem(index);
-        assertEquals(item, e.get().getTreeItem());
-    }
-
-    @Override
-    protected void assertLastStartIndex(EditEventReport report, int index,
-            Object column) {
-        Optional<EditEvent> e = report.getLastEditStart();
-        assertTrue(e.isPresent());
-        TreeItem item = e.get().getSource().getTreeItem(index);
-        assertEquals(item, e.get().getTreeItem());
-    }
-
-    @Override
-    protected void assertLastCommitIndex(EditEventReport report, int index,
-            Object target, Object value) {
-        Optional<EditEvent> e = report.getLastEditCommit();
-        assertTrue(e.isPresent());
-        TreeItem item = e.get().getSource().getTreeItem(index);
-        assertEquals(item, e.get().getTreeItem());
-        
-    }
-
-//    @Override
-//    protected EditEventReport createEditReport(EditableControl control) {
-//        return new TreeViewEditReport(control);
-//    }
-//
     @Override
     protected EditableControl<TreeView, TreeCell> createEditableControl() {
         TreeItem rootItem = new TreeItem<>("root");

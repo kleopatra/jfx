@@ -450,6 +450,11 @@ public class TreeCell<T> extends IndexedCell<T> {
             
             TreeItem<T> editingItem = tree.getTreeItem(editingIndexAtStartEdit);
             T value = editingItem != null ? editingItem.getValue() : null;
+            
+            // use current cell state
+//            TreeItem<T> editingItem = getTreeItem();
+//            T value = getItem();
+            
             // reset the editing index on the TreeView
             if (updateEditingIndex) tree.edit(null);
 
