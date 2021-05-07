@@ -97,6 +97,8 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
     default Object getTargetColumn() {
         return null;
     }
+    
+    AbstractEditReport createEditReport();
 
     class EListView extends ListView implements EditableControl<ListView, ListCell> {
 
@@ -155,10 +157,12 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         public Object getValueAt(int index) {
             return getItems().get(index);
         }
-        
-        
-        
 
+        @Override
+        public AbstractEditReport createEditReport() {
+            return new ListViewEditReport(this);
+        }
+        
     }
 
     /**
@@ -285,6 +289,11 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
             return cell;
         }
 
+        @Override
+        public AbstractEditReport createEditReport() {
+            return new TableViewEditReport(this);
+        }
+
 
     }
 
@@ -346,7 +355,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         @Override
         public Object getValueAt(int index) {
             TreeItem item = getTreeItem(index);
-            return item.getValue();
+            return item != null ? item.getValue() : null;
         }
 
         @Override
@@ -360,6 +369,11 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         public TreeCell createCell() {
             TreeCell cell = (TreeCell) getCellFactory().call(this);
             return cell;
+        }
+
+        @Override
+        public AbstractEditReport createEditReport() {
+            return new TreeViewEditReport(this);
         }
 
     }

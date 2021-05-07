@@ -6,6 +6,8 @@ package test.com.sun.javafx.scene.control.celledit;
 
 import java.util.Optional;
 
+import static org.junit.Assert.*;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -14,7 +16,7 @@ import javafx.event.EventType;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class AbstractEditReport<E extends Event> {
+public class AbstractEditReport<E extends Event> {
 
 
     private EditableControl source;
@@ -131,6 +133,19 @@ public abstract class AbstractEditReport<E extends Event> {
         return edits;
     }
     
-    public abstract String getEditEventText(E event); 
+    public String getEditEventText(E event) {
+        return event.toString();
+    }; 
+    
+    public void assertLastCancelIndex(int index, Object column) {
+        fail("not yet implemented");
+    }
+    public void assertLastStartIndex(int index, Object column) {
+        fail("not yet implemented");
+    }
+    public void assertLastCommitIndex(int index, Object target, Object value) {
+        fail("not yet implemented");
+    }
+
     
 }

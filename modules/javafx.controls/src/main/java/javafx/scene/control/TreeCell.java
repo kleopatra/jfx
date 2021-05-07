@@ -384,8 +384,11 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             tree.requestFocus();
         }
+        editingIndexAtStartEdit = getIndex();
     }
 
+    int editingIndexAtStartEdit = -1;
+    
      /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
         if (! isEditing()) return;
@@ -442,6 +445,11 @@ public class TreeCell<T> extends IndexedCell<T> {
             // is the correct value to send!
 //            TreeItem<T> editingItem = tree.getEditingItem();
 //            T value = editingItem != null ? editingItem.getValue() : null;
+            
+            // next try: use same index as at start
+            
+            TreeItem<T> editingItem = tree.getTreeItem(editingIndexAtStartEdit);
+            T value = editingItem != null ? editingItem.getValue() : null;
             // reset the editing index on the TreeView
             if (updateEditingIndex) tree.edit(null);
 
@@ -453,10 +461,10 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             tree.fireEvent(new TreeView.EditEvent<T>(tree,
                     TreeView.<T>editCancelEvent(),
-                    getTreeItem(),
-                    getItem(),
-//                    editingItem,
-//                    value,
+//                    getTreeItem(),
+//                    getItem(),
+                    editingItem,
+                    value,
                     null));
         }
     }
