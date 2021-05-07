@@ -91,11 +91,11 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
         
     }
 
-    @Override
-    protected EditEventReport createEditReport(EditableControl control) {
-        return new TreeViewEditReport(control);
-    }
-
+//    @Override
+//    protected EditEventReport createEditReport(EditableControl control) {
+//        return new TreeViewEditReport(control);
+//    }
+//
     @Override
     protected EditableControl<TreeView, TreeCell> createEditableControl() {
         TreeItem rootItem = new TreeItem<>("root");

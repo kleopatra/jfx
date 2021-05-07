@@ -439,7 +439,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
         control.edit(editIndex);
-        EditEventReport report = null; //createEditReport(control);
+        EditEventReport report = createEditReport(control);
         assertTrue("sanity: cell must be editing", cell.isEditing());
         cell.updateIndex(cellIndex);
         assertFalse("cell must not be editing after index change from editIndex: " + editIndex 
@@ -546,7 +546,9 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
 //------------ infrastructure methods
 
    
-    protected abstract EditEventReport createEditReport(EditableControl control);
+    protected EditEventReport createEditReport(EditableControl control) {
+        return control.createEditReport();
+    }
     protected abstract EditableControl<C, I> createEditableControl();
     
     protected abstract Callback<C, I> createTextFieldCellFactory();

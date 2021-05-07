@@ -61,7 +61,7 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @RunWith(Parameterized.class)
-public class EditingStateTest {
+public class EditEventTest {
 
     private EditableControl editableControl;
     private StageLoader stageLoader;
@@ -134,13 +134,16 @@ public class EditingStateTest {
         IndexedCell cell = createEditableCellAt(editingIndex);
         editableControl.edit(editingIndex);
         assertEditingCellInvariant(editableControl, cell, editingIndex);
+        EditEventReport report = editableControl.createEditReport();
         editableControl.edit(-1);
-        assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
-        assertFalse("cell must not be editing", cell.isEditing());
+        // test editEvent
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
     
     @Test
     public void testToggleEditOnControl() {
+        fail("TBD");
         int editingIndex = 1;
         int nextEditingIndex = 2;
         IndexedCell cell = createEditableCellAt(editingIndex);
@@ -181,13 +184,13 @@ public class EditingStateTest {
     @Parameters(name = "{index} - {1}")
     public static Collection selectionModes() {
         return Arrays.asList(new Object[][] { 
-            { (Supplier) EditingStateTest::createEditableListView, "ListView/-Cell"},
-            { (Supplier) EditingStateTest::createEditableTableView, "TableView/-Cell"},
-            { (Supplier) EditingStateTest::createEditableTreeView, "TreeView/-Cell"},
+            { (Supplier) EditEventTest::createEditableListView, "ListView/-Cell"},
+            { (Supplier) EditEventTest::createEditableTableView, "TableView/-Cell"},
+            { (Supplier) EditEventTest::createEditableTreeView, "TreeView/-Cell"},
         });
     }
 
-    public EditingStateTest(Supplier controlSupplier, String typeMessage) {
+    public EditEventTest(Supplier controlSupplier, String typeMessage) {
         this.controlSupplier = controlSupplier;
         this.typeMessage = typeMessage;
     }

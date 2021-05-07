@@ -4,6 +4,11 @@
  */
 package test.com.sun.javafx.scene.control.celledit;
 
+import java.util.Optional;
+
+import static org.junit.Assert.*;
+
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView.EditEvent;
 
 /**
@@ -11,6 +16,32 @@ import javafx.scene.control.TreeView.EditEvent;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TreeViewEditReport extends EditEventReport<EditEvent> {
+
+    
+    
+    @Override
+    public void assertLastCancelIndex(int index, Object column) {
+        Optional<EditEvent> e = getLastEditCancel();
+        assertTrue(e.isPresent());
+        TreeItem item = e.get().getSource().getTreeItem(index);
+        assertEquals(item, e.get().getTreeItem());
+    }
+
+    @Override
+    public void assertLastStartIndex(int index, Object column) {
+        Optional<EditEvent> e = getLastEditStart();
+        assertTrue(e.isPresent());
+        TreeItem item = e.get().getSource().getTreeItem(index);
+        assertEquals(item, e.get().getTreeItem());
+    }
+
+    @Override
+    public void assertLastCommitIndex(int index, Object target, Object value) {
+        Optional<EditEvent> e = getLastEditCommit();
+        assertTrue(e.isPresent());
+        TreeItem item = e.get().getSource().getTreeItem(index);
+        assertEquals(item, e.get().getTreeItem());
+    }
 
     /**
      * @param listView

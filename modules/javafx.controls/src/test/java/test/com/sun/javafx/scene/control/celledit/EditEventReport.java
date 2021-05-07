@@ -133,10 +133,18 @@ public class EditEventReport<E extends Event> {
         return edits;
     }
     
+    /**
+     * Returns a human readable description of the event.
+     * 
+     * @param event
+     * @return
+     */
     public String getEditEventText(E event) {
         return event.toString();
     }; 
     
+    // note: asserts must be implemented in subclasses because the events
+    // are cell-type specific (without common super)
     public void assertLastCancelIndex(int index, Object column) {
         fail("not yet implemented");
     }

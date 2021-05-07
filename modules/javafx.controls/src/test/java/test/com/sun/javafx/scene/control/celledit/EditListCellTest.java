@@ -103,9 +103,9 @@ public class EditListCellTest extends AbstractEditCellTestBase<ListView, ListCel
 //                (Callback<ListView, ListCell>)TextFieldListCell.forListView();
     }
 
-    @Override
-    protected EditEventReport createEditReport(EditableControl control) {
-        return new ListViewEditReport(control);
-    }
+//    @Override
+//    protected EditEventReport createEditReport(EditableControl control) {
+//        return new ListViewEditReport(control);
+//    }
 
 }
