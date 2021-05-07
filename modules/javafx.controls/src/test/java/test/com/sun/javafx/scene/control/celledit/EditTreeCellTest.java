@@ -38,7 +38,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
         tree.setOnEditCommit(e -> new String("dummy"));
         // start edit on control
         tree.edit(editIndex);
-        AbstractEditReport report = createEditReport(tree);
+        EditEventReport report = createEditReport(tree);
         String editedValue = "edited";
         // commit edit on cell
         cell.commitEdit(editedValue);
@@ -64,7 +64,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
     }
 
     @Override
-    protected void assertLastCancelIndex(AbstractEditReport report, int index,
+    protected void assertLastCancelIndex(EditEventReport report, int index,
             Object column) {
         Optional<EditEvent> e = report.getLastEditCancel();
         assertTrue(e.isPresent());
@@ -73,7 +73,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
     }
 
     @Override
-    protected void assertLastStartIndex(AbstractEditReport report, int index,
+    protected void assertLastStartIndex(EditEventReport report, int index,
             Object column) {
         Optional<EditEvent> e = report.getLastEditStart();
         assertTrue(e.isPresent());
@@ -82,7 +82,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
     }
 
     @Override
-    protected void assertLastCommitIndex(AbstractEditReport report, int index,
+    protected void assertLastCommitIndex(EditEventReport report, int index,
             Object target, Object value) {
         Optional<EditEvent> e = report.getLastEditCommit();
         assertTrue(e.isPresent());
@@ -92,7 +92,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
     }
 
     @Override
-    protected AbstractEditReport createEditReport(EditableControl control) {
+    protected EditEventReport createEditReport(EditableControl control) {
         return new TreeViewEditReport(control);
     }
 

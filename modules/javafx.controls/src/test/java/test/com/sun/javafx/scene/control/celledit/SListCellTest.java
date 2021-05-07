@@ -156,21 +156,21 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
     };
     
     @Override
-    protected void assertLastStartIndex(AbstractEditReport report, int index, Object target) {
+    protected void assertLastStartIndex(EditEventReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditStart();
         assertTrue(e.isPresent());
         assertEquals("index on start event", index, e.get().getIndex());
     }
     
     @Override
-    protected void assertLastCancelIndex(AbstractEditReport report, int index, Object target) {
+    protected void assertLastCancelIndex(EditEventReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditCancel();
         assertTrue(e.isPresent());
         assertEquals("index on cancel event", index, e.get().getIndex());
     }
     
     @Override
-    protected void assertLastCommitIndex(AbstractEditReport report, int index, Object target, Object value) {
+    protected void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value) {
         Optional<EditEvent> commit = report.getLastEditCommit();
         assertTrue(commit.isPresent());
         assertEquals("index on commit event", index, commit.get().getIndex());
@@ -207,7 +207,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
     }
 
     @Override
-    protected AbstractEditReport createEditReport(EditableControl control) {
+    protected EditEventReport createEditReport(EditableControl control) {
         return new ListViewEditReport(control);
     }
 

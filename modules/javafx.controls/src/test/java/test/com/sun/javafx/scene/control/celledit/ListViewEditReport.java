@@ -11,7 +11,7 @@ import javafx.scene.control.ListView.EditEvent;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ListViewEditReport extends AbstractEditReport<ListView.EditEvent> {
+public class ListViewEditReport extends EditEventReport<ListView.EditEvent> {
 
     /**
      * @param listView

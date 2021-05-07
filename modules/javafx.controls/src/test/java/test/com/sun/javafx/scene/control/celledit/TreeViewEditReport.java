@@ -10,7 +10,7 @@ import javafx.scene.control.TreeView.EditEvent;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class TreeViewEditReport extends AbstractEditReport<EditEvent> {
+public class TreeViewEditReport extends EditEventReport<EditEvent> {
 
     /**
      * @param listView

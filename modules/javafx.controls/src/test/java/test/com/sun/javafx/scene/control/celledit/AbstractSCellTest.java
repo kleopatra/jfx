@@ -81,7 +81,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         cell.startEdit();
         // start again -> nothing changed, no event
@@ -95,7 +95,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         EditableControl control = createEditableControl();
         new StageLoader(control.getControl());
         int editIndex = 1;
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         control.edit(editIndex);
         // working as expected because index unchanged -> no change fired
@@ -156,7 +156,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         control.edit(editIndex);
         assertTrue(editingCell.isEditing());
         assertEquals(editIndex, editingCell.getIndex());
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // switch editing to second
         control.edit(secondEditIndex);
 //        LOG.info("" + report.getAllEditEventTexts("edit(0) -> edit(1): "));
@@ -196,7 +196,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         IndexedCell cell = getCellAt(control, editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // commit value on cell
         String editedValue = "edited";
         cell.commitEdit(editedValue);
@@ -220,7 +220,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         Object value = cell.getItem();
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // cancel edit on cell
         cell.cancelEdit();
         // test control state
@@ -242,7 +242,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
         Object value = cell.getItem();
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // commit value on cell
         String editedValue = "edited";
         cell.commitEdit(editedValue);
@@ -273,7 +273,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         IndexedCell cell = getCellAt(control, editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // cancel edit on cell
         cell.cancelEdit();
         // test cell state
@@ -300,7 +300,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         IndexedCell cell = getCellAt(control, editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // cancel edit on control
         control.edit(-1);
         // test cell state
@@ -324,7 +324,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         cell.startEdit();
         // test cell state
@@ -344,7 +344,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         new StageLoader(control.getControl());
         int editIndex = 1;
         IndexedCell cell = getCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         control.edit(editIndex);
         // test cell state
@@ -355,9 +355,9 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertLastStartIndex(report, editIndex, control.getTargetColumn());
     }
     
-    protected abstract void assertLastCancelIndex(AbstractEditReport report, int index, Object column);
-    protected abstract void assertLastStartIndex(AbstractEditReport report, int index, Object column);
-    protected abstract void assertLastCommitIndex(AbstractEditReport report, int index, Object target, Object value);
+    protected abstract void assertLastCancelIndex(EditEventReport report, int index, Object column);
+    protected abstract void assertLastStartIndex(EditEventReport report, int index, Object column);
+    protected abstract void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value);
 
     /**
      * Test update of editing location on control
@@ -438,7 +438,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
 //------------ infrastructure methods
 
    
-    protected abstract AbstractEditReport createEditReport(EditableControl control);
+    protected abstract EditEventReport createEditReport(EditableControl control);
     protected abstract EditableControl<C, I> createEditableControl();
     
     protected abstract Callback<C, I> createTextFieldCellFactory();

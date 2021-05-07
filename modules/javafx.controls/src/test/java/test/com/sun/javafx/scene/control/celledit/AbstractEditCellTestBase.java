@@ -90,7 +90,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
     public void startOnCellTwiceMustFireSingleEvent() {
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         cell.startEdit();
         // start again -> nothing changed, no event
@@ -105,7 +105,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         // need a cell that will fire
         IndexedCell cell = createEditableCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         control.edit(editIndex);
         // working as expected because index unchanged -> no change fired
@@ -167,7 +167,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         control.edit(editIndex);
         assertTrue(editingCell.isEditing());
         assertEquals(editIndex, editingCell.getIndex());
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // switch editing to second
         control.edit(secondEditIndex);
 //        LOG.info("" + report.getAllEditEventTexts("edit(0) -> edit(1): "));
@@ -212,7 +212,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         IndexedCell cell = createEditableCellAt(control, editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // commit value on cell
         String editedValue = "edited";
         cell.commitEdit(editedValue);
@@ -237,7 +237,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         IndexedCell cell = VirtualFlowTestUtils.getCell(control.getControl(), editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // commit value on cell
         String editedValue = "edited";
         cell.commitEdit(editedValue);
@@ -259,7 +259,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
         Object value = cell.getItem();
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // cancel edit on cell
         cell.cancelEdit();
         // test control state
@@ -279,7 +279,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
         Object value = cell.getItem();
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // commit value on cell
         String editedValue = "edited";
         cell.commitEdit(editedValue);
@@ -308,7 +308,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         IndexedCell cell = createEditableCellAt(control, editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // cancel edit on cell
         cell.cancelEdit();
         // test cell state
@@ -336,7 +336,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         IndexedCell cell = createEditableCellAt(control, editIndex);
         // start edit on control
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // cancel edit on control
         control.edit(-1);
         // test cell state
@@ -358,7 +358,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
     public void startOnCellEvent() {
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on cell
         cell.startEdit();
         // test cell state
@@ -376,7 +376,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
     public void startOnControlEvent() {
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         // start edit on control
         control.edit(editIndex);
         // test cell state
@@ -393,7 +393,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, cellIndex);
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         assertFalse("sanity: ", cell.isEditing());
         cell.updateIndex(editIndex);
         assertTrue("cell must be editing on updateIndex from " + cellIndex 
@@ -408,7 +408,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, cellIndex);
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         assertFalse("sanity: ", cell.isEditing());
         cell.updateIndex(editIndex);
         assertTrue("cell must be editing on updateIndex from " + cellIndex 
@@ -423,7 +423,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
         control.edit(editIndex);
-        AbstractEditReport report = createEditReport(control);
+        EditEventReport report = createEditReport(control);
         assertTrue("sanity: cell must be editing", cell.isEditing());
         cell.updateIndex(cellIndex);
         assertFalse("cell must not be editing after index change from editIndex: " + editIndex 
@@ -439,7 +439,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         int editIndex = 1;
         IndexedCell cell = createEditableCellAt(control, editIndex);
         control.edit(editIndex);
-        AbstractEditReport report = null; //createEditReport(control);
+        EditEventReport report = null; //createEditReport(control);
         assertTrue("sanity: cell must be editing", cell.isEditing());
         cell.updateIndex(cellIndex);
         assertFalse("cell must not be editing after index change from editIndex: " + editIndex 
@@ -454,9 +454,9 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
         
     }
     
-    protected abstract void assertLastCancelIndex(AbstractEditReport report, int index, Object column);
-    protected abstract void assertLastStartIndex(AbstractEditReport report, int index, Object column);
-    protected abstract void assertLastCommitIndex(AbstractEditReport report, int index, Object target, Object value);
+    protected abstract void assertLastCancelIndex(EditEventReport report, int index, Object column);
+    protected abstract void assertLastStartIndex(EditEventReport report, int index, Object column);
+    protected abstract void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value);
 
     /**
      * Test update of editing location on control
@@ -546,7 +546,7 @@ public abstract class AbstractEditCellTestBase<C extends Control, I extends Inde
 //------------ infrastructure methods
 
    
-    protected abstract AbstractEditReport createEditReport(EditableControl control);
+    protected abstract EditEventReport createEditReport(EditableControl control);
     protected abstract EditableControl<C, I> createEditableControl();
     
     protected abstract Callback<C, I> createTextFieldCellFactory();

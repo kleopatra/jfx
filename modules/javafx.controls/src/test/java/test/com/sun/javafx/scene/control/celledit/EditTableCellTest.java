@@ -65,7 +65,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
         IndexedCell cell =  createEditableCellAt(table, editIndex);
         // start edit on control
         table.edit(editIndex, column);
-        AbstractEditReport report = createEditReport(table);
+        EditEventReport report = createEditReport(table);
         String editedValue = "edited";
         cell.commitEdit(editedValue);
         assertEquals("tableCell must fire a single event", 1, report.getEditEventSize());
@@ -84,7 +84,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
         IndexedCell cell =  createEditableCellAt(table, editIndex);
         // start edit on control
         table.edit(editIndex, column);;
-        AbstractEditReport report = createEditReport(table);
+        EditEventReport report = createEditReport(table);
         String editedValue = "edited";
         cell.commitEdit(editedValue);
         assertEquals("tableCell must fire a single event", 1, report.getEditEventSize());
@@ -115,7 +115,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
     }
     
     @Override
-    protected void assertLastStartIndex(AbstractEditReport report, int index, Object first) {
+    protected void assertLastStartIndex(EditEventReport report, int index, Object first) {
         Optional<CellEditEvent> e = report.getLastEditStart();
         assertTrue(e.isPresent());
 //        LOG.info("what do we get?" + report.getEditText(e.get()));
@@ -126,7 +126,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
     }
     
     @Override
-    protected void assertLastCancelIndex(AbstractEditReport report, int index, Object first) {
+    protected void assertLastCancelIndex(EditEventReport report, int index, Object first) {
         Optional<CellEditEvent> e = report.getLastEditCancel();
         assertTrue(e.isPresent());
 //        LOG.info("what do we get?" + report.getEditText(e.get()));
@@ -137,7 +137,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
     }
     
     @Override
-    protected void assertLastCommitIndex(AbstractEditReport report, int index, Object first, Object value) {
+    protected void assertLastCommitIndex(EditEventReport report, int index, Object first, Object value) {
         Optional<CellEditEvent> e = report.getLastEditCommit();
         assertTrue(e.isPresent());
 //        LOG.info("what do we get?" + report.getEditText(e.get()));
@@ -207,7 +207,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
     }
 
     @Override
-    protected AbstractEditReport createEditReport(EditableControl control) {
+    protected EditEventReport createEditReport(EditableControl control) {
         return new TableViewEditReport(control);
     }
 }

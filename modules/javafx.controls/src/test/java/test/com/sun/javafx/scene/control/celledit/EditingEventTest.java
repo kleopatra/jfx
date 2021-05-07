@@ -134,7 +134,7 @@ public class EditingEventTest {
         IndexedCell cell = createEditableCellAt(editingIndex);
         editableControl.edit(editingIndex);
         assertEditingCellInvariant(editableControl, cell, editingIndex);
-        AbstractEditReport report = editableControl.createEditReport();
+        EditEventReport report = editableControl.createEditReport();
         editableControl.edit(-1);
         // test editEvent
         assertEquals(1, report.getEditEventSize());

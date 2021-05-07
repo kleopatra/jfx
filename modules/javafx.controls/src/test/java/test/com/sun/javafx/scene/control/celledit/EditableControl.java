@@ -98,7 +98,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         return null;
     }
     
-    AbstractEditReport createEditReport();
+    EditEventReport createEditReport();
 
     class EListView extends ListView implements EditableControl<ListView, ListCell> {
 
@@ -159,7 +159,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         }
 
         @Override
-        public AbstractEditReport createEditReport() {
+        public EditEventReport createEditReport() {
             return new ListViewEditReport(this);
         }
         
@@ -290,7 +290,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         }
 
         @Override
-        public AbstractEditReport createEditReport() {
+        public EditEventReport createEditReport() {
             return new TableViewEditReport(this);
         }
 
@@ -372,7 +372,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         }
 
         @Override
-        public AbstractEditReport createEditReport() {
+        public EditEventReport createEditReport() {
             return new TreeViewEditReport(this);
         }
 

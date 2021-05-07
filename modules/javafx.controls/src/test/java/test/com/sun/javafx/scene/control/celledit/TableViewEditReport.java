@@ -14,7 +14,7 @@ import javafx.scene.control.TablePosition;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class TableViewEditReport extends AbstractEditReport<CellEditEvent> {
+public class TableViewEditReport extends EditEventReport<CellEditEvent> {
 
     /**
      * @param listView

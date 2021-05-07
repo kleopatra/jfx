@@ -16,14 +16,14 @@ import javafx.event.EventType;
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class AbstractEditReport<E extends Event> {
+public class EditEventReport<E extends Event> {
 
 
     private EditableControl source;
     
     protected ObservableList<E> editEvents = FXCollections.<E>observableArrayList();
     
-    public AbstractEditReport(EditableControl editableControl) {
+    public EditEventReport(EditableControl editableControl) {
         this.source = editableControl;
     }
     
