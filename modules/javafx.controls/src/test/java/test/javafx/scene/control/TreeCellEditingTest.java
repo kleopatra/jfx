@@ -202,6 +202,36 @@ public class TreeCellEditingTest {
         assertFalse("sanity: cell editing must be unchanged", cell.isEditing());
     }
     
+    @Test
+    public void testUpdateSameIndexWhileEdititing() {
+        cell.updateIndex(editingIndex);
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        tree.setOnEditCancel(events::add);
+        tree.setOnEditCommit(events::add);
+        tree.setOnEditStart(events::add);
+        cell.updateIndex(editingIndex);
+        assertEquals(editingItem, tree.getEditingItem());
+        assertTrue(cell.isEditing());
+        assertEquals(0, events.size());
+    }
+    
+    @Test
+    public void testUpdateSameIndexWhileNotEdititing() {
+        cell.updateIndex(cellIndex);
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        tree.setOnEditCancel(events::add);
+        tree.setOnEditCommit(events::add);
+        tree.setOnEditStart(events::add);
+        cell.updateIndex(cellIndex);
+        assertEquals(editingItem, tree.getEditingItem());
+        assertFalse(cell.isEditing());
+        assertEquals(0, events.size());
+    }
+   
     @Before public void setup() {
         cell = new TreeCell<String>();
         model = FXCollections.observableArrayList(new TreeItem<>("zero"), 

@@ -96,6 +96,34 @@ public class EditStateTest {
         assertEditingCellInvariant(editableControl, cell, editingIndex);
     }
     
+    /**
+     * Sanity: fix doesn't interfere with RT-31165
+     */
+    @Test
+    public void testUpdateSameIndexWhileNotEditing() {
+        int cellIndex = 2; 
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(cellIndex);
+        editableControl.edit(editingIndex);
+        cell.updateIndex(cellIndex);
+        assertEquals("sanity: cell index changed", cellIndex, cell.getIndex());
+        assertFalse("cell must not be editing", cell.isEditing());
+        assertEquals("control editing must be unchanged", editingIndex, editableControl.getEditingIndex());
+    }
+    
+    /**
+     * Sanity: fix doesn't interfere with RT-31165
+     */
+    @Test
+    public void testUpdateSameIndexWhileEditing() {
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        editableControl.edit(editingIndex);
+        cell.updateIndex(editingIndex);
+        assertEditingCellInvariant(editableControl, cell, editingIndex);
+    }
+    
+    
     @Test
     public void testCommitEditOnCell() {
         int editingIndex = 1;

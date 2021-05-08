@@ -98,6 +98,27 @@ public class EditEventTest {
     }
     
     @Test
+    public void testUpdateSameIndexWhileEditing() {
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
+        cell.updateIndex(editingIndex);
+        assertEquals(0, report.getEditEventSize());
+    }
+    
+    @Test
+    public void testUpdateSameIndexWhileNotEditing() {
+        int cellIndex = 2;
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(cellIndex);
+        editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
+        cell.updateIndex(cellIndex);
+        assertEquals(0, report.getEditEventSize());
+    }
+    
+    @Test
     public void testCommitEditOnCell() {
         int editingIndex = 1;
         String edited = "edited";

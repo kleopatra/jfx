@@ -503,11 +503,11 @@ public class TreeCell<T> extends IndexedCell<T> {
             // there's a test in TreeViewTest.test_rt31165 which does not
             // fail (fx16+) when updating all unconditonally
         } else {
-            updateItem(oldIndex);
-            updateSelection();
-            updateFocus();
-            updateEditing();
         }
+        updateItem(oldIndex);
+        updateSelection();
+        updateFocus();
+        updateEditing();
     }
 
     private boolean isFirstRun = true;

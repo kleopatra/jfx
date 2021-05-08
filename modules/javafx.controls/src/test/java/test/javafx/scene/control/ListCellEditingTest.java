@@ -191,6 +191,39 @@ public class ListCellEditingTest {
         list.edit(editingIndex);
         assertEquals("sanity: edit list must not fire editStart", 0, events.size());
     }
+    /**
+     * Sanity: fix doesn't interfere with RT-31165
+     */
+    @Test
+    public void testUpdateIndexSameWhileNotEditing() {
+        cell.updateIndex(cellIndex);
+        list.edit(editingIndex);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        list.setOnEditStart(events::add);
+        list.setOnEditCancel(events::add);
+        list.setOnEditCommit(events::add);
+        cell.updateIndex(cellIndex);
+        assertEquals(editingIndex, list.getEditingIndex());
+        assertFalse(cell.isEditing());
+        assertEquals(0, events.size());
+    }
+    
+    /**
+     * Sanity: fix doesn't interfere with RT-31165
+     */
+    @Test
+    public void testUpdateIndexSameWhileEditing() {
+        cell.updateIndex(editingIndex);
+        list.edit(editingIndex);
+        List<EditEvent> events = new ArrayList<EditEvent>();
+        list.setOnEditStart(events::add);
+        list.setOnEditCancel(events::add);
+        list.setOnEditCommit(events::add);
+        cell.updateIndex(editingIndex);
+        assertEquals(editingIndex, list.getEditingIndex());
+        assertTrue(cell.isEditing());
+        assertEquals(0, events.size());
+    }
     
     @Before public void setup() {
         cell = new ListCell<String>();
