@@ -337,12 +337,13 @@ public class ListCell<T> extends IndexedCell<T> {
             if (oldIndex == -1) 
                 throw new IllegalStateException("cell index must not be -1 while editing");
         } else {
+//            System.out.println("normal: ");
             updateItem(oldIndex);
             updateSelection();
             updateFocus();
+            updateEditing();
         }
         
-        updateEditing();
     }
 
     /** {@inheritDoc} */
