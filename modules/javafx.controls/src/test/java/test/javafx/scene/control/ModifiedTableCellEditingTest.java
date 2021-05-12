@@ -42,7 +42,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ListView.EditEvent;
 
 /**
  * Test TableCell editing state updated on re-use (aka after updateIndex(old, new)).
@@ -50,7 +52,7 @@ import javafx.scene.control.TableView;
  * This test is parameterized in cellIndex and editingIndex.
  */
 @RunWith(Parameterized.class)
-public class TableCellEditingTest {
+public class ModifiedTableCellEditingTest {
     private TableCell<String,String> cell;
     private TableView<String> table;
     private TableColumn<String, String> editingColumn;
@@ -85,8 +87,8 @@ public class TableCellEditingTest {
         assertEquals("cell must have fired edit cancel", 1, events.size());
         assertEquals("cancel event index must be same as editingIndex", editingIndex,
                 events.get(0).getTablePosition().getRow());
-        assertEquals("cancel event index must be same as editingIndex", 
-                editingIndex, table.getEditingCell().getRow());
+        // forgot in integrated version
+        assertEquals(editingIndex, table.getEditingCell().getRow());
     }
 
 //--------------- change to editing index
@@ -133,7 +135,7 @@ public class TableCellEditingTest {
         return Arrays.asList(data);
     }
 
-    public TableCellEditingTest(int cellIndex, int editingIndex) {
+    public ModifiedTableCellEditingTest(int cellIndex, int editingIndex) {
         this.cellIndex = cellIndex;
         this.editingIndex = editingIndex;
     }
@@ -149,6 +151,33 @@ public class TableCellEditingTest {
         table.edit(editingIndex, editingColumn);
         assertTrue("sanity: cell must be editing", cell.isEditing());
     }
+
+    /**
+     * https://bugs.openjdk.java.net/browse/JDK-8165214
+     * index of cancel is incorrect
+     * 
+     * also related: 
+     * https://bugs.openjdk.java.net/browse/JDK-8187226
+     * 
+     * Tree/TableCell specific: https://bugs.openjdk.java.net/browse/JDK-8187229
+     * fires NPE on accessing the row
+     */
+    @Test
+    public void testCancelEditOnControl() {
+        cell.updateIndex(editingIndex);
+        table.edit(editingIndex, editingColumn);
+        TablePosition editingCell = table.getEditingCell();
+        List<CellEditEvent> events = new ArrayList<CellEditEvent>();
+        editingColumn.setOnEditCancel(e -> {
+            events.add(e);
+        });
+        table.edit(-1, null);
+        assertEquals(1, events.size());
+        CellEditEvent cancelEvent = events.get(0);
+        assertEquals("editingCell must be same", editingCell, cancelEvent.getTablePosition());
+        assertEquals(editingIndex, cancelEvent.getTablePosition().getRow());
+    }
+    
 
     /**
      * Sanity: cell editing state unchanged when off editing index.
@@ -180,5 +209,60 @@ public class TableCellEditingTest {
         assertFalse("sanity: cellIndex not same as editingIndex", cellIndex == editingIndex);
         assertTrue("sanity: valid editingIndex", editingIndex < model.size());
     }
+
+//-------------- KEEP for now, even though they don't belong here   
+    
+    /**
+     * some properties (like focused) are updated to true only if tablecell is configured with a 
+     * row. Doing so interferes with testing of editing state, though (because a cell's listener
+     * to focusProperty cancels the edit), so don't include here. For other cell types, make
+     * sure the focused is -1 in all tests.
+     */
+//    private void setupWithTableRow() {
+//        // need a row for relevant tests
+//        tableRow = new TableRow<>();
+//        tableRow.updateTableView(table);
+//        cell.updateTableRow(tableRow);
+////         revert default focus - otherwise we get test failures on changing cell index
+////         keep focus at -1 to remove interference 
+//        table.getSelectionModel().setCellSelectionEnabled(true);
+//        table.getFocusModel().focus(-1);
+//    }
+    /**
+     * Sanity: test setup - we need the tableCell updated with a tableRow for
+     * complete setup _AND_ update both cell and row indices manually.
+     */
+//    @Test
+//    public void testRowIndex() {
+//        tableRow.updateIndex(cellIndex);
+//        cell.updateIndex(cellIndex);
+//        assertEquals(cellIndex, tableRow.getIndex());
+//        assertEquals(cellIndex, cell.getIndex());
+//    }
+    /**
+     * Sanity: complete cleanup on updateIndex to -1
+     * belongs into basic tableCell test - only makes sense when
+     * cell has its tableRow configure. BUT: if so, the focused
+     * property interferes with the editing tests (by calling cancel
+     * from listener to focused property)
+     */
+//    @Test
+//    public void testIndexNegativeInvariants() {
+//        table.getSelectionModel().select(editingIndex, editingColumn);
+//        tableRow.updateIndex(editingIndex);
+//        cell.updateIndex(editingIndex);
+//        // fails if cell not contained in row
+//        assertTrue(cell.isSelected());
+//        assertTrue(cell.isFocused());
+//        assertFalse(cell.isEditing());
+//        tableRow.updateIndex(-1);
+//        cell.updateIndex(-1);
+//        // nothing updated if empty?
+//        assertFalse(cell.isSelected());
+//        assertFalse(cell.isFocused());
+//        assertFalse(cell.isEditing());
+//        
+//    }
+    
 
 }

@@ -43,7 +43,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
-import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableView;
 
 /**
@@ -88,8 +87,8 @@ public class TreeTableCellEditingTest {
         assertEquals("cell must have fired edit cancel", 1, events.size());
         assertEquals("cancel event index must be same as editingIndex", editingIndex,
                 events.get(0).getTreeTablePosition().getRow());
-        // forgot in integrated version
-        assertEquals(editingIndex, table.getEditingCell().getRow());
+        assertEquals("cancel event index must be same as editingIndex", 
+                editingIndex, table.getEditingCell().getRow());
     }
 
 //--------------- change to editing index
@@ -152,33 +151,6 @@ public class TreeTableCellEditingTest {
         table.edit(editingIndex, editingColumn);
         assertTrue("sanity: cell must be editing", cell.isEditing());
     }
-
-    /**
-     * https://bugs.openjdk.java.net/browse/JDK-8165214
-     * index of cancel is incorrect
-     * 
-     * also related: 
-     * https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
-     * Tree/TableCell specific: https://bugs.openjdk.java.net/browse/JDK-8187229
-     * fires NPE on accessing the row
-     */
-    @Test
-    public void testCancelEditOnControl() {
-        cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
-        TreeTablePosition editingCell = table.getEditingCell();
-        List<CellEditEvent> events = new ArrayList<CellEditEvent>();
-        editingColumn.setOnEditCancel(e -> {
-            events.add(e);
-        });
-        table.edit(-1, null);
-        assertEquals(1, events.size());
-        CellEditEvent cancelEvent = events.get(0);
-        assertEquals("editingCell must be same", editingCell, cancelEvent.getTreeTablePosition());
-        assertEquals(editingIndex, cancelEvent.getTreeTablePosition().getRow());
-    }
-    
 
     /**
      * Sanity: cell editing state unchanged when off editing index.
