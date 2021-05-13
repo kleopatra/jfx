@@ -16,20 +16,20 @@ import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 /**
  * Listener for editEvents on first column.
- * 
+ *
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class OldTableViewEditReport {
 
     TableView source;
-    
+
     ObservableList<CellEditEvent> editEvents = FXCollections.observableArrayList();
-    
+
     /**
      * Instantiates and add an eventHandler for edit events on the first column
      * of the given table.
-     * 
+     *
      * @param table
      * @throws NullPointerException if table is null or has no columns
      */
@@ -38,7 +38,7 @@ public class OldTableViewEditReport {
         TableColumn column = (TableColumn) table.getColumns().get(0);
         column.addEventHandler(editAnyEvent(), e -> addEvent((CellEditEvent) e));
     }
-    
+
     /**
      * Returns the list of editEvents as unmodifiable list.
      * @return
@@ -47,22 +47,22 @@ public class OldTableViewEditReport {
         return FXCollections.unmodifiableObservableList(editEvents);
     }
     /**
-     * Clears list of received events. 
+     * Clears list of received events.
      */
     public void clear() {
         editEvents.clear();
     }
-    
+
     public int getEditEventSize() {
         return editEvents.size();
     }
-    
+
     public Optional<CellEditEvent> getLastEditStart() {
         return editEvents.stream()
                 .filter(e -> e.getEventType().equals(editStartEvent()))
                 .findFirst();
     }
-    
+
     public Optional<CellEditEvent> getLastEditCancel() {
         return editEvents.stream()
                 .filter(e -> e.getEventType().equals(editCancelEvent()))
@@ -73,7 +73,7 @@ public class OldTableViewEditReport {
                 .filter(e -> e.getEventType().equals(editCommitEvent()))
                 .findFirst();
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editStart,
      * false otherwise.
@@ -82,7 +82,7 @@ public class OldTableViewEditReport {
     public boolean isLastEditStart() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(editStartEvent()) : false;
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editCommit,
      * false otherwise.
@@ -91,7 +91,7 @@ public class OldTableViewEditReport {
     public boolean isLastEditCommit() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(editCommitEvent()) : false;
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editCancel,
      * false otherwise.
@@ -100,24 +100,24 @@ public class OldTableViewEditReport {
     public boolean isLastEditCancel() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(editCancelEvent()) : false;
     }
-    
+
     public CellEditEvent getLastAnyEvent() {
         return hasEditEvents() ? editEvents.get(0) : null;
     }
-    
+
     public boolean hasEditEvents() {
         return !editEvents.isEmpty();
     }
-    
-    
+
+
     protected void addEvent(CellEditEvent event) {
         editEvents.add(0, event);
     }
-    
+
     /**
-     * Returns the enhanced edit text of all events received, most 
+     * Returns the enhanced edit text of all events received, most
      * recent first.
-     * 
+     *
      * @param message
      * @return
      */
@@ -129,7 +129,7 @@ public class OldTableViewEditReport {
         }
         return edits;
     }
-    
+
     public static String getEditEventText(CellEditEvent event) {
         // table, tablePosition (aka: row/column), eventType, newValue
         TablePosition pos = event.getTablePosition();
@@ -137,8 +137,8 @@ public class OldTableViewEditReport {
         int row = pos != null ? pos.getRow() : -1;
         Object oldValue = pos != null ? event.getOldValue() : null;
         Object rowValue = pos != null ? event.getRowValue() : null;
-        return "[tableViewEditEvent [ type: " + event.getEventType() + " pos: " + pos + " rowValue: " + rowValue + " oldValue: " 
+        return "[tableViewEditEvent [ type: " + event.getEventType() + " pos: " + pos + " rowValue: " + rowValue + " oldValue: "
                 + oldValue + " newValue: " + event.getNewValue();
-        
+
     }
 }

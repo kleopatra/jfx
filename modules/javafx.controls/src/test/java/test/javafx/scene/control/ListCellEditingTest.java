@@ -46,33 +46,33 @@ import javafx.scene.control.ListView.EditEvent;
 
 /**
  * Test listCell editing state updated on re-use (aka: updateIndex(old, new)).
- * 
+ *
  * This test is parameterized in cellIndex and editingIndex.
- * 
+ *
  */
 @RunWith(Parameterized.class)
 public class ListCellEditingTest {
     private ListCell<String> cell;
     private ListView<String> list;
     private ObservableList<String> model;
-    
+
     private int cellIndex;
     private int editingIndex;
-    
+
 //--------------- change off editing index
-    
+
     @Test
     public void testOffEditingIndex() {
-        
+
         cell.updateIndex(editingIndex);
         list.edit(editingIndex);
         cell.updateIndex(cellIndex);
         assertEquals("sanity: cell index changed", cellIndex, cell.getIndex());
         assertEquals("sanity: list editing Index must be unchanged", editingIndex, list.getEditingIndex());
-        assertFalse("cell must not be editing on update from editingIndex" + editingIndex 
+        assertFalse("cell must not be editing on update from editingIndex" + editingIndex
                 + " to cellIndex " + cellIndex, cell.isEditing());
     }
-    
+
     @Test
     public void testCancelOffEditingIndex() {
         cell.updateIndex(editingIndex);
@@ -85,7 +85,7 @@ public class ListCellEditingTest {
         assertEquals("cell must have fired edit cancel", 1, events.size());
         assertEquals("cancel event index must be same as editingIndex", editingIndex, events.get(0).getIndex());
     }
-    
+
 //--------------- change to editing index
 
 
@@ -96,10 +96,10 @@ public class ListCellEditingTest {
         cell.updateIndex(editingIndex);
         assertEquals("sanity: cell at editing index", editingIndex, cell.getIndex());
         assertEquals("sanity: list editing Index must be unchanged", editingIndex, list.getEditingIndex());
-        assertTrue("cell must be editing on update from " + cellIndex 
+        assertTrue("cell must be editing on update from " + cellIndex
                 + " to editingIndex " + editingIndex, cell.isEditing());
     }
-    
+
     @Test
     public void testStartEvent() {
         cell.updateIndex(cellIndex);
@@ -109,13 +109,13 @@ public class ListCellEditingTest {
             events.add(e);
         });
         cell.updateIndex(editingIndex);
-        assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex, 
+        assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex,
                 1, events.size());
         assertEquals("start event index must be same as editingIndex", editingIndex, events.get(0).getIndex());
     }
-    
+
 //------------- parameterized
- 
+
     // Note: name property not supported before junit 4.11
     @Parameterized.Parameters // (name = "{index}: cellIndex {0}, editingIndex {1}")
     public static Collection<Object[]> data() {
@@ -135,7 +135,7 @@ public class ListCellEditingTest {
         this.editingIndex = editingIndex;
     }
 //-------------- setup and helpers
-    
+
     /**
      * Sanity: cell editing state updated when on editing index.
      */
@@ -149,8 +149,8 @@ public class ListCellEditingTest {
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8165214
      * index of cancel is incorrect
-     * 
-     * also related: 
+     *
+     * also related:
      * https://bugs.openjdk.java.net/browse/JDK-8187226
      */
     @Test
@@ -166,7 +166,7 @@ public class ListCellEditingTest {
         EditEvent cancelEvent = events.get(0);
         assertEquals(editingIndex, cancelEvent.getIndex());
     }
-    
+
 
     /**
      * Sanity: cell editing state unchanged when off editing index.
@@ -177,7 +177,7 @@ public class ListCellEditingTest {
         list.edit(editingIndex);
         assertFalse("sanity: cell editing must be unchanged", cell.isEditing());
     }
-    
+
     /**
      * Sanity: edit on list does not fire start.
      */
@@ -207,7 +207,7 @@ public class ListCellEditingTest {
         assertFalse(cell.isEditing());
         assertEquals(0, events.size());
     }
-    
+
     /**
      * Sanity: fix doesn't interfere with RT-31165
      */
@@ -224,7 +224,7 @@ public class ListCellEditingTest {
         assertTrue(cell.isEditing());
         assertEquals(0, events.size());
     }
-    
+
     @Before public void setup() {
         cell = new ListCell<String>();
         model = FXCollections.observableArrayList("Apples", "Oranges", "Pears");
@@ -245,7 +245,7 @@ public class ListCellEditingTest {
         assertFalse("sanity: cellIndex not same as editingIndex", cellIndex == editingIndex);
         assertTrue("sanity: valid editingIndex", editingIndex < model.size());
 //        System.out.println("changed?");
-        
+
     }
 
 }

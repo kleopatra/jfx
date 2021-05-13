@@ -17,8 +17,8 @@ import javafx.scene.control.TreeView.EditEvent;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TreeViewEditReport extends EditEventReport<EditEvent> {
 
-    
-    
+
+
     @Override
     public void assertLastCancelIndex(int index, Object column) {
         Optional<EditEvent> e = getLastEditCancel();
@@ -54,7 +54,7 @@ public class TreeViewEditReport extends EditEventReport<EditEvent> {
 
     @Override
     public String getEditEventText(EditEvent event) {
-        return "[TreeViewEditEvent [type: " + event.getEventType() + " treeItem " 
+        return "[TreeViewEditEvent [type: " + event.getEventType() + " treeItem "
                 + event.getTreeItem() + " newValue " + event.getNewValue() + "]";
     }
 

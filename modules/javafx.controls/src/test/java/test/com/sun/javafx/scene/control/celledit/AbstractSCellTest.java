@@ -19,13 +19,13 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 /**
  * Note: this is outdated, kept for now just to see nothing was missed on refactored
  * ----
- * Base tests that are same/similar to all cell types. Initially copied all from 
+ * Base tests that are same/similar to all cell types. Initially copied all from
  * CellTest, then deleted all tests that are not listCell
- * 
+ *
  * Note: S in the name denotes testing in scenegraph (with StageLoader)
  * Note: implementing subs are setting editable control's cellFactory to TextFieldXXCell
- * 
- * 
+ *
+ *
  * @author Jeanette Winzenburg, Berlin
  */
 @RunWith(JUnit4.class)
@@ -43,7 +43,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
     /**
      * Cell.startEdit doesn't switch into editing if empty. That's
      * the case for a cell without view.
-     * 
+     *
      * But: core bug - NPE on all TextFieldXXCell (not with base XXCell!)
      * But: cell must be attached to a control to switch t oediting!
      */
@@ -53,7 +53,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         cell.startEdit();
         assertFalse("cell without control must not be editing", cell.isEditing());
     }
-    
+
     /**
      * Test cancel with null control
      */
@@ -62,7 +62,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         I cell = createTextFieldCellFactory().call(null);
         cell.cancelEdit();
     }
-    
+
     /**
      * Test cancel with null control
      */
@@ -71,9 +71,9 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         I cell = createTextFieldCellFactory().call(null);
         cell.commitEdit("dummy");
     }
-    
+
     /**
-     * 
+     *
      */
     @Test
     public void testEditStartOnCellTwice() {
@@ -89,7 +89,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         // test editEvent
         assertEquals("second start on same must not fire event", 1, report.getEditEventSize());
     }
-    
+
     @Test
     public void testEditStartOnControlTwice() {
         EditableControl control = createEditableControl();
@@ -103,41 +103,41 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         // test editEvent
         assertEquals("second start on same must not fire event", 1, report.getEditEventSize());
     }
-    
 
-//---------------- test editEvents and cell/control state   
-    
+
+//---------------- test editEvents and cell/control state
+
     @Test
     public void testNoCommitNotEditing() {
         fail("tbd: not implemented - what should go in here");
     }
-    
+
     /**
      * Test notification/cell/list state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * Here: 
+     *
+     * Here:
      * edit(1)
      * edit(0)
-     * 
+     *
      */
     @Test
     public void testEditChangeEditIndexOnControlReversed() {
         assertChangeEdit(1,  0);
     }
-    
+
     /**
      * Test notification/cell/table state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * 
-     * Here: 
+     *
+     *
+     * Here:
      * edit(0)
      * edit(1)
      */
@@ -145,7 +145,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
     public void testEditChangeEditIndexOnControl() {
         assertChangeEdit(0, 1);
     }
-    
+
     protected void assertChangeEdit(int editIndex, int secondEditIndex) {
         EditableControl control = createEditableControl();
         new StageLoader(control.getControl());
@@ -168,24 +168,24 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         // test editEvent
         assertLastStartIndex(report, secondEditIndex, control.getTargetColumn());
         assertLastCancelIndex(report, editIndex, control.getTargetColumn());
-        
+
     }
-    
-    
+
+
     /**
      * start edit on list
      * -> commit edit on cell with newValue (same with identical value)
-     * 
-     * Here we see 
-     * ListView: receives both editCommit (expected) and 
+     *
+     * Here we see
+     * ListView: receives both editCommit (expected) and
      * editCancel (unexpected) when edit committed
-     * 
+     *
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8187307
      *
      * This fails for ListView in scenegraph, passes with raw cell .. test error?
      * maybe because there is no other cell that could fire?
-     * 
+     *
      * Note: can't commit on control, missing api
      */
     @Test
@@ -209,9 +209,9 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertEquals(editIndex, cell.getIndex());
         assertLastCommitIndex(report, editIndex, control.getTargetColumn(), editedValue);
     }
-    
+
     /**
-     * Test that nothing changed by a cancel if not editing. 
+     * Test that nothing changed by a cancel if not editing.
      */
     @Test
     public void testEditCancelNotEditing() {
@@ -231,9 +231,9 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertEquals(editIndex, cell.getIndex());
         assertEquals(0, report.getEditEventSize());
     }
-    
+
     /**
-     * Test that nothing changed by a commit if not editing. 
+     * Test that nothing changed by a commit if not editing.
      */
     @Test
     public void testEditCommitNotEditing() {
@@ -254,16 +254,16 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertEquals(editIndex, cell.getIndex());
         assertEquals(0, report.getEditEventSize());
     }
-    
+
     protected abstract void assertValueAt(int index, Object editedValue, EditableControl<C, I> control);
-    
+
     /**
      * Here: cancel the edit with cell.cancelEdit ->
      * the cancel index is correct
      * ListView: EditEvent on cancel has incorrect index
-     * 
+     *
      * reported: https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      */
     @Test
     public void testEditCancelOnCell() {
@@ -284,13 +284,13 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertEquals(1, report.getEditEventSize());
         assertLastCancelIndex(report, editIndex, control.getTargetColumn());
     }
-    
+
     /**
      * Here: cancel the edit with list.edit(-1)
      * ListView: EditEvent on cancel has incorrect index
-     * 
+     *
      * reported: https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      */
     @Test
     public void testEditCancelOnControl() {
@@ -310,13 +310,13 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertEquals(1, report.getEditEventSize());
         assertLastCancelIndex(report, editIndex, control.getTargetColumn());
     }
-    
+
     /**
      * Incorrect index in editStart event when edit started on cell
-     * 
+     *
      * reported as
      * https://bugs.openjdk.java.net/browse/JDK-8187432
-     * 
+     *
      */
     @Test
     public void testEditStartOnCell() {
@@ -336,8 +336,8 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
 //        Optional<EditEvent> e = report.getLastEditStart();
 //        assertEquals("index on start event", editIndex, e.get().getIndex());
     }
-    
-    
+
+
     @Test
     public void testEditStartOnControl() {
         EditableControl control = createEditableControl();
@@ -354,7 +354,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertEquals(1, report.getEditEventSize());
         assertLastStartIndex(report, editIndex, control.getTargetColumn());
     }
-    
+
     protected abstract void assertLastCancelIndex(EditEventReport report, int index, Object column);
     protected abstract void assertLastStartIndex(EditEventReport report, int index, Object column);
     protected abstract void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value);
@@ -374,7 +374,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         // test editing location
         assertEquals("editingIndex must be updated", -1, control.getEditingIndex());
     }
-    
+
     /**
      * Test update of editing location on control
      */
@@ -390,7 +390,7 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         // test editing location
         assertEquals("editingIndex must be updated", -1, control.getEditingIndex());
     }
-    
+
     /**
      * Test update of editing location on control
      */
@@ -416,13 +416,13 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
     }
 
 //----------------------- focus state
-    
+
 
 // ------------------ test default edit handlers
     /**
      * Test default edit handlers: expected none for start/cancel,
      * default that commits
-     * 
+     *
      * Here: List
      */
     @Test
@@ -433,14 +433,14 @@ public abstract class AbstractSCellTest<C extends Control, I extends IndexedCell
         assertNull(control.getOnEditStart());
         assertNotNull("listView must have default commit handler", control.getOnEditCommit());
     }
-    
-    
+
+
 //------------ infrastructure methods
 
-   
+
     protected abstract EditEventReport createEditReport(EditableControl control);
     protected abstract EditableControl<C, I> createEditableControl();
-    
+
     protected abstract Callback<C, I> createTextFieldCellFactory();
-    
+
 }

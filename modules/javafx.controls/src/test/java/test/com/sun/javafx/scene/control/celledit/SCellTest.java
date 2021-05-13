@@ -42,13 +42,13 @@ import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 /**
  * Note: since 15.sept.2017, tests are separated out per cell-type.
- * 
+ *
  * Divers tests around all cell types.
- * 
+ *
  * @see OldListCellTest
  * @see OldTableCellTest
  * @see OldTreeCellTest
- * 
+ *
  * @author Jeanette Winzenburg, Berlin
  */
 //@RunWith(JUnit4.class)
@@ -56,17 +56,17 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 public class SCellTest {
 
 //----------- test editEvents and cell/control state on Tree
-    
-    
+
+
     /**
      * Test notification/cell/list state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * 
-     * Here: 
+     *
+     *
+     * Here:
      * edit(1)
      * edit(0)
      */
@@ -101,16 +101,16 @@ public class SCellTest {
         assertTrue(cancel.isPresent());
         assertEquals("item on cancel event", initialEditItem, cancel.get().getTreeItem());
     }
-    
+
     /**
      * Test notification/cell/list state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * 
-     * Here: 
+     *
+     *
+     * Here:
      * edit(0)
      * edit(1)
      */
@@ -145,18 +145,18 @@ public class SCellTest {
         assertTrue(cancel.isPresent());
         assertEquals("item on cancel event", initialEditItem, cancel.get().getTreeItem());
     }
-    
+
     /**
-     * 
+     *
      * start edit on control
      * -> commit edit on cell with newValue (same with identical value)
      *
      * TreeCell: must not interfere with custom commit handler
-     * 
+     *
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8187309
      *
-     * 
+     *
      * Note: can't commit on control, missing api
      */
     @Test
@@ -179,16 +179,16 @@ public class SCellTest {
         assertEquals("value must not be changed", oldValue, control.getTreeItem(editIndex).getValue());
         assertEquals(1, report.getEditEventSize());
     }
-    
+
     /**
-     * 
+     *
      * start edit on list
      * -> commit edit on cell with newValue (same with identical value)
-     * 
+     *
      * This passes in core - even though treeView has no default commit handler! -
      * due to https://bugs.openjdk.java.net/browse/JDK-8187309, cell fiddles with
      * data
-     * 
+     *
      * Note: can't commit on control, missing api
      */
     @Test
@@ -217,12 +217,12 @@ public class SCellTest {
         assertEquals("editing location must be reset: ", null, control.getEditingItem());
         assertEquals("treeCell must fire a single event", 1, report.getEditEventSize());
     }
-    
-    
-    
+
+
+
     /**
      * Here: cancel the edit with control.edit(-1, null)
-     * 
+     *
      */
     @Test
     public void testTreeEditCancelOnCell() {
@@ -248,7 +248,7 @@ public class SCellTest {
 
     /**
      * Here: cancel the edit with control.edit(null)
-     * 
+     *
      */
     @Test
     public void testTreeEditCancelOnControl() {
@@ -271,8 +271,8 @@ public class SCellTest {
         assertTrue(cancel.isPresent());
         assertEquals("index on cancel event", editItem, cancel.get().getTreeItem());
     }
-    
-    
+
+
     /**
      * Test editing state after start
      */
@@ -295,7 +295,7 @@ public class SCellTest {
         assertTrue(e.isPresent());
         assertEquals("index on start event", editItem, e.get().getTreeItem());
     }
-    
+
     @Test
     public void testTreeEditStartOnControl() {
         TreeView<String> control = createEditableTree();
@@ -315,15 +315,15 @@ public class SCellTest {
         assertTrue(e.isPresent());
         assertEquals("index on start event", editItem, e.get().getTreeItem());
     }
-    
 
-    
-    
-    
+
+
+
+
     /**
      * Test update of editing location on control.
      * Here: after commit edit with cell.commitEdit
-     * 
+     *
      */
     @Test
     public void testTreeEditCommitOnCellResetEditingItem() {
@@ -339,11 +339,11 @@ public class SCellTest {
         cell.commitEdit(value);
         assertEquals("editing location must be reset: ", null, control.getEditingItem());
     }
-    
+
     /**
      * Test update of editing location on control.
      * Here: after cancel edit with cell.cancelEdit
-     * 
+     *
      */
     @Test
     public void testTreeEditCancelOnCellResetEditingItem() {
@@ -362,7 +362,7 @@ public class SCellTest {
     /**
      * Test update of editing location on control.
      * Here: after start edit with cell.startEdit
-     * 
+     *
      * This might be fixed with Jon's patch
      * for commit-on-focuslost
      */
@@ -379,16 +379,16 @@ public class SCellTest {
         assertEquals("editingCell on control ", editingItem, control.getEditingItem());
     }
 
-//----------- test editEvents and cell/control state on Table  
+//----------- test editEvents and cell/control state on Table
     /**
      * Test notification/cell/list state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * 
-     * Here: 
+     *
+     *
+     * Here:
      * edit(0)
      * edit(1)
      */
@@ -424,16 +424,16 @@ public class SCellTest {
         assertNotNull("pos on cancelEvent must not be null", start.get().getTablePosition());
         assertEquals("cancel on initially edited", initialEditIndex, cancel.get().getTablePosition().getRow());
     }
-    
+
     /**
      * Test notification/cell/list state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * 
-     * Here: 
+     *
+     *
+     * Here:
      * edit(0)
      * edit(1)
      */
@@ -488,7 +488,7 @@ public class SCellTest {
         cell.commitEdit(editedValue);
         assertEquals("tableCell must fire a single event", 1, report.getEditEventSize());
     }
-    
+
     @Test
     public void testTableEditCommitOnCell() {
         TableView<TableColumn> control = createEditableTable();
@@ -515,14 +515,14 @@ public class SCellTest {
         assertEquals("tableColumn must be colum", column, commit.get().getTableColumn());
         assertEquals("tableCell must fire a single event", 1, report.getEditEventSize());
     }
-    
+
     /**
      * Here: cancel the edit with cell.cancelEdit ->
      * the cancel index is correct
      * ListView: EditEvent on cancel has incorrect index
-     * 
+     *
      * reported: https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      */
     @Test
     public void testTableEditCancelOnCell() {
@@ -547,11 +547,11 @@ public class SCellTest {
         assertEquals("index on cancel event", editIndex,
                 cancel.get().getTablePosition().getRow());
     }
-    
+
 
     /**
      * Here: cancel the edit with control.edit(-1, null)
-     * 
+     *
      */
     @Test
     public void testTableEditCancelOnTable() {
@@ -576,7 +576,7 @@ public class SCellTest {
         assertEquals("index on cancel event", editIndex,
                 cancel.get().getTablePosition().getRow());
     }
-    
+
 
     /**
      * This test blows because table.editingCell isn't updated ... why not?
@@ -602,7 +602,7 @@ public class SCellTest {
         assertEquals("index on start event", editIndex, e.get().getTablePosition().getRow());
         assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
     }
-    
+
     @Test
     public void testTableEditStartOnTable() {
         TableView<TableColumn> control = createEditableTable();
@@ -629,7 +629,7 @@ public class SCellTest {
     /**
      * Test update of editing location on control.
      * Here: after commit edit with cell.cancelEdit
-     * 
+     *
      */
     @Test
     public void testTableEditCommitOnCellResetEditingCell() {
@@ -647,7 +647,7 @@ public class SCellTest {
     /**
      * Test update of editing location on control.
      * Here: after cancel edit with cell.cancelEdit
-     * 
+     *
      */
     @Test
     public void testTableEditCancelOnCellResetEditingCell() {
@@ -665,8 +665,8 @@ public class SCellTest {
     /**
      * Test update of editing location on control.
      * Here: after start edit with cell.startEdit
-     * 
-     * 
+     *
+     *
      * This might be fixed with Jon's patch
      * for commit-on-focuslost
      */
@@ -683,22 +683,22 @@ public class SCellTest {
         // test control state
         assertEquals("editingCell on control be updated", expected, control.getEditingCell());
     }
-    
 
-//---------------- test editEvents and cell/control state on List    
-    
-    
+
+//---------------- test editEvents and cell/control state on List
+
+
     /**
      * Test notification/cell/list state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * Here: 
+     *
+     * Here:
      * edit(1)
      * edit(0)
-     * 
+     *
      */
     @Test
     public void testListEditChangeEditIndexOnListReversed() {
@@ -724,7 +724,7 @@ public class SCellTest {
         assertEquals(secondEditIndex, secondEditingCell.getIndex());
         // test editEvent
         assertEquals("change edit must fire ", 2, report.getEditEventSize());
-        
+
         Optional<EditEvent> start = report.getLastEditStart();
         assertTrue(start.isPresent());
         assertEquals("start on changed edited", secondEditIndex, start.get().getIndex());
@@ -732,16 +732,16 @@ public class SCellTest {
         assertTrue(cancel.isPresent());
         assertEquals("cancel on initially edited", initialEditIndex, cancel.get().getIndex());
     }
-    
+
     /**
      * Test notification/cell/table state with multiple edits
-     * 
+     *
      * the index of cancel is always incorrect: a cancel is fired with index on the
      * new edit position.
      * Here the incorrect index is fired before the start event.
-     * 
-     * 
-     * Here: 
+     *
+     *
+     * Here:
      * edit(0)
      * edit(1)
      */
@@ -775,18 +775,18 @@ public class SCellTest {
         assertTrue(cancel.isPresent());
         assertEquals("cancel on initially edited", initialEditIndex, cancel.get().getIndex());
     }
-    
 
-    
-    
+
+
+
     /**
      * start edit on list
      * -> commit edit on cell with newValue (same with identical value)
-     * 
-     * Here we see 
-     * ListView: receives both editCommit (expected) and 
+     *
+     * Here we see
+     * ListView: receives both editCommit (expected) and
      * editCancel (unexpected) when edit committed
-     * 
+     *
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8187307
      *
@@ -817,14 +817,14 @@ public class SCellTest {
         assertEquals("newValue on commit event", editedValue, commit.get().getNewValue());
         assertEquals("commit must fire a single event", 1, report.getEditEventSize());
     }
-    
+
     /**
      * Here: cancel the edit with cell.cancelEdit ->
      * the cancel index is correct
      * ListView: EditEvent on cancel has incorrect index
-     * 
+     *
      * reported: https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      */
     @Test
     public void testListEditCancelOnCell() {
@@ -847,13 +847,13 @@ public class SCellTest {
         assertTrue(cancel.isPresent());
         assertEquals("index on cancel event", editIndex, cancel.get().getIndex());
     }
-    
+
     /**
      * Here: cancel the edit with list.edit(-1)
      * ListView: EditEvent on cancel has incorrect index
-     * 
+     *
      * reported: https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      */
     @Test
     public void testListEditCancelOnControl() {
@@ -876,13 +876,13 @@ public class SCellTest {
         assertEquals("index on cancel event", editIndex,
                 cancel.get().getIndex());
     }
-    
+
     /**
      * Incorrect index in editStart event when edit started on cell
-     * 
+     *
      * reported as
      * https://bugs.openjdk.java.net/browse/JDK-8187432
-     * 
+     *
      * Ignore stand-alone only, otherwise can't show fix in custom ListCell
      */
     @Test
@@ -902,10 +902,10 @@ public class SCellTest {
         Optional<EditEvent> e = report.getLastEditStart();
         assertEquals("index on start event", editIndex, e.get().getIndex());
     }
-    
+
     /**
      * Incorrect index in editStart event when edit started on cell
-     * 
+     *
      * reported as
      * https://bugs.openjdk.java.net/browse/JDK-8187432
      */
@@ -930,7 +930,7 @@ public class SCellTest {
         assertEquals("type is startEdit", ListView.editStartEvent(), editEvent.get().getEventType());
         assertEquals("index on start event", editIndex, editEvent.get().getIndex());
     }
-    
+
     @Test
     public void testListEditStartOnList() {
         ListView<String> control = createEditableList();
@@ -949,7 +949,7 @@ public class SCellTest {
         assertTrue(e.isPresent());
         assertEquals("index on start event", editIndex, e.get().getIndex());
     }
-    
+
     /**
      * Test update of editing location on control
      */
@@ -965,7 +965,7 @@ public class SCellTest {
         // test editing location
         assertEquals("editingIndex must be updated", -1, control.getEditingIndex());
     }
-    
+
     /**
      * Test update of editing location on control
      */
@@ -981,7 +981,7 @@ public class SCellTest {
         // test editing location
         assertEquals("editingIndex must be updated", -1, control.getEditingIndex());
     }
-    
+
     /**
      * Test update of editing location on control
      */
@@ -998,7 +998,7 @@ public class SCellTest {
     }
 
 //----------------------- focus state
-    
+
     /**
      * Experiments around focus
      */
@@ -1021,13 +1021,13 @@ public class SCellTest {
         assertTrue("cell must be focused", cell.isFocused());
         assertEquals("textField must be focused", cell.getGraphic(), sl.getStage().getScene().getFocusOwner());
     }
-    
+
 
 // ------------------ test default edit handlers
     /**
      * Test default edit handlers: expected none for start/cancel,
      * default that commits
-     * 
+     *
      * Here: Table
      */
     @Test
@@ -1039,11 +1039,11 @@ public class SCellTest {
         assertNull(control.getOnEditStart());
         assertNotNull("listView must have default commit handler", control.getOnEditCommit());
     }
-    
+
     /**
      * Test default edit handlers: expected none for start/cancel,
      * default that commits
-     * 
+     *
      * Here: List
      */
     @Test
@@ -1054,11 +1054,11 @@ public class SCellTest {
         assertNull(control.getOnEditStart());
         assertNotNull("listView must have default commit handler", control.getOnEditCommit());
     }
-    
+
     /**
      * Test default edit handlers: expected none for start/cancel,
      * default that commits
-     * 
+     *
      * Here: Tree - fails, probably reason for cell taking over itself
      * (https://bugs.openjdk.java.net/browse/JDK-8187309)
      */
@@ -1070,7 +1070,7 @@ public class SCellTest {
         assertNull(control.getOnEditStart());
         assertNotNull("treeView must have default commit handler", control.getOnEditCommit());
     }
-    
+
 //------------ infrastructure methods
 
     /**
@@ -1078,25 +1078,25 @@ public class SCellTest {
      * configured with 3 items
      * and TextFieldTableCell as cellFactory on first column (which represents
      * the textProperty of a TableColumn, no extractor
-     * 
+     *
      * @return
      */
     protected TableView<TableColumn> createEditableTable() {
         return createEditableTable(false);
     }
-    
+
     /**
      * Creates and returns an editable Table of TableColumns (as items ;)
      * configured with 3 items
      * and TextFieldTableCell as cellFactory on first column (which represents
-     * the textProperty of a TableColumn, extractor as requested 
-     * 
-     * @param withExtractor flag to indicate whether or not install extractor on 
+     * the textProperty of a TableColumn, extractor as requested
+     *
+     * @param withExtractor flag to indicate whether or not install extractor on
      *   editing column
      * @return
      */
     protected TableView<TableColumn> createEditableTable(boolean withExtractor) {
-        ObservableList<TableColumn> items = withExtractor ? 
+        ObservableList<TableColumn> items = withExtractor ?
             FXCollections.observableArrayList(e -> new Observable[] {e.textProperty()})
             : FXCollections.observableArrayList();
         items.addAll(new TableColumn("first"), new TableColumn("second"), new TableColumn("third"));
@@ -1118,11 +1118,11 @@ public class SCellTest {
     protected Callback<TableColumn<TableColumn, String>, TableCell<TableColumn, String>> createTextFieldTableCell() {
         return TextFieldTableCell.forTableColumn();
     }
-    
+
     /**
      * Creates and returns an editable List configured with 4 items
      * and TextFieldListCell as cellFactory
-     * 
+     *
      */
     protected ListView<String> createEditableList() {
         ListView<String> control = new ListView<>(FXCollections
@@ -1138,12 +1138,12 @@ public class SCellTest {
     protected Callback<ListView<String>, ListCell<String>> createTextFieldListCell() {
         return TextFieldListCell.forListView();
     }
-    
+
     /**
      * Creates and returns an editable Tree configured with 3 child item,
      * hidden root
      * and TextFieldTreeCell as cellFactory
-     * 
+     *
      * @return
      */
     protected TreeView<String> createEditableTree() {
@@ -1152,7 +1152,7 @@ public class SCellTest {
                 new TreeItem<>("one"),
                 new TreeItem<>("two"),
                 new TreeItem<>("three")
-                
+
                 );
         TreeView<String> treeView = new TreeView<>(rootItem);
         treeView.setShowRoot(false);
@@ -1167,13 +1167,13 @@ public class SCellTest {
     protected Callback<TreeView<String>, TreeCell<String>> createTextFieldTreeCell() {
         return TextFieldTreeCell.forTreeView();
     }
-    
-//--------------------- old bugs, fixed in fx9    
+
+//--------------------- old bugs, fixed in fx9
     /**
      * Test about treeTableRowSkin: registers
-     * a listener on the treeTableView treeColumn in constructor 
+     * a listener on the treeTableView treeColumn in constructor
      * - throws if not yet bound to a treeTable
-     * 
+     *
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8151524
      */
@@ -1182,13 +1182,13 @@ public class SCellTest {
         TreeTableRow row = new TreeTableRow();
         row.setSkin(new TreeTableRowSkin(row));
     }
-    
+
     @Test
     public void testListCellSkinInit() {
         ListCell cell = new ListCell();
         cell.setSkin(new ListCellSkin(cell));
     }
-    
+
     @Test
     public void testTreeCellSkin() {
         TreeCell cell = new TreeCell();

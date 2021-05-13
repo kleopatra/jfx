@@ -23,21 +23,21 @@ public class ListViewEditReport extends EditEventReport<ListView.EditEvent> {
         assertTrue(e.isPresent());
         assertEquals(getAllEditEventTexts("index on start event"), index, e.get().getIndex());
     }
-    
+
     @Override
     public void assertLastCancelIndex(int index, Object target) {
         Optional<EditEvent> e = getLastEditCancel();
         assertTrue(e.isPresent());
         assertEquals(getAllEditEventTexts("index on cancel event"), index, e.get().getIndex());
     }
-    
+
     @Override
     public void assertLastCommitIndex(int index, Object target, Object value) {
         Optional<EditEvent> commit = getLastEditCommit();
         assertTrue(commit.isPresent());
         assertEquals("index on commit event", index, commit.get().getIndex());
         assertEquals("newValue on commit event", value, commit.get().getNewValue());
-        assertEquals(getAllEditEventTexts("commit must fire a single event "), 
+        assertEquals(getAllEditEventTexts("commit must fire a single event "),
                 1, getEditEventSize());
     }
 
@@ -51,9 +51,9 @@ public class ListViewEditReport extends EditEventReport<ListView.EditEvent> {
 
     @Override
     public String getEditEventText(ListView.EditEvent event) {
-      return "[ListViewEditEvent [type: " + event.getEventType() + " index " 
+      return "[ListViewEditEvent [type: " + event.getEventType() + " index "
               + event.getIndex() + " newValue " + event.getNewValue() + "]";
-      
+
     }
 
 }

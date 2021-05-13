@@ -46,7 +46,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 //        IndexedCell cell = getCell(control, editIndex);
 //        SimpleIntegerProperty counter = new SimpleIntegerProperty(0);
 //        control.addEventHandler(ListView.editStartEvent(), e -> counter.set(counter.get() + 1));
-//        
+//
 //        // start edit on control
 //        cell.startEdit();
 //        // start again -> nothing changed, no event
@@ -54,7 +54,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 //        // test editEvent
 //        assertEquals("second start on same must not fire event", 1, counter.get());
 //    }
-//    
+//
 //    /**
 //     * Must not fire editStartEvent if editing
 //     * reported: https://bugs.openjdk.java.net/browse/JDK-8188027
@@ -70,7 +70,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 //        IndexedCell cell = getCell(control, editIndex);
 //        SimpleIntegerProperty counter = new SimpleIntegerProperty(0);
 //        control.addEventHandler(ListView.editStartEvent(), e -> counter.set(counter.get() + 1));
-//       
+//
 //        // start edit on control
 //        cell.startEdit();
 //        // start again -> nothing changed, no event
@@ -78,7 +78,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 //        // test editEvent
 //        assertEquals("second start on same must not fire event", 1, counter.get());
 //    }
-//    
+//
 //    /**
 //     * NPE on all TextFieldXXCell (not with base XXCell!)
 //     * reported: https://bugs.openjdk.java.net/browse/JDK-8188026
@@ -100,7 +100,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
 //
 //    /**
 //     * Incorrect index in editStart event when edit started on cell
-//     * 
+//     *
 //     * reported as
 //     * https://bugs.openjdk.java.net/browse/JDK-8187432
 //     */
@@ -148,27 +148,27 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
         assertTrue("cell must be focused", cell.isFocused());
         assertEquals("textField must be focused", cell.getGraphic(), sl.getStage().getScene().getFocusOwner());
     }
-    
+
 
     @Override
     protected void assertValueAt(int index, Object editedValue, EditableControl<ListView, ListCell> control) {
         assertEquals(editedValue, control.getControl().getItems().get(index));
     };
-    
+
     @Override
     protected void assertLastStartIndex(EditEventReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditStart();
         assertTrue(e.isPresent());
         assertEquals("index on start event", index, e.get().getIndex());
     }
-    
+
     @Override
     protected void assertLastCancelIndex(EditEventReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditCancel();
         assertTrue(e.isPresent());
         assertEquals("index on cancel event", index, e.get().getIndex());
     }
-    
+
     @Override
     protected void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value) {
         Optional<EditEvent> commit = report.getLastEditCommit();
@@ -178,18 +178,18 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
         assertEquals("commit must fire a single event", 1, report.getEditEventSize());
     }
 
-    //--------------------- old bugs, fixed in fx9    
+    //--------------------- old bugs, fixed in fx9
     @Test
     public void testListCellSkinInit() {
         ListCell cell = new ListCell();
         cell.setSkin(new ListCellSkin(cell));
     }
-    
+
 
     /**
      * Creates and returns an editable List configured with 4 items
      * and TextFieldListCell as cellFactory
-     * 
+     *
      */
     @Override
     protected EditableControl createEditableControl() {

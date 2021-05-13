@@ -334,7 +334,7 @@ public class ListCell<T> extends IndexedCell<T> {
             // will not change to the editing state as a layout of VirtualFlow
             // is immediately invoked, which forces all cells to be updated.
             System.out.println("in indexChanged while editing and same old/new index: " + oldIndex);
-            if (oldIndex == -1) 
+            if (oldIndex == -1)
                 throw new IllegalStateException("cell index must not be -1 while editing");
         } else {
 //            System.out.println("normal: ");
@@ -343,7 +343,7 @@ public class ListCell<T> extends IndexedCell<T> {
             updateFocus();
             updateEditing();
         }
-        
+
     }
 
     /** {@inheritDoc} */
@@ -561,7 +561,7 @@ public class ListCell<T> extends IndexedCell<T> {
             }
         }
     }
-    
+
     private void doCancelEdit() {
         // If my index is not the one being edited then I need to cancel
         // the edit. The tricky thing here is that as part of this call

@@ -3708,8 +3708,8 @@ public class TreeViewTest {
         // in the selectedIndices and selectedItems list
         childNode1.setExpanded(false);
     }
-    
-    
+
+
     /**
      * Test that cell.cancelEdit can switch tree editing off
      * even if a subclass violates its contract.
@@ -3739,7 +3739,7 @@ public class TreeViewTest {
             // catching to test in finally
         } finally {
             assertFalse("cell must not be editing", cell.isEditing());
-            assertEquals("table must be editing at intermediate index", 
+            assertEquals("table must be editing at intermediate index",
                     intermediateTreeItem, treeView.getEditingItem());
         }
         // test editing: second round

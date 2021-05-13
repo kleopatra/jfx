@@ -23,7 +23,7 @@ import javafx.util.Callback;
 
 /**
  * Decorator for editable virtualized controls. Useful in testing cells and their editing behaviour.
- * 
+ *
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -32,10 +32,10 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
     void setEditable(boolean editable);
     boolean isEditable();
     /**
-     *  Note: this method is the same as the control's except for 
+     *  Note: this method is the same as the control's except for
      *  tabular controls: they must implement this to delegate
      *  to the target column.
-     *  
+     *
      * @param factory
      */
     void setCellFactory(Callback<C, I> factory);
@@ -81,15 +81,15 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
     int getEditingIndex();
 
     void edit(int index);
-    
+
     /**
-     * Returns the value that might be changed by cell editing. 
+     * Returns the value that might be changed by cell editing.
      */
     Object getValueAt(int index);
 
     /**
      * Returns the value at index if targetColumn is null or at index and targetColumn if not.
-     * 
+     *
      * @param index
      * @return
      */
@@ -97,7 +97,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
     default Object getTargetColumn() {
         return null;
     }
-    
+
     EditEventReport createEditReport();
 
     class EListView extends ListView implements EditableControl<ListView, ListCell> {
@@ -162,13 +162,13 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         public EditEventReport createEditReport() {
             return new ListViewEditReport(this);
         }
-        
+
     }
 
     /**
      * A TableView decorated as EditableControl. Note that the table must be instantiated with at least one
      * column and all column related edit api is passed to the target column.
-     * 
+     *
      * @author Jeanette Winzenburg, Berlin
      */
     class ETableView extends TableView implements EditableControl<TableView, TableCell> {
@@ -190,7 +190,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         public Callback<TableView, TableCell> getCellFactory() {
             return getTargetColumn().getCellFactory();
         }
-        
+
         @Override
         public TableColumn getTargetColumn() {
             return (TableColumn) getColumns().get(0);
@@ -351,7 +351,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
             edit(item);
         }
 
-        
+
         @Override
         public Object getValueAt(int index) {
             TreeItem item = getTreeItem(index);

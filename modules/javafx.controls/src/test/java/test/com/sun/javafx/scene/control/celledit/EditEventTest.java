@@ -57,9 +57,9 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
  * Test editEvent state after transitions.
- * 
+ *
  * The general test setup:
- * 
+ *
  * - init editableCell and editing state on control
  * - install report
  * - test expected event state
@@ -73,8 +73,8 @@ public class EditEventTest {
     private Supplier<EditableControl> controlSupplier;
     private String typeMessage;
 
-//----------------- test editEvents    
-    
+//----------------- test editEvents
+
     @Test
     public void testUpdateIndexOffEditing() {
         int cellIndex = -1;
@@ -85,7 +85,7 @@ public class EditEventTest {
         cell.updateIndex(cellIndex);
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
-    
+
     @Test
     public void testUpdateIndexToEditing() {
         int cellIndex = -1;
@@ -96,7 +96,7 @@ public class EditEventTest {
         cell.updateIndex(editingIndex);
         report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
     }
-    
+
     @Test
     public void testUpdateSameIndexWhileEditing() {
         int editingIndex = 1;
@@ -106,7 +106,7 @@ public class EditEventTest {
         cell.updateIndex(editingIndex);
         assertEquals(0, report.getEditEventSize());
     }
-    
+
     @Test
     public void testUpdateSameIndexWhileNotEditing() {
         int cellIndex = 2;
@@ -117,7 +117,7 @@ public class EditEventTest {
         cell.updateIndex(cellIndex);
         assertEquals(0, report.getEditEventSize());
     }
-    
+
     @Test
     public void testCommitEditOnCell() {
         int editingIndex = 1;
@@ -129,7 +129,7 @@ public class EditEventTest {
         assertEquals(1, report.getEditEventSize());
         report.assertLastCommitIndex(editingIndex, editableControl.getTargetColumn(), edited);
     }
-    
+
     @Test
     public void testCancelEditOnCell() {
         int editingIndex = 1;
@@ -140,7 +140,7 @@ public class EditEventTest {
         assertEquals(1, report.getEditEventSize());
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
-    
+
     @Test
     public void testStartEditOnCell() {
         int editingIndex = 1;
@@ -150,7 +150,7 @@ public class EditEventTest {
         assertEquals(1, report.getEditEventSize());
         report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
     }
-    
+
     @Test
     public void testCancelEditOnControl() {
         int editingIndex = 1;
@@ -162,7 +162,7 @@ public class EditEventTest {
         assertEquals(1, report.getEditEventSize());
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
-    
+
     @Test
     public void testToggleEditOnControl() {
         int editingIndex = 1;
@@ -189,20 +189,20 @@ public class EditEventTest {
 //        assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
         assertEquals(eControl.getValueAt(editingIndex), cell.getItem());
     }
- 
+
  //-----------------------
-    
+
     private IndexedCell createEditableCellAt(int editingIndex) {
         IndexedCell cell = editableControl.createEditableCell();
         cell.updateIndex(editingIndex);
         return cell;
     }
-    
+
 //----------- parameterized in xxCell
-    
+
     @Parameters(name = "{index} - {1}")
     public static Collection selectionModes() {
-        return Arrays.asList(new Object[][] { 
+        return Arrays.asList(new Object[][] {
             { (Supplier) EditEventTest::createEditableListView, "ListView/-Cell"},
             { (Supplier) EditEventTest::createEditableTableView, "TableView/-Cell"},
             { (Supplier) EditEventTest::createEditableTreeView, "TreeView/-Cell"},
@@ -213,8 +213,8 @@ public class EditEventTest {
         this.controlSupplier = controlSupplier;
         this.typeMessage = typeMessage;
     }
-//-------------- setup   
-    
+//-------------- setup
+
     @Test
     public void testInitialState() {
         // control
@@ -230,7 +230,7 @@ public class EditEventTest {
         // FIXME: add api to EditableControl?
 //      assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
    }
-    
+
     public static EditableControl<ListView, ListCell> createEditableListView() {
         EditableControl.EListView control = new EditableControl.EListView(FXCollections
                 .observableArrayList("Item1", "Item2", "Item3", "Item4"));
@@ -239,14 +239,14 @@ public class EditEventTest {
         control.getFocusModel().focus(-1);
         return control;
     }
-    
+
     public static EditableControl<TreeView, TreeCell> createEditableTreeView() {
         TreeItem rootItem = new TreeItem<>("root");
         rootItem.getChildren().addAll(
                 new TreeItem<>("zero"),
                 new TreeItem<>("one"),
                 new TreeItem<>("two")
-                
+
                 );
         EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
         treeView.setShowRoot(false);
@@ -255,13 +255,13 @@ public class EditEventTest {
         treeView.getFocusModel().focus(-1);
         return treeView;
     }
-    
+
     public static EditableControl<TableView, TableCell> createEditableTableView() {
-        ObservableList<TableColumn> items = 
+        ObservableList<TableColumn> items =
 //                withExtractor
 //                ? FXCollections.observableArrayList(
 //                        e -> new Observable[] { e.textProperty() })
-//                : 
+//                :
                     FXCollections.observableArrayList();
         items.addAll(new TableColumn("first"), new TableColumn("second"),
                 new TableColumn("third"));
@@ -277,7 +277,7 @@ public class EditEventTest {
         table.getFocusModel().focus(-1);
         return table;
     }
-    
+
     /**
      * @return
      */
@@ -286,7 +286,7 @@ public class EditEventTest {
         return createEditableTreeView();
 //        return createEditableTableView();
     }
-    
+
     @Before
     public void setup() {
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
@@ -299,7 +299,7 @@ public class EditEventTest {
 //        editableControl = createEditableControl();
         editableControl = controlSupplier.get();
     }
- 
+
 
     @After
     public void cleanup() {

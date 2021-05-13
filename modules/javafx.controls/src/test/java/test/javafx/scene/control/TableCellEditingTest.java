@@ -85,7 +85,7 @@ public class TableCellEditingTest {
         assertEquals("cell must have fired edit cancel", 1, events.size());
         assertEquals("cancel event index must be same as editingIndex", editingIndex,
                 events.get(0).getTablePosition().getRow());
-        assertEquals("cancel event index must be same as editingIndex", 
+        assertEquals("cancel event index must be same as editingIndex",
                 editingIndex, table.getEditingCell().getRow());
     }
 

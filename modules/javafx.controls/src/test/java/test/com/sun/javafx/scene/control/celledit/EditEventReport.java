@@ -20,13 +20,13 @@ public class EditEventReport<E extends Event> {
 
 
     private EditableControl source;
-    
+
     protected ObservableList<E> editEvents = FXCollections.<E>observableArrayList();
-    
+
     public EditEventReport(EditableControl editableControl) {
         this.source = editableControl;
     }
-    
+
     public EditableControl getSource() {
         return source;
     }
@@ -38,19 +38,19 @@ public class EditEventReport<E extends Event> {
         return FXCollections.unmodifiableObservableList(editEvents);
     }
     /**
-     * Clears list of received events. 
+     * Clears list of received events.
      */
     public void clear() {
         editEvents.clear();
     }
-    
+
     /**
      * Returns # of all events.
      */
     public int getEditEventSize() {
         return editEvents.size();
     }
-    
+
     /**
      * Returns # of events of given type.
      */
@@ -59,13 +59,13 @@ public class EditEventReport<E extends Event> {
                 .filter(e -> e.getEventType().equals(type))
                 .count();
     }
-    
+
     public Optional<E> getLastEditStart() {
         return editEvents.stream()
                 .filter(e -> e.getEventType().equals(source.editStart()))
                 .findFirst();
     }
-    
+
     public Optional<E> getLastEditCancel() {
         return editEvents.stream()
                 .filter(e -> e.getEventType().equals(source.editCancel()))
@@ -76,7 +76,7 @@ public class EditEventReport<E extends Event> {
                 .filter(e -> e.getEventType().equals(source.editCommit()))
                 .findFirst();
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editStart,
      * false otherwise.
@@ -85,7 +85,7 @@ public class EditEventReport<E extends Event> {
     public boolean isLastEditStart() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(source.editStart()) : false;
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editCommit,
      * false otherwise.
@@ -94,7 +94,7 @@ public class EditEventReport<E extends Event> {
     public boolean isLastEditCommit() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(source.editCommit()) : false;
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editCancel,
      * false otherwise.
@@ -103,26 +103,26 @@ public class EditEventReport<E extends Event> {
     public boolean isLastEditCancel() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(source.editCancel()) : false;
     }
-    
+
     public E getLastAnyEvent() {
         return hasEditEvents() ? editEvents.get(0) : null;
     }
-    
+
     public boolean hasEditEvents() {
         return !editEvents.isEmpty();
     }
-    
+
     /**
      * Adds the given event.
-     * 
+     *
      * Impl. note: adds at 0.
      */
     protected void addEvent(E event) {
         editEvents.add(0, event);
     }
-    
+
     /**
-     * Returns the enhanced edit text of all events received, last received first. 
+     * Returns the enhanced edit text of all events received, last received first.
      */
     public String getAllEditEventTexts(String message) {
         if (!hasEditEvents()) return "noEvents";
@@ -132,17 +132,17 @@ public class EditEventReport<E extends Event> {
         }
         return edits;
     }
-    
+
     /**
      * Returns a human readable description of the event.
-     * 
+     *
      * @param event
      * @return
      */
     public String getEditEventText(E event) {
         return event.toString();
-    }; 
-    
+    };
+
     // note: asserts must be implemented in subclasses because the events
     // are cell-type specific (without common super)
     public void assertLastCancelIndex(int index, Object column) {
@@ -155,5 +155,5 @@ public class EditEventReport<E extends Event> {
         fail("not yet implemented");
     }
 
-    
+
 }

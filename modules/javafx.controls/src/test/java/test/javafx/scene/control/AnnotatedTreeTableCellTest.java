@@ -260,7 +260,7 @@ public class AnnotatedTreeTableCellTest {
      /**
       * Test error? without column, cell updateItem(int) keeps the cell as empty
       * which leads to cell.startEdit to not switch into editing state
-      * 
+      *
       * Fully configuring the cell (note: edit must be started with editingColumn)
       */
 //    @Ignore // TODO file bug!
@@ -302,7 +302,7 @@ public class AnnotatedTreeTableCellTest {
         assertNull(tree.getEditingCell());
     }
 
-//    @Ignore("JDK-8187474") 
+//    @Ignore("JDK-8187474")
     @Test public void editCellWithTreeResultsInUpdatedEditingIndexProperty() {
         tree.setEditable(true);
         TreeTableColumn<String, String> editingColumn = new TreeTableColumn<>("TEST");
@@ -341,7 +341,7 @@ public class AnnotatedTreeTableCellTest {
      * Will fail without fix for startEdit issue.
      * Beware: we need a column for these tests to make sense?
      */
-//    @Ignore("8187474") 
+//    @Ignore("8187474")
     @Test public void commitWhenTreeIsNotNullWillUpdateTheItemsTree() {
         tree.setEditable(true);
         cell.updateTreeTableView(tree);

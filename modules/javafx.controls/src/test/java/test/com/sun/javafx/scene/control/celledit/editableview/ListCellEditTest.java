@@ -57,17 +57,17 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
             return view.isEditable();
         }
 
-        
+
         @Override
         public void editView(int index) {
             view.edit(index);
         }
-        
+
         @Override
         protected ListCell createCell() {
             return new ListCell();
         }
-        
+
         @Override
         protected ListView createView() {
             ObservableList<String >model = FXCollections.observableArrayList("Apples", "Oranges", "Pears");
@@ -123,7 +123,7 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
             cell.commitEdit(value);
             return collector;
         }
-        
+
         @Override
         public void assertCommitEditEvent(Object event, int index, Object value) {
             EditEvent editEvent = (EditEvent) event;
@@ -131,7 +131,7 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
             assertEquals(index, editEvent.getIndex());
             assertEquals(value, editEvent.getNewValue());
         }
- 
+
         @Override
         public List<?> cancelCellEdit() {
             List<Object> collector = new ArrayList<>();
@@ -152,7 +152,7 @@ public class ListCellEditTest extends CellEditTestBase<ListCell, ListView> {
         public Object getItem(int index) {
             return view.getItems().get(index);
         }
-        
+
     }
 
 }

@@ -581,7 +581,7 @@ public class AnnotatedTreeCellTest {
         assertNull(tree.getEditingItem());
     }
 
-//    @Ignore("JDK-8187474") 
+//    @Ignore("JDK-8187474")
     @Test public void editCellWithTreeResultsInUpdatedEditingIndexProperty() {
         tree.setEditable(true);
         cell.updateTreeView(tree);
@@ -649,8 +649,8 @@ public class AnnotatedTreeCellTest {
         assertNotNull("sanity", tree.getEditingItem());
         assertTrue(cell.isEditing());
         cell.commitEdit("Watermelon");
-        // FIXME: 
-        // when starting edit on cell, 
+        // FIXME:
+        // when starting edit on cell,
         // testing editingItem is a no-op - due to JDK-8187474 the editingItem was never !=null
         assertNull(tree.getEditingItem());
         assertFalse(cell.isEditing());

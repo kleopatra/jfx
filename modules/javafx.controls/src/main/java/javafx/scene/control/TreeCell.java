@@ -388,7 +388,7 @@ public class TreeCell<T> extends IndexedCell<T> {
     }
 
     int editingIndexAtStartEdit = -1;
-    
+
      /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
         if (! isEditing()) return;
@@ -445,16 +445,16 @@ public class TreeCell<T> extends IndexedCell<T> {
             // is the correct value to send!
 //            TreeItem<T> editingItem = tree.getEditingItem();
 //            T value = editingItem != null ? editingItem.getValue() : null;
-            
+
             // next try: use same index as at start
-            
+
 //            TreeItem<T> editingItem = tree.getTreeItem(editingIndexAtStartEdit);
 //            T value = editingItem != null ? editingItem.getValue() : null;
-            
+
             // use current cell state
             TreeItem<T> editingItem = getTreeItem();
             T value = getItem();
-            
+
             // reset the editing index on the TreeView
             if (updateEditingIndex) tree.edit(null);
 

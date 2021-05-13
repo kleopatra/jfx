@@ -155,10 +155,10 @@ public class ModifiedTableCellEditingTest {
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8165214
      * index of cancel is incorrect
-     * 
-     * also related: 
+     *
+     * also related:
      * https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      * Tree/TableCell specific: https://bugs.openjdk.java.net/browse/JDK-8187229
      * fires NPE on accessing the row
      */
@@ -177,7 +177,7 @@ public class ModifiedTableCellEditingTest {
         assertEquals("editingCell must be same", editingCell, cancelEvent.getTablePosition());
         assertEquals(editingIndex, cancelEvent.getTablePosition().getRow());
     }
-    
+
 
     /**
      * Sanity: cell editing state unchanged when off editing index.
@@ -210,10 +210,10 @@ public class ModifiedTableCellEditingTest {
         assertTrue("sanity: valid editingIndex", editingIndex < model.size());
     }
 
-//-------------- KEEP for now, even though they don't belong here   
-    
+//-------------- KEEP for now, even though they don't belong here
+
     /**
-     * some properties (like focused) are updated to true only if tablecell is configured with a 
+     * some properties (like focused) are updated to true only if tablecell is configured with a
      * row. Doing so interferes with testing of editing state, though (because a cell's listener
      * to focusProperty cancels the edit), so don't include here. For other cell types, make
      * sure the focused is -1 in all tests.
@@ -224,7 +224,7 @@ public class ModifiedTableCellEditingTest {
 //        tableRow.updateTableView(table);
 //        cell.updateTableRow(tableRow);
 ////         revert default focus - otherwise we get test failures on changing cell index
-////         keep focus at -1 to remove interference 
+////         keep focus at -1 to remove interference
 //        table.getSelectionModel().setCellSelectionEnabled(true);
 //        table.getFocusModel().focus(-1);
 //    }
@@ -261,8 +261,8 @@ public class ModifiedTableCellEditingTest {
 //        assertFalse(cell.isSelected());
 //        assertFalse(cell.isFocused());
 //        assertFalse(cell.isEditing());
-//        
+//
 //    }
-    
+
 
 }

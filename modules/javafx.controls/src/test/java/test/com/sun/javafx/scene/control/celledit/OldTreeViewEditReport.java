@@ -19,14 +19,14 @@ import javafx.scene.control.TreeView.EditEvent;
 public class OldTreeViewEditReport {
 
     private TreeView source;
-    
+
     private ObservableList<EditEvent> editEvents = FXCollections.observableArrayList();
-    
+
     public OldTreeViewEditReport(TreeView listView) {
         this.source = listView;
         listView.addEventHandler(editAnyEvent(), this::addEvent);
     }
-    
+
     /**
      * Returns the list of editEvents as unmodifiable list, most recent first.
      * @return
@@ -35,22 +35,22 @@ public class OldTreeViewEditReport {
         return FXCollections.unmodifiableObservableList(editEvents);
     }
     /**
-     * Clears list of received events. 
+     * Clears list of received events.
      */
     public void clear() {
         editEvents.clear();
     }
-    
+
     public int getEditEventSize() {
         return editEvents.size();
     }
-    
+
     public Optional<EditEvent> getLastEditStart() {
         return editEvents.stream()
                 .filter(e -> e.getEventType().equals(editStartEvent()))
                 .findFirst();
     }
-    
+
     public Optional<EditEvent> getLastEditCancel() {
         return editEvents.stream()
                 .filter(e -> e.getEventType().equals(editCancelEvent()))
@@ -61,7 +61,7 @@ public class OldTreeViewEditReport {
                 .filter(e -> e.getEventType().equals(editCommitEvent()))
                 .findFirst();
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editStart,
      * false otherwise.
@@ -70,7 +70,7 @@ public class OldTreeViewEditReport {
     public boolean isLastEditStart() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(editStartEvent()) : false;
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editCommit,
      * false otherwise.
@@ -79,7 +79,7 @@ public class OldTreeViewEditReport {
     public boolean isLastEditCommit() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(editCommitEvent()) : false;
     }
-    
+
     /**
      * Returns true if the last event in the received events represents editCancel,
      * false otherwise.
@@ -88,24 +88,24 @@ public class OldTreeViewEditReport {
     public boolean isLastEditCancel() {
         return hasEditEvents() ? getLastAnyEvent().getEventType().equals(editCancelEvent()) : false;
     }
-    
+
     public EditEvent getLastAnyEvent() {
         return hasEditEvents() ? editEvents.get(0) : null;
     }
-    
+
     public boolean hasEditEvents() {
         return !editEvents.isEmpty();
     }
-    
-    
+
+
     protected void addEvent(EditEvent event) {
         editEvents.add(0, event);
     }
-    
+
     /**
-     * Returns the enhanced edit text of all events received, most 
+     * Returns the enhanced edit text of all events received, most
      * recent first.
-     * 
+     *
      * @param message
      * @return
      */
@@ -117,10 +117,10 @@ public class OldTreeViewEditReport {
         }
         return edits;
     }
-    
+
     public static String getEditEventText(EditEvent event) {
-        return "[TreeViewEditEvent [type: " + event.getEventType() + " treeItem " 
+        return "[TreeViewEditEvent [type: " + event.getEventType() + " treeItem "
                 + event.getTreeItem() + " newValue " + event.getNewValue() + "]";
-        
+
     }
 }

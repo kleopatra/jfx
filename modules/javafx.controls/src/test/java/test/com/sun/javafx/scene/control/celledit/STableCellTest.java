@@ -38,29 +38,29 @@ import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
  * core tableView/cell test
- * 
+ *
  * moved cellSelection and extractor testing into this, not applicable in abstract layer.
- * 
+ *
  * @author Jeanette Winzenburg, Berlin
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
 
-    protected boolean cellSelectionEnabled; 
-    
+    protected boolean cellSelectionEnabled;
+
     @Parameters(name = "{index} - cell {0}")
     public static Collection selectionModes() {
         return Arrays.asList(new Object[][] { { false }, { true } });
     }
 
     /**
-     * 
+     *
      */
     public STableCellTest(boolean cellSelection) {
         this.cellSelectionEnabled = cellSelection;
     }
-    
+
     @Test
     public void testTableEditCommitCellSelection() {
         ETableView control = (ETableView) createEditableControl(true);
@@ -98,9 +98,9 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
 
     /**
      * Test about treeTableRowSkin: registers
-     * a listener on the treeTableView treeColumn in constructor 
+     * a listener on the treeTableView treeColumn in constructor
      * - throws if not yet bound to a treeTable
-     * 
+     *
      * reported:
      * https://bugs.openjdk.java.net/browse/JDK-8151524
      */
@@ -109,17 +109,17 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
         TreeTableRow row = new TreeTableRow();
         row.setSkin(new TreeTableRowSkin(row));
     }
-    
+
 
     @Override
     protected void assertValueAt(int index, Object editedValue,
             EditableControl<TableView, TableCell> control) {
         ETableView table = (ETableView) control;
         TableColumn column = table.getTargetColumn();
-        assertEquals("editedValue must be committed", editedValue, 
+        assertEquals("editedValue must be committed", editedValue,
                 column.getCellObservableValue(index).getValue());
     }
-    
+
     @Override
     protected void assertLastStartIndex(EditEventReport report, int index, Object first) {
         Optional<CellEditEvent> e = report.getLastEditStart();
@@ -128,9 +128,9 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
         assertNotNull("position on event must not be null", e.get().getTablePosition());
         assertEquals("index on start event", index, e.get().getTablePosition().getRow());
         assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
-        
+
     }
-    
+
     @Override
     protected void assertLastCancelIndex(EditEventReport report, int index, Object first) {
         Optional<CellEditEvent> e = report.getLastEditCancel();
@@ -139,9 +139,9 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
         assertNotNull("position on event must not be null", e.get().getTablePosition());
         assertEquals("index on cancel event", index, e.get().getTablePosition().getRow());
         assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
-        
+
     }
-    
+
     @Override
     protected void assertLastCommitIndex(EditEventReport report, int index, Object first, Object value) {
         Optional<CellEditEvent> e = report.getLastEditCommit();
@@ -168,22 +168,22 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
      * and TextFieldTableCell as cellFactory on first column (which represents
      * the textProperty of a TableColumn, no extractor, cellSelectionEnabled
      * as defined by parameter.
-     * 
+     *
      * @return
      */
     @Override
     protected EditableControl<TableView, TableCell> createEditableControl() {
         return createEditableControl(false);
     }
-    
+
     /**
       * Creates and returns an editable Table of TableColumns (as items ;)
      * configured with 3 items
      * and TextFieldTableCell as cellFactory on first column (which represents
      * the textProperty of a TableColumn, extractor as requested cellSelectionEnabled
      * as defined by parameter.
-     * 
-     * 
+     *
+     *
      * @param withExtractor
      * @return
      */

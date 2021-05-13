@@ -26,9 +26,9 @@ public class TableViewEditReport extends EditEventReport<CellEditEvent> {
         assertNotNull("position on event must not be null", e.get().getTablePosition());
         assertEquals(getAllEditEventTexts("index on start event"), index, e.get().getTablePosition().getRow());
         assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
-        
+
     }
-    
+
     @Override
     public void assertLastCancelIndex(int index, Object first) {
         Optional<CellEditEvent> e = getLastEditCancel();
@@ -36,9 +36,9 @@ public class TableViewEditReport extends EditEventReport<CellEditEvent> {
         assertNotNull("position on event must not be null", e.get().getTablePosition());
         assertEquals(getAllEditEventTexts("index on cancel event"), index, e.get().getTablePosition().getRow());
         assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
-        
+
     }
-    
+
     @Override
     public void assertLastCommitIndex(int index, Object first, Object value) {
         Optional<CellEditEvent> e = getLastEditCommit();
@@ -66,9 +66,9 @@ public class TableViewEditReport extends EditEventReport<CellEditEvent> {
         int row = pos != null ? pos.getRow() : -1;
         Object oldValue = pos != null ? event.getOldValue() : null;
         Object rowValue = pos != null ? event.getRowValue() : null;
-        return "[tableViewEditEvent [ type: " + event.getEventType() + " pos: " + pos + " rowValue: " + rowValue + " oldValue: " 
+        return "[tableViewEditEvent [ type: " + event.getEventType() + " pos: " + pos + " rowValue: " + rowValue + " oldValue: "
                 + oldValue + " newValue: " + event.getNewValue();
-      
+
     }
 
 }

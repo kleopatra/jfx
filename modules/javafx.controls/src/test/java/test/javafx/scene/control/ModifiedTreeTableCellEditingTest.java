@@ -156,10 +156,10 @@ public class ModifiedTreeTableCellEditingTest {
     /**
      * https://bugs.openjdk.java.net/browse/JDK-8165214
      * index of cancel is incorrect
-     * 
-     * also related: 
+     *
+     * also related:
      * https://bugs.openjdk.java.net/browse/JDK-8187226
-     * 
+     *
      * Tree/TableCell specific: https://bugs.openjdk.java.net/browse/JDK-8187229
      * fires NPE on accessing the row
      */
@@ -178,7 +178,7 @@ public class ModifiedTreeTableCellEditingTest {
         assertEquals("editingCell must be same", editingCell, cancelEvent.getTreeTablePosition());
         assertEquals(editingIndex, cancelEvent.getTreeTablePosition().getRow());
     }
-    
+
 
     /**
      * Sanity: cell editing state unchanged when off editing index.

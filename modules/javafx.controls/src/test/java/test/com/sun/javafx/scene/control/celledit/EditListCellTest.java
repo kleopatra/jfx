@@ -49,43 +49,43 @@ public class EditListCellTest extends AbstractEditCellTestBase<ListView, ListCel
     protected void assertValueAt(int index, Object editedValue, EditableControl<ListView, ListCell> control) {
         assertEquals(editedValue, control.getControl().getItems().get(index));
     };
-    
+
     @Override
     protected void assertLastStartIndex(EditEventReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditStart();
         assertTrue(e.isPresent());
         assertEquals(report.getAllEditEventTexts("index on start event"), index, e.get().getIndex());
     }
-    
+
     @Override
     protected void assertLastCancelIndex(EditEventReport report, int index, Object target) {
         Optional<EditEvent> e = report.getLastEditCancel();
         assertTrue(e.isPresent());
         assertEquals(report.getAllEditEventTexts("index on cancel event"), index, e.get().getIndex());
     }
-    
+
     @Override
     protected void assertLastCommitIndex(EditEventReport report, int index, Object target, Object value) {
         Optional<EditEvent> commit = report.getLastEditCommit();
         assertTrue(commit.isPresent());
         assertEquals("index on commit event", index, commit.get().getIndex());
         assertEquals("newValue on commit event", value, commit.get().getNewValue());
-        assertEquals(report.getAllEditEventTexts("commit must fire a single event "), 
+        assertEquals(report.getAllEditEventTexts("commit must fire a single event "),
                 1, report.getEditEventSize());
     }
 
-    //--------------------- old bugs, fixed in fx9    
+    //--------------------- old bugs, fixed in fx9
     @Test
     public void testListCellSkinInit() {
         ListCell cell = new ListCell();
         cell.setSkin(new ListCellSkin(cell));
     }
-    
+
 
     /**
      * Creates and returns an editable List configured with 4 items
      * and TextFieldListCell as cellFactory
-     * 
+     *
      */
     @Override
     protected EditableControl createEditableControl() {

@@ -68,10 +68,10 @@ public class EditStateTest {
     private Supplier<EditableControl> controlSupplier;
     private String typeMessage;
 
-//----------------- test editEvents    
-    
+//----------------- test editEvents
+
 //----------------- test state transitions
-    
+
     @Test
     public void testUpdateIndexOffEditing() {
         int cellIndex = -1;
@@ -85,7 +85,7 @@ public class EditStateTest {
         assertFalse("cell must not be editing", cell.isEditing());
         assertEquals("control editing must be unchanged", editingIndex, editableControl.getEditingIndex());
     }
-    
+
     @Test
     public void testUpdateIndexToEditing() {
         int cellIndex = -1;
@@ -95,13 +95,13 @@ public class EditStateTest {
         cell.updateIndex(editingIndex);
         assertEditingCellInvariant(editableControl, cell, editingIndex);
     }
-    
+
     /**
      * Sanity: fix doesn't interfere with RT-31165
      */
     @Test
     public void testUpdateSameIndexWhileNotEditing() {
-        int cellIndex = 2; 
+        int cellIndex = 2;
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(cellIndex);
         editableControl.edit(editingIndex);
@@ -110,7 +110,7 @@ public class EditStateTest {
         assertFalse("cell must not be editing", cell.isEditing());
         assertEquals("control editing must be unchanged", editingIndex, editableControl.getEditingIndex());
     }
-    
+
     /**
      * Sanity: fix doesn't interfere with RT-31165
      */
@@ -122,8 +122,8 @@ public class EditStateTest {
         cell.updateIndex(editingIndex);
         assertEditingCellInvariant(editableControl, cell, editingIndex);
     }
-    
-    
+
+
     @Test
     public void testCommitEditOnCell() {
         int editingIndex = 1;
@@ -136,7 +136,7 @@ public class EditStateTest {
         assertEquals("control editingIndex must be reset", -1, editableControl.getEditingIndex());
         assertEquals("edited value must be committed", edited, editableControl.getValueAt(editingIndex));
     }
-    
+
     @Test
     public void testCancelEditOnCell() {
         int editingIndex = 1;
@@ -147,7 +147,7 @@ public class EditStateTest {
         assertFalse("sanity: cell must not be editing", cell.isEditing());
         assertEquals("control editingIndex must be reset", -1, editableControl.getEditingIndex());
     }
-    
+
     @Test
     public void testStartEditOnCell() {
         int editingIndex = 1;
@@ -155,7 +155,7 @@ public class EditStateTest {
         cell.startEdit();
         assertEditingCellInvariant(editableControl, cell, editingIndex);
     }
-    
+
     @Test
     public void testCancelEditOnControl() {
         int editingIndex = 1;
@@ -166,7 +166,7 @@ public class EditStateTest {
         assertEquals("sanity: cell index unchanged", editingIndex, cell.getIndex());
         assertFalse("cell must not be editing", cell.isEditing());
     }
-    
+
     @Test
     public void testToggleEditOnControl() {
         int editingIndex = 1;
@@ -195,20 +195,20 @@ public class EditStateTest {
 //        assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
         assertEquals(eControl.getValueAt(editingIndex), cell.getItem());
     }
- 
+
  //-----------------------
-    
+
     private IndexedCell createEditableCellAt(int editingIndex) {
         IndexedCell cell = editableControl.createEditableCell();
         cell.updateIndex(editingIndex);
         return cell;
     }
-    
+
 //----------- parameterized in xxCell
-    
+
     @Parameters(name = "{index} - {1}")
     public static Collection selectionModes() {
-        return Arrays.asList(new Object[][] { 
+        return Arrays.asList(new Object[][] {
             { (Supplier) EditStateTest::createEditableListView, "ListView/-Cell"},
             { (Supplier) EditStateTest::createEditableTableView, "TableView/-Cell"},
             { (Supplier) EditStateTest::createEditableTreeView, "TreeView/-Cell"},
@@ -219,8 +219,8 @@ public class EditStateTest {
         this.controlSupplier = controlSupplier;
         this.typeMessage = typeMessage;
     }
-//-------------- setup   
-    
+//-------------- setup
+
     @Test
     public void testInitialState() {
         // control
@@ -236,7 +236,7 @@ public class EditStateTest {
         // FIXME: add api to EditableControl?
 //      assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
    }
-    
+
     public static EditableControl<ListView, ListCell> createEditableListView() {
         EditableControl.EListView control = new EditableControl.EListView(FXCollections
                 .observableArrayList("Item1", "Item2", "Item3", "Item4"));
@@ -245,14 +245,14 @@ public class EditStateTest {
         control.getFocusModel().focus(-1);
         return control;
     }
-    
+
     public static EditableControl<TreeView, TreeCell> createEditableTreeView() {
         TreeItem rootItem = new TreeItem<>("root");
         rootItem.getChildren().addAll(
                 new TreeItem<>("one"),
                 new TreeItem<>("two"),
                 new TreeItem<>("three")
-                
+
                 );
         EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
         treeView.setShowRoot(false);
@@ -261,13 +261,13 @@ public class EditStateTest {
         treeView.getFocusModel().focus(-1);
         return treeView;
     }
-    
+
     public static EditableControl<TableView, TableCell> createEditableTableView() {
-        ObservableList<TableColumn> items = 
+        ObservableList<TableColumn> items =
 //                withExtractor
 //                ? FXCollections.observableArrayList(
 //                        e -> new Observable[] { e.textProperty() })
-//                : 
+//                :
                     FXCollections.observableArrayList();
         items.addAll(new TableColumn("first"), new TableColumn("second"),
                 new TableColumn("third"));
@@ -283,7 +283,7 @@ public class EditStateTest {
         table.getFocusModel().focus(-1);
         return table;
     }
-    
+
     /**
      * @return
      */
@@ -292,7 +292,7 @@ public class EditStateTest {
         return createEditableTreeView();
 //        return createEditableTableView();
     }
-    
+
     @Before
     public void setup() {
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
@@ -305,7 +305,7 @@ public class EditStateTest {
 //        editableControl = createEditableControl();
         editableControl = controlSupplier.get();
     }
- 
+
 
     @After
     public void cleanup() {

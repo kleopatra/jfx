@@ -44,7 +44,7 @@ import javafx.scene.control.TreeView.EditEvent;
  */
 public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
 
-//----------- overridden test: failures understood - 
+//----------- overridden test: failures understood -
 
     /**
      * Bug: Tree editing state not updated from cell.startEdit
@@ -59,7 +59,7 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
         assertTrue(cell.isEditing());
         assertEquals(cellIndex, editableView.getViewEditingIndex());
     }
-    
+
     /**
      * Bug: Tree editing state not updated from cell.startEdit
      */
@@ -77,15 +77,15 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
         // Note: we don't get here until start updates tree editing state!
         editableView.assertStartEditEvent(events.get(0), cellIndex);
     }
-    
+
 
     /**
-     * 
-     * treeCell.cancelEdit throws NPE if at the time of calling the tree's 
+     *
+     * treeCell.cancelEdit throws NPE if at the time of calling the tree's
      * editingItem == null (which it is after tree.edit(null).
-     * 
+     *
      * No: was caused in this branch by trying to fix editing event state.
-     * 
+     *
      * No test in TreeCellTest!
      */
     @Override
@@ -100,10 +100,10 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
     }
 
     /**
-     * the commit assert is hampered by 
+     * the commit assert is hampered by
      * https://bugs.openjdk.java.net/browse/JDK-8187473 and
      * https://bugs.openjdk.java.net/browse/JDK-8187309
-     * 
+     *
      * Both roughly the same: cell commit changes the value of the treeItem
      * directly (vs. having a default handler doing so)
      */
@@ -121,9 +121,9 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
         assertEquals(1, events.size());
         editableView.assertCommitEditEvent(events.get(0), cellIndex, value);
     }
-    
 
-//--------- overridden tests: failures not fully understood/ not reported    
+
+//--------- overridden tests: failures not fully understood/ not reported
     @Override
     @Test //@Ignore
     public void testCellCancelTerminatesViewEditing() {
@@ -212,7 +212,7 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
         @Override
         protected void setViewEditable(boolean editable) {
             view.setEditable(editable);
-            
+
         }
 
         @Override
@@ -258,11 +258,11 @@ public class TreeCellEditTest extends CellEditTestBase<TreeCell, TreeView> {
         protected TreeView createView() {
             TreeItem<String> root = new TreeItem<>("root");
             root.setExpanded(true);
-            root.getChildren().addAll(FXCollections.observableArrayList(new TreeItem<>("Four"), 
+            root.getChildren().addAll(FXCollections.observableArrayList(new TreeItem<>("Four"),
                 new TreeItem<>("Five"), new TreeItem<>("Fear"))); // "Flop", "Food", "Fizz")
             TreeView<String> tree = new TreeView<>(root);
             return tree;
         }
-        
+
     }
 }

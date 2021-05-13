@@ -43,8 +43,8 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
         assertEquals("value must not be changed", oldValue, tree.getControl().getTreeItem(editIndex).getValue());
         assertEquals(1, report.getEditEventSize());
     }
-    
-  //--------------------- old bugs, fixed in fx9    
+
+  //--------------------- old bugs, fixed in fx9
     @Test
     public void testTreeCellSkin() {
         TreeCell cell = new TreeCell();
@@ -52,7 +52,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
     }
 
 //----------------- implement super's assertions in terms of TreeView
-    
+
     @Override
     protected void assertValueAt(int index, Object editedValue,
             EditableControl<TreeView, TreeCell> control) {
@@ -67,7 +67,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
                 new TreeItem<>("one"),
                 new TreeItem<>("two"),
                 new TreeItem<>("three")
-                
+
                 );
         EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
         treeView.setShowRoot(false);

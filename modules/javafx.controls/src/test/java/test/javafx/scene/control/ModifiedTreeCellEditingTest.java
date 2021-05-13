@@ -49,21 +49,21 @@ import javafx.scene.control.TreeView.EditEvent;
 
 /**
  * Test TreeCell editing state updated on re-use (aka: updateIndex(old, new)).
- * 
+ *
  * This test is parameterized in cellIndex and editingIndex.
- * 
+ *
  */
 @RunWith(Parameterized.class)
 public class ModifiedTreeCellEditingTest {
     private TreeCell<String> cell;
     private TreeView<String> tree;
     private ObservableList<TreeItem<String>> model;
-    
+
     private int cellIndex;
     private int editingIndex;
-    
+
 //--------------- change off editing index
-    
+
     @Test
     public void testOffEditingIndex() {
         cell.updateIndex(editingIndex);
@@ -72,10 +72,10 @@ public class ModifiedTreeCellEditingTest {
         assertTrue("sanity: cell is editing", cell.isEditing());
         cell.updateIndex(cellIndex);
         assertEquals("sanity: cell index changed", cellIndex, cell.getIndex());
-        assertFalse("cell must not be editing on update from editingIndex " + editingIndex 
+        assertFalse("cell must not be editing on update from editingIndex " + editingIndex
                 + " to cellIndex " + cellIndex, cell.isEditing());
     }
-    
+
     @Test
     public void testCancelOffEditingIndex() {
         cell.updateIndex(editingIndex);
@@ -88,7 +88,7 @@ public class ModifiedTreeCellEditingTest {
         assertEquals("sanity: editingIndex unchanged", editingIndex, tree.getRow(editingItem));
         assertEquals("cell must have fired edit cancel", 1, events.size());
     }
-    
+
     /**
      * Extracted from above to formally ignore
      * FIXME: move the assert to the other method, once the issue is solved
@@ -102,16 +102,16 @@ public class ModifiedTreeCellEditingTest {
         List<EditEvent> events = new ArrayList<EditEvent>();
         tree.setOnEditCancel(events::add);
         cell.updateIndex(cellIndex);
-        assertEquals("cancel on updateIndex from " + editingIndex + " to " + cellIndex + "\n  ", 
+        assertEquals("cancel on updateIndex from " + editingIndex + " to " + cellIndex + "\n  ",
                 editingItem, events.get(0).getTreeItem());
     }
-    
+
     private String asString(EditEvent ev) {
         return "" + ev.getEventType() + "/ old: " + ev.getOldValue()
            + "/ new: " + ev.getNewValue()
            + "/ item: " + ev.getTreeItem();
     }
-    
+
 //--------------- change to editing index
 
 
@@ -123,10 +123,10 @@ public class ModifiedTreeCellEditingTest {
         assertFalse("sanity: cell must not be editing", cell.isEditing());
         cell.updateIndex(editingIndex);
         assertEquals("sanity: cell at editing index", editingIndex, cell.getIndex());
-        assertTrue("cell must be editing on update from " + cellIndex 
+        assertTrue("cell must be editing on update from " + cellIndex
                 + " to editingIndex " + editingIndex, cell.isEditing());
     }
-    
+
     @Test
     public void testStartEvent() {
         cell.updateIndex(cellIndex);
@@ -135,13 +135,13 @@ public class ModifiedTreeCellEditingTest {
         List<EditEvent> events = new ArrayList<EditEvent>();
         tree.setOnEditStart(events::add);
         cell.updateIndex(editingIndex);
-        assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex, 
+        assertEquals("cell must have fired edit start on update from " + cellIndex + " to " + editingIndex,
                 1, events.size());
         assertEquals("treeItem of start event ", editingItem, events.get(0).getTreeItem());
     }
-    
+
 //------------- parameterized
- 
+
     // Note: name property not supported before junit 4.11
     @Parameterized.Parameters //(name = "{index}: cellIndex {0}, editingIndex {1}")
     public static Collection<Object[]> data() {
@@ -161,7 +161,7 @@ public class ModifiedTreeCellEditingTest {
         this.editingIndex = editingIndex;
     }
 //-------------- setup and helpers
-    
+
     /**
      * Sanity: cell editing state updated when on editing index.
      */
@@ -172,7 +172,7 @@ public class ModifiedTreeCellEditingTest {
         tree.edit(editingItem);
         assertTrue("sanity: cell must be editing", cell.isEditing());
     }
-    
+
     @Test
     public void testCancelEditOnControl() {
         cell.updateIndex(editingIndex);
@@ -185,7 +185,7 @@ public class ModifiedTreeCellEditingTest {
         EditEvent cancelEvent = events.get(0);
         assertEquals(editingItem, cancelEvent.getTreeItem());
     }
-    
+
     @Test
     public void testCancelEditOnCell() {
         cell.updateIndex(editingIndex);
@@ -198,7 +198,7 @@ public class ModifiedTreeCellEditingTest {
         EditEvent cancelEvent = events.get(0);
         assertEquals(editingItem, cancelEvent.getTreeItem());
     }
-    
+
     /**
      * Sanity: cell editing state unchanged when off editing index.
      */
@@ -209,7 +209,7 @@ public class ModifiedTreeCellEditingTest {
         tree.edit(editingItem);
         assertFalse("sanity: cell editing must be unchanged", cell.isEditing());
     }
-    
+
     @Test
     public void testUpdateSameIndexWhileEdititing() {
         cell.updateIndex(editingIndex);
@@ -224,7 +224,7 @@ public class ModifiedTreeCellEditingTest {
         assertTrue(cell.isEditing());
         assertEquals(0, events.size());
     }
-    
+
     @Test
     public void testUpdateSameIndexWhileNotEdititing() {
         cell.updateIndex(cellIndex);
@@ -239,10 +239,10 @@ public class ModifiedTreeCellEditingTest {
         assertFalse(cell.isEditing());
         assertEquals(0, events.size());
     }
-   
+
     @Before public void setup() {
         cell = new TreeCell<String>();
-        model = FXCollections.observableArrayList(new TreeItem<>("zero"), 
+        model = FXCollections.observableArrayList(new TreeItem<>("zero"),
                 new TreeItem<>("one"), new TreeItem<>("two")); // "Flop", "Food", "Fizz"
         TreeItem<String> root = new TreeItem<>("root");
         root.getChildren().addAll(model);
@@ -256,7 +256,7 @@ public class ModifiedTreeCellEditingTest {
         cell.updateTreeView(tree);
         assertFalse("sanity: cellIndex not same as editingIndex", cellIndex == editingIndex);
         assertTrue("sanity: valid editingIndex", editingIndex < model.size());
-        
+
     }
 
 }
