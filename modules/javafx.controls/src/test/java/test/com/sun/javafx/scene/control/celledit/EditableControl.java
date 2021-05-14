@@ -51,6 +51,12 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
      * Creates and returns a cell produced with the cellFactory.
      */
     I createCell();
+    
+    /**
+     * Returns the control that's associated with the given cell.
+     * 
+     */
+    C getCellControl(I cell);
 
     void fireEvent(Event ev);
 
@@ -87,13 +93,15 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
      */
     Object getValueAt(int index);
 
+    void removeItemAt(int index);
+    void addItemAt(int index);
+    
     /**
      * Returns the value at index if targetColumn is null or at index and targetColumn if not.
      *
      * @param index
      * @return
      */
-//    Object getValueAt(int index);
     default Object getTargetColumn() {
         return null;
     }
@@ -152,6 +160,11 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         public ListCell createCell() {
             return (ListCell) getCellFactory().call(this);
         }
+        
+        @Override
+        public ListView getCellControl(ListCell cell) {
+            return cell.getListView();
+        }
 
         @Override
         public Object getValueAt(int index) {
@@ -161,6 +174,16 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         @Override
         public EditEventReport createEditReport() {
             return new ListViewEditReport(this);
+        }
+
+        @Override
+        public void removeItemAt(int index) {
+            getItems().remove(index);
+        }
+
+        @Override
+        public void addItemAt(int index) {
+            getItems().add(index, "added" + index);
         }
 
     }
@@ -294,6 +317,24 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
             return new TableViewEditReport(this);
         }
 
+        @Override
+        public TableView getCellControl(TableCell cell) {
+            return cell.getTableView();
+        }
+
+        @Override
+        public void removeItemAt(int index) {
+            getItems().remove(index);
+            
+        }
+
+        @Override
+        public void addItemAt(int index) {
+            // TODO Auto-generated method stub
+            getItems().add(index, "added" + index);
+            
+        }
+
 
     }
 
@@ -374,6 +415,30 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         @Override
         public EditEventReport createEditReport() {
             return new TreeViewEditReport(this);
+        }
+
+        @Override
+        public TreeView getCellControl(TreeCell cell) {
+            return cell.getTreeView();
+        }
+
+        @Override
+        public void removeItemAt(int index) {
+            TreeItem item = getTreeItem(index);
+            TreeItem parent = item.getParent();
+            if (parent != null) {
+                parent.getChildren().remove(item);
+            }
+        }
+
+        @Override
+        public void addItemAt(int index) {
+            TreeItem item = getTreeItem(index);
+            TreeItem parent = item.getParent();
+            if (parent != null) {
+                int indexInChildren = parent.getChildren().indexOf(item);
+                parent.getChildren().add(indexInChildren, new TreeItem("added" + indexInChildren));
+            }
         }
 
     }

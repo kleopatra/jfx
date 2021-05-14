@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -67,8 +68,6 @@ public class EditStateTest {
     private StageLoader stageLoader;
     private Supplier<EditableControl> controlSupplier;
     private String typeMessage;
-
-//----------------- test editEvents
 
 //----------------- test state transitions
 
@@ -196,8 +195,113 @@ public class EditStateTest {
         assertEquals(eControl.getValueAt(editingIndex), cell.getItem());
     }
 
+ //------------- test editing state when changing related properties
+    
+    @Test
+    public void testRemoveItemBeforeUpdatesEditingIndex() {
+        int editingIndex = 2;
+        Object item = editableControl.getValueAt(editingIndex);
+        editableControl.edit(editingIndex);
+        editableControl.removeItemAt(editingIndex -1);
+        assertEquals(editingIndex - 1, editableControl.getEditingIndex());
+    }
+    
+    @Test
+    public void testRemoveItemBeforeKeepsEditingItem() {
+        int editingIndex = 2;
+        Object item = editableControl.getValueAt(editingIndex);
+        editableControl.edit(editingIndex);
+        editableControl.removeItemAt(editingIndex -1);
+        assertEquals(item, editableControl.getValueAt(editingIndex));
+    }
+    
+    /**
+     * FIXME: cell must cancel its editing when cell editable is false while editing
+     * here: in scenegraph
+     */
+    @Test
+    public void testCellEditingOnSetEditableFalseInScene() {
+        new StageLoader(editableControl.getControl());
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        editableControl.edit(editingIndex);
+        cell.setEditable(false);
+        assertFalse("cell must not be editing when editable is set to false while editing", cell.isEditing());
+    }
+    
+    /**
+     * FIXME: cell must cancel its editing when cell editable is false while editing
+     */
+    @Test
+    public void testCellEditingOnSetEditableFalse() {
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        editableControl.edit(editingIndex);
+        cell.setEditable(false);
+        assertFalse("cell must not be editing when editable is set to false while editing", cell.isEditing());
+    }
+    
+    /**
+     * FIXME: control must cancel its editing when control editable is false while editing
+     * here: in scenegraph
+     */
+    @Test
+    public void testControlEditingOnSetEditableFalseInScene() {
+        new StageLoader(editableControl.getControl());
+        editableControl.edit(1);
+        editableControl.setEditable(false);
+        assertEquals("control must not be editing when editable is set to false while editing", -1, editableControl.getEditingIndex());
+    }
+    
+    /**
+     * FIXME: control must cancel its editing when editable is false while editing
+     */
+    @Test
+    public void testControlEditingOnSetEditableFalse() {
+        editableControl.edit(1);
+        editableControl.setEditable(false);
+        assertEquals("control must not be editing when editable is set to false while editing", -1, editableControl.getEditingIndex());
+    }
+    
+ //------------ test state without tree
+    
+    /**
+     * JDK-8188026: all cell implementations in package cell violate their contract by
+     * strengthening their precondition
+     * 
+     * Note: for base xxCells, there are tests (if there _are_ tests about editing ;)
+     * for the contrary, that is explicitly allow null control, f.i. 
+     * ListCellTest.editCellWithNullListViewResultsInNoExceptions
+     */
+    @Ignore("JDK-8188026")
+    @Test
+    public void testStartEditNullControlAllowed() {
+        IndexedCell cell = editableControl.createCell();
+        cell.startEdit();
+        // Note: not starting edit is a side-effect of being empty
+        assertFalse("sanity", cell.isEditing());
+    }
+    
+    @Ignore("JDK-8188026")
+    @Test
+    public void testCancelEditNullControlAllowed() {
+        IndexedCell cell = editableControl.createCell();
+        cell.cancelEdit();
+    }
+    
+    @Ignore("JDK-8188026")
+    @Test
+    public void testCommitEditNullControlAllowed() {
+        IndexedCell cell = editableControl.createCell();
+        cell.commitEdit("edited");
+    }
+    
  //-----------------------
 
+    /**
+     * Creates and returns an editable cell at the given index.
+     * Note: neither control nor cell are in editing state!
+     */
     private IndexedCell createEditableCellAt(int editingIndex) {
         IndexedCell cell = editableControl.createEditableCell();
         cell.updateIndex(editingIndex);
@@ -233,8 +337,11 @@ public class EditStateTest {
         assertFalse("cell must not be editing", cell.isEditing());
         assertTrue("cell must be empty", cell.isEmpty());
         assertEquals("cell index must be negative", -1, cell.getIndex());
-        // FIXME: add api to EditableControl?
-//      assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
+        assertEquals("sanity: cell must be attached to control", 
+              editableControl.getControl(), editableControl.getCellControl(cell));
+        // not editable cell
+        cell = editableControl.createCell();
+        assertNull(editableControl.getCellControl(cell));
    }
 
     public static EditableControl<ListView, ListCell> createEditableListView() {
@@ -258,6 +365,7 @@ public class EditStateTest {
         treeView.setShowRoot(false);
         treeView.setEditable(true);
         treeView.setCellFactory(TextFieldTreeCell.forTreeView());
+//        treeView.setCellFactory(c -> new TreeCell());
         treeView.getFocusModel().focus(-1);
         return treeView;
     }
@@ -284,14 +392,6 @@ public class EditStateTest {
         return table;
     }
 
-    /**
-     * @return
-     */
-    private EditableControl createEditableControl() {
-//        return createEditableListView();
-        return createEditableTreeView();
-//        return createEditableTableView();
-    }
 
     @Before
     public void setup() {

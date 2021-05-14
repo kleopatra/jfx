@@ -499,7 +499,7 @@ public class TreeCell<T> extends IndexedCell<T> {
             // appear that a cell is uneditable as, despite being clicked, it
             // will not change to the editing state as a layout of VirtualFlow
             // is immediately invoked, which forces all cells to be updated.
-            System.out.println("editing and same index: " + newIndex);
+//            System.out.println("editing and same index: " + newIndex);
             // there's a test in TreeViewTest.test_rt31165 which does not
             // fail (fx16+) when updating all unconditonally
         } else {

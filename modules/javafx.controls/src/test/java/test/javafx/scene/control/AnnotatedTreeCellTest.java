@@ -547,6 +547,23 @@ public class AnnotatedTreeCellTest {
         assertValueListenersDoesNotContain(fm.focusedIndexProperty(), listener);
     }
 
+    //----------------treeCell without TreeView
+    
+    /**
+     * A bit pathological: updateTreeItem without TreeItem
+     * 
+     * There's no contract as to what should happen - looks like nothing ;)
+     * cell remains empty, its item is not set
+     */
+    @Test
+    public void testUpdateTreeItemNoTree() {
+        cell.updateTreeItem(root);
+        assertEquals(root, cell.getTreeItem());
+        assertTrue(cell.isEmpty());
+        assertNull(cell.getItem());
+    }
+    
+    
     /*********************************************************************
      * Tests for all things related to editing one of these guys         *
      ********************************************************************/
@@ -571,6 +588,7 @@ public class AnnotatedTreeCellTest {
     @Test public void editCellWithNullTreeViewResultsInNoExceptions() {
         cell.updateIndex(1);
         cell.startEdit();
+        assertFalse("cell without tree must not be editing", cell.isEditing());
     }
 
     @Test public void editCellOnNonEditableTreeDoesNothing() {
