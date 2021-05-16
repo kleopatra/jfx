@@ -4,6 +4,7 @@
  */
 package test.com.sun.javafx.scene.control.celledit;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -19,6 +20,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.util.Callback;
 
 /**
@@ -28,6 +33,56 @@ import javafx.util.Callback;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public interface EditableControl<C extends Control, I extends IndexedCell> {
+
+//------------ factory methods to create the decorated controls
+    
+    public static EditableControl<ListView, ListCell> createEditableListView() {
+        EditableControl.EListView control = new EditableControl.EListView(FXCollections
+                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
+        control.setEditable(true);
+        control.setCellFactory(TextFieldListCell.forListView());
+        control.getFocusModel().focus(-1);
+        return control;
+    }
+
+    public static EditableControl<TreeView, TreeCell> createEditableTreeView() {
+        TreeItem rootItem = new TreeItem<>("root");
+        rootItem.getChildren().addAll(
+                new TreeItem<>("zero"),
+                new TreeItem<>("one"),
+                new TreeItem<>("two")
+
+                );
+        EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
+        treeView.setShowRoot(false);
+        treeView.setEditable(true);
+        treeView.setCellFactory(TextFieldTreeCell.forTreeView());
+        treeView.getFocusModel().focus(-1);
+        return treeView;
+    }
+
+    public static EditableControl<TableView, TableCell> createEditableTableView() {
+        ObservableList<TableColumn> items =
+//                withExtractor
+//                ? FXCollections.observableArrayList(
+//                        e -> new Observable[] { e.textProperty() })
+//                :
+                    FXCollections.observableArrayList();
+        items.addAll(new TableColumn("first"), new TableColumn("second"),
+                new TableColumn("third"));
+        EditableControl.ETableView table = new EditableControl.ETableView(items);
+        table.setEditable(true);
+//        table.getSelectionModel().setCellSelectionEnabled(cellSelectionEnabled);
+
+        TableColumn<TableColumn, String> first = new TableColumn<>("Text");
+        first.setCellFactory(TextFieldTableCell.forTableColumn());
+        first.setCellValueFactory(new PropertyValueFactory<>("text"));
+
+        table.getColumns().addAll(first);
+        table.getFocusModel().focus(-1);
+        return table;
+    }
+
 
     void setEditable(boolean editable);
     boolean isEditable();

@@ -197,6 +197,7 @@ public class EditStateTest {
 
  //------------- test editing state when changing related properties
     
+    @Ignore("model change")
     @Test
     public void testRemoveItemBeforeUpdatesEditingIndex() {
         int editingIndex = 2;
@@ -206,6 +207,7 @@ public class EditStateTest {
         assertEquals(editingIndex - 1, editableControl.getEditingIndex());
     }
     
+    @Ignore("model change")
     @Test
     public void testRemoveItemBeforeKeepsEditingItem() {
         int editingIndex = 2;
@@ -219,6 +221,7 @@ public class EditStateTest {
      * FIXME: cell must cancel its editing when cell editable is false while editing
      * here: in scenegraph
      */
+    @Ignore("editable change")
     @Test
     public void testCellEditingOnSetEditableFalseInScene() {
         new StageLoader(editableControl.getControl());
@@ -232,6 +235,7 @@ public class EditStateTest {
     /**
      * FIXME: cell must cancel its editing when cell editable is false while editing
      */
+    @Ignore("editable change")
     @Test
     public void testCellEditingOnSetEditableFalse() {
         int editingIndex = 1;
@@ -245,6 +249,7 @@ public class EditStateTest {
      * FIXME: control must cancel its editing when control editable is false while editing
      * here: in scenegraph
      */
+    @Ignore("editable change")
     @Test
     public void testControlEditingOnSetEditableFalseInScene() {
         new StageLoader(editableControl.getControl());
@@ -256,6 +261,7 @@ public class EditStateTest {
     /**
      * FIXME: control must cancel its editing when editable is false while editing
      */
+    @Ignore("editable change")
     @Test
     public void testControlEditingOnSetEditableFalse() {
         editableControl.edit(1);
@@ -302,20 +308,20 @@ public class EditStateTest {
      * Creates and returns an editable cell at the given index.
      * Note: neither control nor cell are in editing state!
      */
-    private IndexedCell createEditableCellAt(int editingIndex) {
+    private IndexedCell createEditableCellAt(int index) {
         IndexedCell cell = editableControl.createEditableCell();
-        cell.updateIndex(editingIndex);
+        cell.updateIndex(index);
         return cell;
     }
 
 //----------- parameterized in xxCell
 
     @Parameters(name = "{index} - {1}")
-    public static Collection selectionModes() {
+    public static Collection parameters() {
         return Arrays.asList(new Object[][] {
-            { (Supplier) EditStateTest::createEditableListView, "ListView/-Cell"},
-            { (Supplier) EditStateTest::createEditableTableView, "TableView/-Cell"},
-            { (Supplier) EditStateTest::createEditableTreeView, "TreeView/-Cell"},
+            { (Supplier) EditableControl::createEditableListView, "ListView/-Cell"},
+            { (Supplier) EditableControl::createEditableTableView, "TableView/-Cell"},
+            { (Supplier) EditableControl::createEditableTreeView, "TreeView/-Cell"},
         });
     }
 
@@ -343,55 +349,6 @@ public class EditStateTest {
         cell = editableControl.createCell();
         assertNull(editableControl.getCellControl(cell));
    }
-
-    public static EditableControl<ListView, ListCell> createEditableListView() {
-        EditableControl.EListView control = new EditableControl.EListView(FXCollections
-                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
-        control.setEditable(true);
-        control.setCellFactory(TextFieldListCell.forListView());
-        control.getFocusModel().focus(-1);
-        return control;
-    }
-
-    public static EditableControl<TreeView, TreeCell> createEditableTreeView() {
-        TreeItem rootItem = new TreeItem<>("root");
-        rootItem.getChildren().addAll(
-                new TreeItem<>("one"),
-                new TreeItem<>("two"),
-                new TreeItem<>("three")
-
-                );
-        EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
-        treeView.setShowRoot(false);
-        treeView.setEditable(true);
-        treeView.setCellFactory(TextFieldTreeCell.forTreeView());
-//        treeView.setCellFactory(c -> new TreeCell());
-        treeView.getFocusModel().focus(-1);
-        return treeView;
-    }
-
-    public static EditableControl<TableView, TableCell> createEditableTableView() {
-        ObservableList<TableColumn> items =
-//                withExtractor
-//                ? FXCollections.observableArrayList(
-//                        e -> new Observable[] { e.textProperty() })
-//                :
-                    FXCollections.observableArrayList();
-        items.addAll(new TableColumn("first"), new TableColumn("second"),
-                new TableColumn("third"));
-        EditableControl.ETableView table = new EditableControl.ETableView(items);
-        table.setEditable(true);
-//        table.getSelectionModel().setCellSelectionEnabled(cellSelectionEnabled);
-
-        TableColumn<TableColumn, String> first = new TableColumn<>("Text");
-        first.setCellFactory(TextFieldTableCell.forTableColumn());
-        first.setCellValueFactory(new PropertyValueFactory<>("text"));
-
-        table.getColumns().addAll(first);
-        table.getFocusModel().focus(-1);
-        return table;
-    }
-
 
     @Before
     public void setup() {

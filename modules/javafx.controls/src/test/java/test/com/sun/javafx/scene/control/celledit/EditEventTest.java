@@ -97,6 +97,9 @@ public class EditEventTest {
         report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
     }
 
+    /**
+     * Test do-nothing block in indexChanged (was RT-31165, is JDK-8123482)
+     */
     @Test
     public void testUpdateSameIndexWhileEditing() {
         int editingIndex = 1;
@@ -107,6 +110,9 @@ public class EditEventTest {
         assertEquals(0, report.getEditEventSize());
     }
 
+    /**
+     * Test do-nothing block in indexChanged (was RT-31165, is JDK-8123482)
+     */
     @Test
     public void testUpdateSameIndexWhileNotEditing() {
         int cellIndex = 2;
@@ -163,14 +169,36 @@ public class EditEventTest {
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
 
+    /**
+     * Note: on toggle edit, the sequence of cancel (from old editing) and start (from
+     * new editing) is not specified: it depends on the sequence of attaching the
+     * cell to the control (because all are listening to the editing location property
+     * on the control).
+     * 
+     * The only difference between these two tests is the sequence in which the 
+     * cells are created (and attached to the control)
+     */
+    @Test
+    public void testToggleEditOnControlInverseCreatingSequence() {
+        // note: do not inline - the sequence of creation is important
+        IndexedCell nextCell = createEditableCellAt(2);
+        IndexedCell cell = createEditableCellAt(1);
+        assertToggleEdit(cell, nextCell);
+    }
+    
     @Test
     public void testToggleEditOnControl() {
-        int editingIndex = 1;
-        int nextEditingIndex = 2;
-        IndexedCell cell = createEditableCellAt(editingIndex);
-        IndexedCell nextCell = createEditableCellAt(nextEditingIndex);
+        // note: do not inline - the sequence of creation is important
+        IndexedCell cell = createEditableCellAt(1);
+        IndexedCell nextCell = createEditableCellAt(2);
+        assertToggleEdit(cell, nextCell);
+    }
+    
+    private void assertToggleEdit(IndexedCell firstEditingCell, IndexedCell nextEditingCell) {
+        int editingIndex = firstEditingCell.getIndex();
+        int nextEditingIndex = nextEditingCell.getIndex();
         editableControl.edit(editingIndex);
-        assertEditingCellInvariant(editableControl, cell, editingIndex);
+        assertEditingCellInvariant(editableControl, firstEditingCell, editingIndex);
         EditEventReport report = editableControl.createEditReport();
         editableControl.edit(nextEditingIndex);
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
@@ -186,26 +214,30 @@ public class EditEventTest {
         assertTrue("cell must be editing", cell.isEditing());
         assertEquals("cell index must be same as control editingIndex", eControl.getEditingIndex(), cell.getIndex());
         // FIXME: add api to EditableControl?
-//        assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
+        assertEquals("sanity: cell must be attached to control", eControl.getControl(), eControl.getCellControl(cell));
         assertEquals(eControl.getValueAt(editingIndex), cell.getItem());
     }
 
  //-----------------------
 
-    private IndexedCell createEditableCellAt(int editingIndex) {
+    /**
+     * Creates and returns an editable cell at the given index.
+     * Note: neither control nor cell are in editing state!
+     */
+    private IndexedCell createEditableCellAt(int index) {
         IndexedCell cell = editableControl.createEditableCell();
-        cell.updateIndex(editingIndex);
+        cell.updateIndex(index);
         return cell;
     }
 
 //----------- parameterized in xxCell
 
     @Parameters(name = "{index} - {1}")
-    public static Collection selectionModes() {
+    public static Collection parameters() {
         return Arrays.asList(new Object[][] {
-            { (Supplier) EditEventTest::createEditableListView, "ListView/-Cell"},
-            { (Supplier) EditEventTest::createEditableTableView, "TableView/-Cell"},
-            { (Supplier) EditEventTest::createEditableTreeView, "TreeView/-Cell"},
+            { (Supplier) EditableControl::createEditableListView, "ListView/-Cell"},
+            { (Supplier) EditableControl::createEditableTableView, "TableView/-Cell"},
+            { (Supplier) EditableControl::createEditableTreeView, "TreeView/-Cell"},
         });
     }
 
@@ -227,66 +259,21 @@ public class EditEventTest {
         assertFalse("cell must not be editing", cell.isEditing());
         assertTrue("cell must be empty", cell.isEmpty());
         assertEquals("cell index must be negative", -1, cell.getIndex());
-        // FIXME: add api to EditableControl?
-//      assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
+        assertEquals("sanity: cell must be attached to control", 
+              editableControl.getControl(), editableControl.getCellControl(cell));
+        // not editable cell
+        cell = editableControl.createCell();
+        assertNull(editableControl.getCellControl(cell));
    }
-
-    public static EditableControl<ListView, ListCell> createEditableListView() {
-        EditableControl.EListView control = new EditableControl.EListView(FXCollections
-                .observableArrayList("Item1", "Item2", "Item3", "Item4"));
-        control.setEditable(true);
-        control.setCellFactory(TextFieldListCell.forListView());
-        control.getFocusModel().focus(-1);
-        return control;
-    }
-
-    public static EditableControl<TreeView, TreeCell> createEditableTreeView() {
-        TreeItem rootItem = new TreeItem<>("root");
-        rootItem.getChildren().addAll(
-                new TreeItem<>("zero"),
-                new TreeItem<>("one"),
-                new TreeItem<>("two")
-
-                );
-        EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
-        treeView.setShowRoot(false);
-        treeView.setEditable(true);
-        treeView.setCellFactory(TextFieldTreeCell.forTreeView());
-        treeView.getFocusModel().focus(-1);
-        return treeView;
-    }
-
-    public static EditableControl<TableView, TableCell> createEditableTableView() {
-        ObservableList<TableColumn> items =
-//                withExtractor
-//                ? FXCollections.observableArrayList(
-//                        e -> new Observable[] { e.textProperty() })
-//                :
-                    FXCollections.observableArrayList();
-        items.addAll(new TableColumn("first"), new TableColumn("second"),
-                new TableColumn("third"));
-        EditableControl.ETableView table = new EditableControl.ETableView(items);
-        table.setEditable(true);
-//        table.getSelectionModel().setCellSelectionEnabled(cellSelectionEnabled);
-
-        TableColumn<TableColumn, String> first = new TableColumn<>("Text");
-        first.setCellFactory(TextFieldTableCell.forTableColumn());
-        first.setCellValueFactory(new PropertyValueFactory<>("text"));
-
-        table.getColumns().addAll(first);
-        table.getFocusModel().focus(-1);
-        return table;
-    }
-
-    /**
-     * @return
-     */
-    private EditableControl createEditableControl() {
-//        return createEditableListView();
-        return createEditableTreeView();
-//        return createEditableTableView();
-    }
-
+//    /**
+//     * @return
+//     */
+//    private EditableControl createEditableControl() {
+////        return createEditableListView();
+//        return createEditableTreeView();
+////        return createEditableTableView();
+//    }
+//
     @Before
     public void setup() {
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
