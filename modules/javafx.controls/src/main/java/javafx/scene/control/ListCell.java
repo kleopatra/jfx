@@ -433,8 +433,8 @@ public class ListCell<T> extends IndexedCell<T> {
 
         if (list != null) {
             int editingIndex = 
-//                    editingIndexAtStartEdit; 
-                list.getEditingIndex();
+                    editingIndexAtStartEdit; 
+//                list.getEditingIndex();
 
             // reset the editing index on the ListView
             if (updateEditingIndex) list.edit(-1);
