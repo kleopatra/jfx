@@ -338,6 +338,9 @@ public class ListCell<T> extends IndexedCell<T> {
                 throw new IllegalStateException("cell index must not be -1 while editing");
         } else {
 //            System.out.println("normal: ");
+            if (oldIndex == 16) {
+                int dummy = 16;
+            }
             updateItem(oldIndex);
             updateSelection();
             updateFocus();
@@ -447,7 +450,7 @@ public class ListCell<T> extends IndexedCell<T> {
 
             list.fireEvent(new ListView.EditEvent<T>(list,
                     ListView.<T>editCancelEvent(),
-                    null,
+                    getItem(),
                     editingIndex));
         }
     }
