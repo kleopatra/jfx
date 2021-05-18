@@ -330,8 +330,8 @@ public class TableCell<S,T> extends IndexedCell<T> {
             );
 
             Event.fireEvent(column, editEvent);
+            editingCellAtStartEdit = new TablePosition<>(table, getIndex(), column);
         }
-        editingCellAtStartEdit = new TablePosition<>(table, getIndex(), column);
     }
 
     TablePosition<S, ?> editingCellAtStartEdit = null;

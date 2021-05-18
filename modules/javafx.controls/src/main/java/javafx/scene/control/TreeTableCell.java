@@ -333,8 +333,8 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
             );
 
             Event.fireEvent(column, editEvent);
+            editingCellAtStartEdit = new TreeTablePosition<>(table, getIndex(), column);
         }
-        editingCellAtStartEdit = new TreeTablePosition<>(table, getIndex(), column);
     }
 
     TreeTablePosition<S, ?> editingCellAtStartEdit = null;
