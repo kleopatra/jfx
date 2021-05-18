@@ -331,7 +331,10 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
             Event.fireEvent(column, editEvent);
         }
+        editingCellAtStartEdit = new TablePosition<>(table, getIndex(), column);
     }
+
+    TablePosition<S, ?> editingCellAtStartEdit = null;
 
     /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
@@ -383,6 +386,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
         // reset the editing index on the TableView
         if (table != null) {
             TablePosition<S,?> editingCell = table.getEditingCell();
+            editingCell = editingCellAtStartEdit;
             if (updateEditingIndex) table.edit(-1, null);
 
             // request focus back onto the table, only if the current focus

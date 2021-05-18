@@ -38,21 +38,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import static org.junit.Assert.*;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.IndexedCell;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldListCell;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.control.cell.TextFieldTreeCell;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -237,6 +223,7 @@ public class EditEventTest {
         return Arrays.asList(new Object[][] {
             { (Supplier) EditableControl::createEditableListView, "ListView/-Cell"},
             { (Supplier) EditableControl::createEditableTableView, "TableView/-Cell"},
+            { (Supplier) EditableControl::createEditableTreeTableView, "TreeTableView/-Cell"},
             { (Supplier) EditableControl::createEditableTreeView, "TreeView/-Cell"},
         });
     }

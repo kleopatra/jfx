@@ -334,8 +334,11 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
 
             Event.fireEvent(column, editEvent);
         }
+        editingCellAtStartEdit = new TreeTablePosition<>(table, getIndex(), column);
     }
 
+    TreeTablePosition<S, ?> editingCellAtStartEdit = null;
+    
     /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
         if (! isEditing()) return;
@@ -389,8 +392,10 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
         // reset the editing index on the TableView
         if (table != null) {
             @SuppressWarnings("unchecked")
-            TreeTablePosition<S,T> editingCell = (TreeTablePosition<S,T>) table.getEditingCell();
+            TreeTablePosition<S,?> editingCell = // (TreeTablePosition<S,T>) 
+                table.getEditingCell();
 
+            editingCell = editingCellAtStartEdit;
             if (updateEditingIndex) table.edit(-1, null);
 
             // request focus back onto the table, only if the current focus
@@ -399,10 +404,10 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
             // It would be rude of us to request it back again.
             ControlUtils.requestFocusOnControlOnlyIfCurrentFocusOwnerIsChild(table);
 
-            CellEditEvent<S,T> editEvent = new CellEditEvent<S,T>(
+            CellEditEvent<S,?> editEvent = new CellEditEvent<>(
                 table,
                 editingCell,
-                TreeTableColumn.<S,T>editCancelEvent(),
+                TreeTableColumn.editCancelEvent(),
                 null
             );
 

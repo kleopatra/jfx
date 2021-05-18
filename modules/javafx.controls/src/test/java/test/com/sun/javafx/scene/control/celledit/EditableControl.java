@@ -13,17 +13,24 @@ import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTablePosition;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.util.Callback;
 
 /**
@@ -51,7 +58,7 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
                 new TreeItem<>("zero"),
                 new TreeItem<>("one"),
                 new TreeItem<>("two")
-
+                
                 );
         EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
         treeView.setShowRoot(false);
@@ -60,7 +67,31 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
         treeView.getFocusModel().focus(-1);
         return treeView;
     }
+    
+    public static EditableControl<TreeTableView, TreeTableCell> createEditableTreeTableView() {
+        ObservableList<MenuItem> items =
+//              withExtractor
+//              ? FXCollections.observableArrayList(
+//                      e -> new Observable[] { e.textProperty() })
+//              :
+                  FXCollections.observableArrayList();
+        items.addAll(new MenuItem("first"), new MenuItem("second"),
+              new MenuItem("third"));
+        TreeItem root = new TreeItem(new MenuItem("root"));
+        items.forEach(menuItem -> root.getChildren().add(new TreeItem(menuItem)));
+        EditableControl.ETreeTableView treeTable = new EditableControl.ETreeTableView(root);
+        treeTable.setShowRoot(false);
+        treeTable.setEditable(true);
+        
+        TreeTableColumn<MenuItem, String> column = new TreeTableColumn<>("Text"); 
+        column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+        column.setCellValueFactory(new TreeItemPropertyValueFactory<>("text"));
+        treeTable.getColumns().addAll(column);
+        treeTable.getFocusModel().focus(-1);
+        return treeTable;
+    }
 
+    
     public static EditableControl<TableView, TableCell> createEditableTableView() {
         ObservableList<TableColumn> items =
 //                withExtractor
@@ -385,14 +416,163 @@ public interface EditableControl<C extends Control, I extends IndexedCell> {
 
         @Override
         public void addItemAt(int index) {
-            // TODO Auto-generated method stub
             getItems().add(index, "added" + index);
-            
         }
 
 
     }
 
+    class ETreeTableView extends TreeTableView implements EditableControl<TreeTableView, TreeTableCell> {
+        
+ 
+        public ETreeTableView() {
+            super();
+        }
+
+        public ETreeTableView(TreeItem root) {
+            super(root);
+        }
+
+        @Override
+        public void setCellFactory(Callback<TreeTableView, TreeTableCell> factory) {
+            getTargetColumn().setCellFactory(factory);
+        }
+
+        @Override
+        public Callback<TreeTableView, TreeTableCell> getCellFactory() {
+            return getTargetColumn().getCellFactory();
+        }
+
+        @Override
+        public TreeTableColumn getTargetColumn() {
+            return (TreeTableColumn) getColumns().get(0);
+        }
+
+        @Override
+        public Object getValueAt(int index) {
+            TreeTableColumn column = getTargetColumn();
+            return column.getCellObservableValue(index).getValue();
+        }
+
+        @Override
+        public EventHandler getOnEditCommit() {
+            return getTargetColumn().getOnEditCommit();
+        }
+
+        @Override
+        public EventHandler getOnEditCancel() {
+            return getTargetColumn().getOnEditCancel();
+        }
+
+        @Override
+        public EventHandler getOnEditStart() {
+            return getTargetColumn().getOnEditStart();
+        }
+
+        @Override
+        public void setOnEditCommit(EventHandler handler) {
+            getTargetColumn().setOnEditCommit(handler);
+        }
+
+        @Override
+        public void setOnEditCancel(EventHandler handler) {
+            getTargetColumn().setOnEditCancel(handler);
+        }
+
+        @Override
+        public void setOnEditStart(EventHandler handler) {
+            getTargetColumn().setOnEditStart(handler);
+        }
+
+        @Override
+        public EventType editCommit() {
+            return TreeTableColumn.editCommitEvent();
+        }
+
+        @Override
+        public EventType editCancel() {
+            return TreeTableColumn.editCancelEvent();
+        }
+
+        @Override
+        public EventType editStart() {
+            return TreeTableColumn.editStartEvent();
+        }
+
+        @Override
+        public EventType editAny() {
+            return TreeTableColumn.editAnyEvent();
+        }
+
+        @Override
+        public TreeTableView getControl() {
+            return this;
+        }
+
+        @Override
+        public int getEditingIndex() {
+            TreeTablePosition pos = getEditingCell();
+            return pos != null ? pos.getRow() : -1;
+        }
+
+        @Override
+        public void edit(int index) {
+            TreeTableColumn column = index < 0 ? null : getTargetColumn();
+            edit(index, column);
+        }
+
+        @Override
+        public <T extends Event> void addEditEventHandler(EventType<T> type,
+                EventHandler<? super T> handler) {
+            getTargetColumn().addEventHandler(type, handler);
+        }
+
+        @Override
+        public TreeTableCell createEditableCell() {
+            TreeTableCell cell = createCell();
+            cell.updateTreeTableColumn(getTargetColumn());
+            cell.updateTreeTableView(getControl());
+            return cell;
+        }
+
+        @Override
+        public TreeTableCell createCell() {
+            TreeTableCell cell = (TreeTableCell) getTargetColumn().getCellFactory().call(getTargetColumn());
+            return cell;
+        }
+
+        @Override
+        public EditEventReport createEditReport() {
+            return new TreeTableViewEditReport(this);
+        }
+
+        @Override
+        public TreeTableView getCellControl(TreeTableCell cell) {
+            return cell.getTreeTableView();
+        }
+
+        @Override
+        public void removeItemAt(int index) {
+            TreeItem item = getTreeItem(index);
+            TreeItem parent = item.getParent();
+            if (parent != null) {
+                parent.getChildren().remove(item);
+            }
+        }
+
+        @Override
+        public void addItemAt(int index) {
+            TreeItem item = getTreeItem(index);
+            TreeItem parent = item.getParent();
+            if (parent != null) {
+                int indexInChildren = parent.getChildren().indexOf(item);
+                parent.getChildren().add(indexInChildren, new TreeItem("added" + indexInChildren));
+            }
+        }
+
+
+        
+    }
     class ETreeView extends TreeView implements EditableControl<TreeView, TreeCell> {
 
         public ETreeView() {

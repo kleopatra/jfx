@@ -93,7 +93,7 @@ public class TreeCellEditingTest {
      * Extracted from testCancelOffEditingIndex to formally ignore
      * FIXME: move the assert to the other method, once the issue is solved
      */
-    @Ignore("JDK-8267094")
+//    @Ignore("JDK-8267094")
     @Test
     public void testCancelOffEditingIndexEventIndex() {
         cell.updateIndex(editingIndex);
