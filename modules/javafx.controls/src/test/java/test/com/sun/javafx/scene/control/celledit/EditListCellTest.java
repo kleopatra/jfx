@@ -89,7 +89,7 @@ public class EditListCellTest extends AbstractEditCellTestBase<ListView, ListCel
      */
     @Override
     protected EditableControl createEditableControl() {
-        EditableControl.EListView control = new EditableControl.EListView(FXCollections
+        EditableControlFactory.EListView control = new EditableControlFactory.EListView(FXCollections
                 .observableArrayList("Item1", "Item2", "Item3", "Item4"));
         control.setEditable(true);
         control.setCellFactory(createTextFieldCellFactory());

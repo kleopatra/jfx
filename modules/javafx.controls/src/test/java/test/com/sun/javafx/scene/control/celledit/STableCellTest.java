@@ -33,7 +33,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.skin.TreeTableRowSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditableControl.ETableView;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory.ETableView;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -63,7 +63,7 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
 
     @Test
     public void testTableEditCommitCellSelection() {
-        ETableView control = (ETableView) createEditableControl(true);
+        EditableControlFactory.ETableView control = (EditableControlFactory.ETableView) createEditableControl(true);
         TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) control.getColumns().get(0);
         assertEquals(cellSelectionEnabled, control.getSelectionModel().isCellSelectionEnabled());
         new StageLoader(control);
@@ -83,7 +83,7 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
      */
     @Test
     public void testTableEditCommitOnCellEventCount() {
-        ETableView control = (ETableView) createEditableControl(true);
+        EditableControlFactory.ETableView control = (EditableControlFactory.ETableView) createEditableControl(true);
         TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) control.getColumns().get(0);
         new StageLoader(control);
         int editIndex = 1;
@@ -114,7 +114,7 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
     @Override
     protected void assertValueAt(int index, Object editedValue,
             EditableControl<TableView, TableCell> control) {
-        ETableView table = (ETableView) control;
+        EditableControlFactory.ETableView table = (EditableControlFactory.ETableView) control;
         TableColumn column = table.getTargetColumn();
         assertEquals("editedValue must be committed", editedValue,
                 column.getCellObservableValue(index).getValue());
@@ -196,7 +196,7 @@ public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
                 : FXCollections.observableArrayList();
         items.addAll(new TableColumn("first"), new TableColumn("second"),
                 new TableColumn("third"));
-        ETableView table = new ETableView(items);
+        EditableControlFactory.ETableView table = new EditableControlFactory.ETableView(items);
         table.setEditable(true);
         table.getSelectionModel().setCellSelectionEnabled(cellSelectionEnabled);
 

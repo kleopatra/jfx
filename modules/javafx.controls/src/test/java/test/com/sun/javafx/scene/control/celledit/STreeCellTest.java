@@ -21,8 +21,8 @@ import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
-import test.com.sun.javafx.scene.control.celledit.EditableControl.ETreeView;;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory.ETreeView;
+import test.com.sun.javafx.scene.control.infrastructure.StageLoader;;
 /**
  * @author Jeanette Winzenburg, Berlin
  */
@@ -108,7 +108,7 @@ public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
                 new TreeItem<>("three")
 
                 );
-        ETreeView treeView = new ETreeView(rootItem);
+        EditableControlFactory.ETreeView treeView = new EditableControlFactory.ETreeView(rootItem);
         treeView.setShowRoot(false);
         treeView.setEditable(true);
         treeView.setCellFactory(createTextFieldCellFactory());

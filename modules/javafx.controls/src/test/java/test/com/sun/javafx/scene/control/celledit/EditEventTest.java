@@ -221,10 +221,10 @@ public class EditEventTest {
     @Parameters(name = "{index} - {1}")
     public static Collection parameters() {
         return Arrays.asList(new Object[][] {
-            { (Supplier) EditableControl::createEditableListView, "ListView/-Cell"},
-            { (Supplier) EditableControl::createEditableTableView, "TableView/-Cell"},
-            { (Supplier) EditableControl::createEditableTreeTableView, "TreeTableView/-Cell"},
-            { (Supplier) EditableControl::createEditableTreeView, "TreeView/-Cell"},
+            { (Supplier) EditableControlFactory::createEditableListView, "ListView/-Cell"},
+            { (Supplier) EditableControlFactory::createEditableTableView, "TableView/-Cell"},
+            { (Supplier) EditableControlFactory::createEditableTreeTableView, "TreeTableView/-Cell"},
+            { (Supplier) EditableControlFactory::createEditableTreeView, "TreeView/-Cell"},
         });
     }
 

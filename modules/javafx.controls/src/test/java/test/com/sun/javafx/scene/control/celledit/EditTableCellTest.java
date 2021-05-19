@@ -57,7 +57,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
 
     @Test
     public void testTableEditCommitCellSelection() {
-        EditableControl.ETableView table = (EditableControl.ETableView) control.getControl();
+        EditableControlFactory.ETableView table = (EditableControlFactory.ETableView) control.getControl();
         TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) table.getColumns().get(0);
         assertEquals(cellSelectionEnabled, table.getSelectionModel().isCellSelectionEnabled());
         int editIndex = 1;
@@ -77,7 +77,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
      */
     @Test
     public void testTableEditCommitOnCellEventCount() {
-        EditableControl.ETableView table = (EditableControl.ETableView) createEditableControl(true);
+        EditableControlFactory.ETableView table = (EditableControlFactory.ETableView) createEditableControl(true);
         TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) table.getColumns().get(0);
         int editIndex = 1;
 //        IndexedCell cell =  getCell(control, editIndex, 0);
@@ -108,7 +108,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
     @Override
     protected void assertValueAt(int index, Object editedValue,
             EditableControl<TableView, TableCell> control) {
-        EditableControl.ETableView table = (EditableControl.ETableView) control;
+        EditableControlFactory.ETableView table = (EditableControlFactory.ETableView) control;
         TableColumn column = table.getTargetColumn();
         assertEquals("editedValue must be committed", editedValue,
                 column.getCellObservableValue(index).getValue());
@@ -188,7 +188,7 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
                 : FXCollections.observableArrayList();
         items.addAll(new TableColumn("first"), new TableColumn("second"),
                 new TableColumn("third"));
-        EditableControl.ETableView table = new EditableControl.ETableView(items);
+        EditableControlFactory.ETableView table = new EditableControlFactory.ETableView(items);
         table.setEditable(true);
         table.getSelectionModel().setCellSelectionEnabled(cellSelectionEnabled);
 

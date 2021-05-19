@@ -39,21 +39,15 @@ import org.junit.runners.Parameterized.Parameters;
 
 import static org.junit.Assert.*;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.scene.control.CellShim;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -68,6 +62,7 @@ public class EditStateTest {
     private StageLoader stageLoader;
     private Supplier<EditableControl> controlSupplier;
     private String typeMessage;
+    private Callback cellFactory;
 
 //----------------- test state transitions
 
@@ -191,7 +186,7 @@ public class EditStateTest {
         assertTrue("cell must be editing", cell.isEditing());
         assertEquals("cell index must be same as control editingIndex", eControl.getEditingIndex(), cell.getIndex());
         // FIXME: add api to EditableControl?
-//        assertEquals("sanity: cell must be attached to control", eControl.getControl(), cell.getControl());
+        assertEquals("sanity: cell must be attached to control", eControl.getControl(), eControl.getCellControl(cell));
         assertEquals(eControl.getValueAt(editingIndex), cell.getItem());
     }
 
@@ -271,6 +266,7 @@ public class EditStateTest {
     
  //------------ test state without tree
     
+    
     /**
      * JDK-8188026: all cell implementations in package cell violate their contract by
      * strengthening their precondition
@@ -278,6 +274,9 @@ public class EditStateTest {
      * Note: for base xxCells, there are tests (if there _are_ tests about editing ;)
      * for the contrary, that is explicitly allow null control, f.i. 
      * ListCellTest.editCellWithNullListViewResultsInNoExceptions
+     * 
+     * Note: going even further are tests in CellTest - f.i. updatingACellBeingEditedDoesNotResultInACancelOfEdit
+     * test that startEdit switches a cell (all base cells) into editing as long as it is not empty
      */
     @Ignore("JDK-8188026")
     @Test
@@ -286,6 +285,31 @@ public class EditStateTest {
         cell.startEdit();
         // Note: not starting edit is a side-effect of being empty
         assertFalse("sanity", cell.isEditing());
+    }
+    
+    /**
+     * This is cellTest.updatingACellBeingEditedDoesNotResultInACancelOfEdit
+     * 
+     * FIXME: cells for tabular controls need to be configured with a row to
+     * be not empty? At least that's what CellTest does in setup (no table, no column)
+     * 
+     * But: also lockItemOnEdit - that is bypasses updateItem(-1), so don't need the row?
+     * 
+     * without tableRow introduces failures in cellTest:
+     * - selectingANonEmptyCellIsOK: tableCell.updateSelected is overridden to do nothing without row, that is
+     *    selected == false
+     * - updatingSelectedToTrueResultsIn_selected_pseudoClass, same: pseudoClass "selected" trivially not
+     *   set if selected == false
+     *   
+     * Summary: don't need tableRow for testing editing, do need lockItem == true
+     * FIXME: lookitem is fishy .. forcing an invalid state?  
+     */
+    @Test
+    public void testStartEditNotEmptyNullControl() {
+        IndexedCell cell = editableControl.createCell();
+        CellShim.updateItem(cell, "value", false);
+        cell.startEdit();
+        assertTrue("not empty cell should be editing", cell.isEditing());
     }
     
     @Ignore("JDK-8188026")
@@ -318,16 +342,28 @@ public class EditStateTest {
 
     @Parameters(name = "{index} - {1}")
     public static Collection parameters() {
+        // control factory, type message, cell factory
         return Arrays.asList(new Object[][] {
-            { (Supplier) EditableControl::createEditableListView, "ListView/-Cell"},
-            { (Supplier) EditableControl::createEditableTableView, "TableView/-Cell"},
-            { (Supplier) EditableControl::createEditableTreeView, "TreeView/-Cell"},
+            { (Supplier) EditableControlFactory::createEditableListView, 
+                    "ListView, ListCell", (Callback) lv -> new ListCell<>()},
+            { (Supplier) EditableControlFactory::createEditableListView, 
+                    "ListView, TextFieldListCell", TextFieldListCell.forListView()},
+            { (Supplier) EditableControlFactory::createEditableTableView, 
+                    "TableView, TableCell", (Callback) lv -> new TableCell<>()},
+            { (Supplier) EditableControlFactory::createEditableTableView, 
+                    "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
+            { (Supplier) EditableControlFactory::createEditableTreeView, 
+                    "TreeView, TreeCell", (Callback) lv -> new TreeCell<>()},
+            { (Supplier) EditableControlFactory::createEditableTreeView, 
+                    "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
         });
     }
 
-    public EditStateTest(Supplier controlSupplier, String typeMessage) {
+    public EditStateTest(Supplier controlSupplier, String typeMessage, Callback cellFactory) {
         this.controlSupplier = controlSupplier;
         this.typeMessage = typeMessage;
+        
+        this.cellFactory = cellFactory;
     }
 //-------------- setup
 
@@ -337,6 +373,7 @@ public class EditStateTest {
         assertTrue("control must be editable", editableControl.isEditable());
         assertEquals("control must not be editing", -1, editableControl.getEditingIndex());
         assertNotNull("control must have cellFactory", editableControl.getCellFactory());
+        assertSame("cellFactory must be same", this.cellFactory, editableControl.getCellFactory());
         // editable cell
         IndexedCell cell = editableControl.createEditableCell();
         assertTrue("cell must be editable", cell.isEditable());
@@ -359,8 +396,10 @@ public class EditStateTest {
                 Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
             }
         });
-//        editableControl = createEditableControl();
         editableControl = controlSupplier.get();
+        if (this.cellFactory != null) {
+            editableControl.setCellFactory(cellFactory);
+        }
     }
 
 

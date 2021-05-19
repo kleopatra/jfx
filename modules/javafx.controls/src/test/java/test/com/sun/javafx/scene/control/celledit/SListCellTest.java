@@ -25,7 +25,7 @@ import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.skin.ListCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditableControl.EListView;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory.EListView;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -193,7 +193,7 @@ public class SListCellTest extends AbstractSCellTest<ListView, ListCell> {
      */
     @Override
     protected EditableControl createEditableControl() {
-        EListView control = new EListView(FXCollections
+        EditableControlFactory.EListView control = new EditableControlFactory.EListView(FXCollections
                 .observableArrayList("Item1", "Item2", "Item3", "Item4"));
         control.setEditable(true);
         control.setCellFactory(createTextFieldCellFactory());

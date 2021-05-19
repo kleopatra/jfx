@@ -69,7 +69,7 @@ public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCel
                 new TreeItem<>("three")
 
                 );
-        EditableControl.ETreeView treeView = new EditableControl.ETreeView(rootItem);
+        EditableControlFactory.ETreeView treeView = new EditableControlFactory.ETreeView(rootItem);
         treeView.setShowRoot(false);
         treeView.setEditable(true);
         treeView.setCellFactory(TextFieldTreeCell.forTreeView()); //createTextFieldCellFactory());
