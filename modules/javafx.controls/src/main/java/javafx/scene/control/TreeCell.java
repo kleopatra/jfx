@@ -375,7 +375,7 @@ public class TreeCell<T> extends IndexedCell<T> {
         super.startEdit();
 
          // Inform the TreeView of the edit starting.
-        if (tree != null) {
+        if (isEditing() && tree != null) {
             tree.fireEvent(new TreeView.EditEvent<T>(tree,
                     TreeView.<T>editStartEvent(),
                     getTreeItem(),

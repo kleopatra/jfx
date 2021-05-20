@@ -347,6 +347,9 @@ public class ListCell<T> extends IndexedCell<T> {
             updateEditing();
         }
 
+        if (isEditing() && getIndex() == -1) {
+            throw new IllegalStateException("cell index must not be -1 while editing");
+        }
     }
 
     /** {@inheritDoc} */
@@ -374,15 +377,15 @@ public class ListCell<T> extends IndexedCell<T> {
         super.startEdit();
 
          // Inform the ListView of the edit starting.
-        if (list != null) {
+        if (isEditing() && list != null) {
             list.fireEvent(new ListView.EditEvent<T>(list,
                     ListView.<T>editStartEvent(),
                     null,
                     getIndex()));
             list.edit(getIndex());
             list.requestFocus();
+            editingIndexAtStartEdit = getIndex();
         }
-        editingIndexAtStartEdit = getIndex();
     }
 
     int editingIndexAtStartEdit;

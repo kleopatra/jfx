@@ -155,6 +155,28 @@ public class EditEventTest {
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
 
+    @Test
+    public void testStartEditDoesNotFireOnEmptyCell() {
+        IndexedCell cell = createEditableCellAt(-1);
+        EditEventReport report = editableControl.createEditReport();
+        cell.startEdit();
+        assertFalse("empty cell must not be editing", cell.isEditing());
+        assertEquals("cell must not fire editEvent if not switched to editing: " 
+                + report.getAllEditEventTexts(typeMessage), 
+                0, report.getEditEventSize());
+    }
+    
+    @Test
+    public void testStartEditDoesNotFireOnOffRangeCell() {
+        IndexedCell cell = createEditableCellAt(1000);
+        EditEventReport report = editableControl.createEditReport();
+        cell.startEdit();
+        assertFalse("empty cell must not be editing", cell.isEditing());
+        assertEquals("cell must not fire editEvent if not switched to editing: " 
+                + report.getAllEditEventTexts(typeMessage), 
+                0, report.getEditEventSize());
+    }
+    
     /**
      * Note: on toggle edit, the sequence of cancel (from old editing) and start (from
      * new editing) is not specified: it depends on the sequence of attaching the

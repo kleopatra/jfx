@@ -88,7 +88,7 @@ public class CellTest {
             TableRow tableRow = new TableRow();
             CellShim.updateItem(tableRow, "TableRow", false);
             ((TableCell)cell).updateTableRow(tableRow);
-//            TableCellShim.set_lockItemOnEdit((TableCell)cell, true);
+            TableCellShim.set_lockItemOnEdit((TableCell)cell, true);
         } else if (cell instanceof TreeTableCell) {
             TreeTableRow tableRow = new TreeTableRow();
             CellShim.updateItem(tableRow, "TableRow", false);
