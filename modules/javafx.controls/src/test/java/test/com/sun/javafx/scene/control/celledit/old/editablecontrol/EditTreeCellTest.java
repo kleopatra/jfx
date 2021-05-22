@@ -2,9 +2,7 @@
  * Created on 29.09.2017
  *
  */
-package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
-
-import java.util.Optional;
+package test.com.sun.javafx.scene.control.celledit.old.editablecontrol;
 
 import org.junit.Test;
 
@@ -14,39 +12,38 @@ import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
 import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
 import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControlFactory;
-import test.com.sun.javafx.scene.control.celledit.infrastructure.TreeViewEditReport;
-import test.com.sun.javafx.scene.control.infrastructure.StageLoader;;
+
 /**
+ * Test editing in TreeCell (no scenegraph)
  * @author Jeanette Winzenburg, Berlin
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
+public class EditTreeCellTest extends AbstractEditCellTestBase<TreeView, TreeCell> {
 
     @Test
     public void testCommitEditRespectHandler() {
-        EditableControl<TreeView, TreeCell> control = createEditableControl();
-        new StageLoader(control.getControl());
+        EditableControl<TreeView, TreeCell> tree = control;//createEditableControl();
+//        new StageLoader(control.getControl());
         int editIndex = 1;
-        IndexedCell cell = getCellAt(control, editIndex);
-        TreeItem<String> editItem = control.getControl().getTreeItem(editIndex);
+        IndexedCell cell = createEditableCellAt(tree, editIndex);
+        TreeItem<String> editItem = tree.getControl().getTreeItem(editIndex);
         String oldValue = editItem.getValue();
         // do nothing
-        control.setOnEditCommit(e -> new String("dummy"));
+        tree.setOnEditCommit(e -> new String("dummy"));
         // start edit on control
-        control.edit(editIndex);
-        EditEventReport report = createEditReport(control);
+        tree.edit(editIndex);
+        EditEventReport report = createEditReport(tree);
         String editedValue = "edited";
         // commit edit on cell
         cell.commitEdit(editedValue);
         // test data
-        assertEquals("value must not be changed", oldValue, control.getControl().getTreeItem(editIndex).getValue());
+        assertEquals("value must not be changed", oldValue, tree.getControl().getTreeItem(editIndex).getValue());
         assertEquals(1, report.getEditEventSize());
     }
 
@@ -67,39 +64,6 @@ public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
     }
 
     @Override
-    protected void assertLastCancelIndex(EditEventReport report, int index,
-            Object column) {
-        Optional<EditEvent> e = report.getLastEditCancel();
-        assertTrue(e.isPresent());
-        TreeItem item = e.get().getSource().getTreeItem(index);
-        assertEquals(item, e.get().getTreeItem());
-    }
-
-    @Override
-    protected void assertLastStartIndex(EditEventReport report, int index,
-            Object column) {
-        Optional<EditEvent> e = report.getLastEditStart();
-        assertTrue(e.isPresent());
-        TreeItem item = e.get().getSource().getTreeItem(index);
-        assertEquals(item, e.get().getTreeItem());
-    }
-
-    @Override
-    protected void assertLastCommitIndex(EditEventReport report, int index,
-            Object target, Object value) {
-        Optional<EditEvent> e = report.getLastEditCommit();
-        assertTrue(e.isPresent());
-        TreeItem item = e.get().getSource().getTreeItem(index);
-        assertEquals(item, e.get().getTreeItem());
-
-    }
-
-    @Override
-    protected EditEventReport createEditReport(EditableControl control) {
-        return new TreeViewEditReport(control);
-    }
-
-    @Override
     protected EditableControl<TreeView, TreeCell> createEditableControl() {
         TreeItem rootItem = new TreeItem<>("root");
         rootItem.getChildren().addAll(
@@ -111,7 +75,8 @@ public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
         EditableControlFactory.ETreeView treeView = new EditableControlFactory.ETreeView(rootItem);
         treeView.setShowRoot(false);
         treeView.setEditable(true);
-        treeView.setCellFactory(createTextFieldCellFactory());
+        treeView.setCellFactory(TextFieldTreeCell.forTreeView()); //createTextFieldCellFactory());
+        treeView.getFocusModel().focus(-1);
         return treeView;
     }
 
@@ -119,5 +84,4 @@ public class STreeCellTest extends AbstractSCellTest<TreeView, TreeCell> {
     protected Callback<TreeView, TreeCell> createTextFieldCellFactory() {
         return e -> new TextFieldTreeCell();
     }
-
 }

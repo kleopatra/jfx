@@ -2,7 +2,7 @@
  * Created on 09.03.2016
  *
  */
-package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
+package test.com.sun.javafx.scene.control.celledit.old.scell;
 
 import java.util.Optional;
 

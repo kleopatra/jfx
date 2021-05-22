@@ -23,7 +23,7 @@
  * questions.
  */
 
-package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
+package test.com.sun.javafx.scene.control.celledit.old.editablecontrol;
 
 import java.util.Optional;
 
