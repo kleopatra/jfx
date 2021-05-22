@@ -23,7 +23,7 @@
  * questions.
  */
 
-package test.com.sun.javafx.scene.control.celledit.editableview;
+package test.com.sun.javafx.scene.control.celledit.old.editableview;
 
 import java.util.ArrayList;
 import java.util.List;

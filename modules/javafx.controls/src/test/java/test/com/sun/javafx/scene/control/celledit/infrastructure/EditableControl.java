@@ -2,7 +2,7 @@
  * Created on 29.09.2017
  *
  */
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.infrastructure;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;

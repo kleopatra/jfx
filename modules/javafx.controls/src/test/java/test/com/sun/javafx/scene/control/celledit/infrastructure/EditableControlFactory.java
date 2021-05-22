@@ -23,7 +23,7 @@
  * questions.
  */
 
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.infrastructure;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

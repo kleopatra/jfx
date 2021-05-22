@@ -49,6 +49,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControlFactory;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**

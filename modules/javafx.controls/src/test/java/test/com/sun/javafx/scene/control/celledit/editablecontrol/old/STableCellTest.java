@@ -29,10 +29,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.skin.TreeTableRowSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditEventReport;
-import test.com.sun.javafx.scene.control.celledit.EditableControl;
-import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
-import test.com.sun.javafx.scene.control.celledit.TableViewEditReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControlFactory;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.TableViewEditReport;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**

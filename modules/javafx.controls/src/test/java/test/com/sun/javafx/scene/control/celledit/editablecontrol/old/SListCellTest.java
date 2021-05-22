@@ -21,10 +21,10 @@ import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.skin.ListCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditEventReport;
-import test.com.sun.javafx.scene.control.celledit.EditableControl;
-import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
-import test.com.sun.javafx.scene.control.celledit.ListViewEditReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControlFactory;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.ListViewEditReport;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**

@@ -18,10 +18,10 @@ import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditEventReport;
-import test.com.sun.javafx.scene.control.celledit.EditableControl;
-import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
-import test.com.sun.javafx.scene.control.celledit.TreeViewEditReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControlFactory;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.TreeViewEditReport;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;;
 /**
  * @author Jeanette Winzenburg, Berlin

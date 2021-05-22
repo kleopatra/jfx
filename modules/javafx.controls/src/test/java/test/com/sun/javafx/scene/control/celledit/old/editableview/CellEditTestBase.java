@@ -23,11 +23,9 @@
  * questions.
  */
 
-package test.com.sun.javafx.scene.control.celledit.editableview;
+package test.com.sun.javafx.scene.control.celledit.old.editableview;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,7 +33,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import javafx.event.Event;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 

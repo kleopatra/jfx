@@ -45,6 +45,9 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeTableCell;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControlFactory;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**

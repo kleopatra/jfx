@@ -14,8 +14,8 @@ import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUt
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexedCell;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditEventReport;
-import test.com.sun.javafx.scene.control.celledit.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
 /**
