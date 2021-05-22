@@ -2,7 +2,7 @@
  * Created on 29.09.2017
  *
  */
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
 
 import java.util.Optional;
 
@@ -10,9 +10,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -21,7 +18,10 @@ import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditableControlFactory.ETreeView;
+import test.com.sun.javafx.scene.control.celledit.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
+import test.com.sun.javafx.scene.control.celledit.TreeViewEditReport;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;;
 /**
  * @author Jeanette Winzenburg, Berlin

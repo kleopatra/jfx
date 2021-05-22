@@ -2,7 +2,7 @@
  * Created on 29.09.2017
  *
  */
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,9 +29,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.skin.TreeTableRowSkin;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
+import test.com.sun.javafx.scene.control.celledit.TableViewEditReport;
+import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
- * core tableView/cell test (not in scenegraph)
+ * core tableView/cell test
  *
  * moved cellSelection and extractor testing into this, not applicable in abstract layer.
  *
@@ -39,7 +44,7 @@ import javafx.util.Callback;
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class EditTableCellTest extends AbstractEditCellTestBase<TableView, TableCell> {
+public class STableCellTest extends AbstractSCellTest<TableView, TableCell> {
 
     protected boolean cellSelectionEnabled;
 
@@ -51,21 +56,21 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
     /**
      *
      */
-    public EditTableCellTest(boolean cellSelection) {
+    public STableCellTest(boolean cellSelection) {
         this.cellSelectionEnabled = cellSelection;
     }
 
     @Test
     public void testTableEditCommitCellSelection() {
-        EditableControlFactory.ETableView table = (EditableControlFactory.ETableView) control.getControl();
-        TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) table.getColumns().get(0);
-        assertEquals(cellSelectionEnabled, table.getSelectionModel().isCellSelectionEnabled());
+        EditableControlFactory.ETableView control = (EditableControlFactory.ETableView) createEditableControl(true);
+        TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) control.getColumns().get(0);
+        assertEquals(cellSelectionEnabled, control.getSelectionModel().isCellSelectionEnabled());
+        new StageLoader(control);
         int editIndex = 1;
-//        IndexedCell cell =  getCell(control, editIndex, 0);
-        IndexedCell cell =  createEditableCellAt(table, editIndex);
+        IndexedCell cell =  getCell(control, editIndex, 0);
         // start edit on control
-        table.edit(editIndex, column);
-        EditEventReport report = createEditReport(table);
+        control.edit(editIndex, column);
+        EditEventReport report = createEditReport(control);
         String editedValue = "edited";
         cell.commitEdit(editedValue);
         assertEquals("tableCell must fire a single event", 1, report.getEditEventSize());
@@ -77,14 +82,14 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
      */
     @Test
     public void testTableEditCommitOnCellEventCount() {
-        EditableControlFactory.ETableView table = (EditableControlFactory.ETableView) createEditableControl(true);
-        TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) table.getColumns().get(0);
+        EditableControlFactory.ETableView control = (EditableControlFactory.ETableView) createEditableControl(true);
+        TableColumn<TableColumn, String> column = (TableColumn<TableColumn, String>) control.getColumns().get(0);
+        new StageLoader(control);
         int editIndex = 1;
-//        IndexedCell cell =  getCell(control, editIndex, 0);
-        IndexedCell cell =  createEditableCellAt(table, editIndex);
+        IndexedCell cell =  getCell(control, editIndex, 0);
         // start edit on control
-        table.edit(editIndex, column);;
-        EditEventReport report = createEditReport(table);
+        control.edit(editIndex, column);;
+        EditEventReport report = createEditReport(control);
         String editedValue = "edited";
         cell.commitEdit(editedValue);
         assertEquals("tableCell must fire a single event", 1, report.getEditEventSize());
@@ -114,44 +119,46 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
                 column.getCellObservableValue(index).getValue());
     }
 
-//    @Override
-//    protected void assertLastStartIndex(EditEventReport report, int index, Object first) {
-//        Optional<CellEditEvent> e = report.getLastEditStart();
-//        assertTrue(e.isPresent());
-////        LOG.info("what do we get?" + report.getEditText(e.get()));
-//        assertNotNull("position on event must not be null", e.get().getTablePosition());
-//        assertEquals("index on start event", index, e.get().getTablePosition().getRow());
-//        assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
-//
-//    }
-//
-//    @Override
-//    protected void assertLastCancelIndex(EditEventReport report, int index, Object first) {
-//        Optional<CellEditEvent> e = report.getLastEditCancel();
-//        assertTrue(e.isPresent());
-////        LOG.info("what do we get?" + report.getEditText(e.get()));
-//        assertNotNull("position on event must not be null", e.get().getTablePosition());
-//        assertEquals("index on cancel event", index, e.get().getTablePosition().getRow());
-//        assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
-//
-//    }
-//
-//    @Override
-//    protected void assertLastCommitIndex(EditEventReport report, int index, Object first, Object value) {
-//        Optional<CellEditEvent> e = report.getLastEditCommit();
-//        assertTrue(e.isPresent());
-////        LOG.info("what do we get?" + report.getEditText(e.get()));
-//        assertNotNull("position on event must not be null", e.get().getTablePosition());
-//        assertEquals("index on commit event", index, e.get().getTablePosition().getRow());
-//        assertEquals("column on commit event", first, e.get().getTablePosition().getTableColumn());
-//        assertEquals("new value on commit event", value, e.get().getNewValue());
-//    }
-//
+    @Override
+    protected void assertLastStartIndex(EditEventReport report, int index, Object first) {
+        Optional<CellEditEvent> e = report.getLastEditStart();
+        assertTrue(e.isPresent());
+//        LOG.info("what do we get?" + report.getEditText(e.get()));
+        assertNotNull("position on event must not be null", e.get().getTablePosition());
+        assertEquals("index on start event", index, e.get().getTablePosition().getRow());
+        assertEquals("column on start event", first, e.get().getTablePosition().getTableColumn());
+
+    }
+
+    @Override
+    protected void assertLastCancelIndex(EditEventReport report, int index, Object first) {
+        Optional<CellEditEvent> e = report.getLastEditCancel();
+        assertTrue(e.isPresent());
+//        LOG.info("what do we get?" + report.getEditText(e.get()));
+        assertNotNull("position on event must not be null", e.get().getTablePosition());
+        assertEquals("index on cancel event", index, e.get().getTablePosition().getRow());
+        assertEquals("column on cancel event", first, e.get().getTablePosition().getTableColumn());
+
+    }
+
+    @Override
+    protected void assertLastCommitIndex(EditEventReport report, int index, Object first, Object value) {
+        Optional<CellEditEvent> e = report.getLastEditCommit();
+        assertTrue(e.isPresent());
+//        LOG.info("what do we get?" + report.getEditText(e.get()));
+        assertNotNull("position on event must not be null", e.get().getTablePosition());
+        assertEquals("index on commit event", index, e.get().getTablePosition().getRow());
+        assertEquals("column on commit event", first, e.get().getTablePosition().getTableColumn());
+        assertEquals("new value on commit event", value, e.get().getNewValue());
+    }
+
+
     @Override
     protected IndexedCell getCellAt(
             EditableControl<TableView, TableCell> control, int editIndex) {
         return getCell(control.getControl(), editIndex, 0);
     }
+
 
 
     /**
@@ -206,8 +213,9 @@ public class EditTableCellTest extends AbstractEditCellTestBase<TableView, Table
 //                (Callback<ListView, ListCell>)TextFieldListCell.forListView();
     }
 
-//    @Override
-//    protected EditEventReport createEditReport(EditableControl control) {
-//        return new TableViewEditReport(control);
-//    }
+    @Override
+    protected EditEventReport createEditReport(EditableControl control) {
+        return new TableViewEditReport(control);
+    }
+
 }

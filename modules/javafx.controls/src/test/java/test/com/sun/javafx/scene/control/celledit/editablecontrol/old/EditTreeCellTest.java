@@ -2,7 +2,7 @@
  * Created on 29.09.2017
  *
  */
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
 
 import org.junit.Test;
 
@@ -15,6 +15,9 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.control.skin.TreeCellSkin;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
 
 /**
  * Test editing in TreeCell (no scenegraph)

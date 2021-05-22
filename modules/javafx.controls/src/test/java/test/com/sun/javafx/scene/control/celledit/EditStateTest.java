@@ -47,6 +47,7 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
@@ -346,16 +347,20 @@ public class EditStateTest {
         return Arrays.asList(new Object[][] {
             { (Supplier) EditableControlFactory::createEditableListView, 
                     "ListView, ListCell", (Callback) lv -> new ListCell<>()},
-            { (Supplier) EditableControlFactory::createEditableListView, 
-                    "ListView, TextFieldListCell", TextFieldListCell.forListView()},
             { (Supplier) EditableControlFactory::createEditableTableView, 
                     "TableView, TableCell", (Callback) lv -> new TableCell<>()},
-            { (Supplier) EditableControlFactory::createEditableTableView, 
-                    "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
             { (Supplier) EditableControlFactory::createEditableTreeView, 
-                    "TreeView, TreeCell", (Callback) lv -> new TreeCell<>()},
-            { (Supplier) EditableControlFactory::createEditableTreeView, 
-                    "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
+                        "TreeView, TreeCell", (Callback) lv -> new TreeCell<>()},
+            { (Supplier) EditableControlFactory::createEditableTreeTableView, 
+                            "TreeTableView, TreeTableCell", (Callback) lv -> new TreeCell<>()},
+//            { (Supplier) EditableControlFactory::createEditableListView, 
+//                    "ListView, TextFieldListCell", TextFieldListCell.forListView()},
+//            { (Supplier) EditableControlFactory::createEditableTableView, 
+//                    "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
+//            { (Supplier) EditableControlFactory::createEditableTreeView, 
+//                    "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
+//            { (Supplier) EditableControlFactory::createEditableTreeTableView, 
+//                    "TreeTableView, TextFieldTreeTableCell", TextFieldTreeTableCell.forTreeTableColumn()},
         });
     }
 

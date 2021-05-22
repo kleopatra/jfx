@@ -23,7 +23,7 @@
  * questions.
  */
 
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
 
 import java.util.Optional;
 
@@ -38,6 +38,9 @@ import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.skin.ListCellSkin;
 import javafx.util.Callback;
+import test.com.sun.javafx.scene.control.celledit.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
 
 /**
  * Test core list cell (not in scenegraph by default, can be added though)

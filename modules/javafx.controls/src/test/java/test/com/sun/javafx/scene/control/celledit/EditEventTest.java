@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,6 +40,11 @@ import org.junit.runners.Parameterized.Parameters;
 import static org.junit.Assert.*;
 
 import javafx.scene.control.IndexedCell;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeTableCell;
+import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
@@ -58,6 +64,7 @@ public class EditEventTest {
     private StageLoader stageLoader;
     private Supplier<EditableControl> controlSupplier;
     private String typeMessage;
+    private Callback cellFactory;
 
 //----------------- test editEvents
 
@@ -155,6 +162,7 @@ public class EditEventTest {
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
 
+    @Ignore("start-fired-not-editing")
     @Test
     public void testStartEditDoesNotFireOnEmptyCell() {
         IndexedCell cell = createEditableCellAt(-1);
@@ -166,6 +174,7 @@ public class EditEventTest {
                 0, report.getEditEventSize());
     }
     
+    @Ignore("start-fired-not-editing")
     @Test
     public void testStartEditDoesNotFireOnOffRangeCell() {
         IndexedCell cell = createEditableCellAt(1000);
@@ -242,17 +251,32 @@ public class EditEventTest {
 
     @Parameters(name = "{index} - {1}")
     public static Collection parameters() {
+        // view factory, message, cell factory
         return Arrays.asList(new Object[][] {
-            { (Supplier) EditableControlFactory::createEditableListView, "ListView/-Cell"},
-            { (Supplier) EditableControlFactory::createEditableTableView, "TableView/-Cell"},
-            { (Supplier) EditableControlFactory::createEditableTreeTableView, "TreeTableView/-Cell"},
-            { (Supplier) EditableControlFactory::createEditableTreeView, "TreeView/-Cell"},
+            { (Supplier) EditableControlFactory::createEditableListView, 
+                "ListView, ListCell", (Callback) lv -> new ListCell<>()},
+        { (Supplier) EditableControlFactory::createEditableTableView, 
+                "TableView, TableCell", (Callback) lv -> new TableCell<>()},
+        { (Supplier) EditableControlFactory::createEditableTreeView, 
+                    "TreeView, TreeCell", (Callback) lv -> new TreeCell<>()},
+        { (Supplier) EditableControlFactory::createEditableTreeTableView, 
+                        "TreeTableView, TreeTableCell", (Callback) lv -> new TreeTableCell<>()},
+//        { (Supplier) EditableControlFactory::createEditableListView, 
+//                "ListView, TextFieldListCell", TextFieldListCell.forListView()},
+//        { (Supplier) EditableControlFactory::createEditableTableView, 
+//                "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
+//        { (Supplier) EditableControlFactory::createEditableTreeView, 
+//                "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
+//        { (Supplier) EditableControlFactory::createEditableTreeTableView, 
+//                "TreeTableView, TextFieldTreeTableCell", TextFieldTreeTableCell.forTreeTableColumn()},
+
         });
     }
 
-    public EditEventTest(Supplier controlSupplier, String typeMessage) {
+    public EditEventTest(Supplier controlSupplier, String typeMessage, Callback cellFactory) {
         this.controlSupplier = controlSupplier;
         this.typeMessage = typeMessage;
+        this.cellFactory = cellFactory;
     }
 //-------------- setup
 
@@ -262,6 +286,7 @@ public class EditEventTest {
         assertTrue("control must be editable", editableControl.isEditable());
         assertEquals("control must not be editing", -1, editableControl.getEditingIndex());
         assertNotNull("control must have cellFactory", editableControl.getCellFactory());
+        assertSame("cellFactory must be same", this.cellFactory, editableControl.getCellFactory());
         // editable cell
         IndexedCell cell = editableControl.createEditableCell();
         assertTrue("cell must be editable", cell.isEditable());
@@ -274,15 +299,7 @@ public class EditEventTest {
         cell = editableControl.createCell();
         assertNull(editableControl.getCellControl(cell));
    }
-//    /**
-//     * @return
-//     */
-//    private EditableControl createEditableControl() {
-////        return createEditableListView();
-//        return createEditableTreeView();
-////        return createEditableTableView();
-//    }
-//
+
     @Before
     public void setup() {
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
@@ -292,8 +309,10 @@ public class EditEventTest {
                 Thread.currentThread().getThreadGroup().uncaughtException(thread, throwable);
             }
         });
-//        editableControl = createEditableControl();
         editableControl = controlSupplier.get();
+        if (this.cellFactory != null) {
+            editableControl.setCellFactory(cellFactory);
+        }
     }
 
 

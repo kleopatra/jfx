@@ -2,7 +2,7 @@
  * Created on 29.09.2017
  *
  */
-package test.com.sun.javafx.scene.control.celledit;
+package test.com.sun.javafx.scene.control.celledit.editablecontrol.old;
 
 import java.util.Optional;
 
@@ -14,10 +14,6 @@ import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils.*;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -25,7 +21,10 @@ import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.skin.ListCellSkin;
 import javafx.util.Callback;
-import test.com.sun.javafx.scene.control.celledit.EditableControlFactory.EListView;
+import test.com.sun.javafx.scene.control.celledit.EditEventReport;
+import test.com.sun.javafx.scene.control.celledit.EditableControl;
+import test.com.sun.javafx.scene.control.celledit.EditableControlFactory;
+import test.com.sun.javafx.scene.control.celledit.ListViewEditReport;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
