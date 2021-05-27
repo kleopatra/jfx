@@ -42,8 +42,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
-//import javafx.scene.control.TableColumn;
-//import javafx.scene.control.TreeTableColumn.CellEditEvent;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.TreeView.EditEvent;
 
@@ -93,7 +91,11 @@ public class TreeCellEditingTest {
      * Extracted from testCancelOffEditingIndex to formally ignore
      * FIXME: move the assert to the other method, once the issue is solved
      */
-//    @Ignore("JDK-8267094")
+    /**
+     * Extracted from testCancelOffEditingIndex to formally ignore
+     * FIXME: move the assert to the other method, once the issue is solved
+     */
+    @Ignore("JDK-8267094")
     @Test
     public void testCancelOffEditingIndexEventIndex() {
         cell.updateIndex(editingIndex);
