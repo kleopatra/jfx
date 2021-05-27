@@ -345,13 +345,13 @@ public class ListCell<T> extends IndexedCell<T> {
             updateSelection();
             updateFocus();
             updateEditing();
-<<<<<<< HEAD
+//<<<<<<< HEAD
         }
 
         if (isEditing() && getIndex() == -1) {
             throw new IllegalStateException("cell index must not be -1 while editing");
-=======
->>>>>>> refs/heads/master
+//=======
+//>>>>>>> refs/heads/master
         }
     }
 
@@ -559,25 +559,8 @@ public class ListCell<T> extends IndexedCell<T> {
         final ListView<T> list = getListView();
         final int editIndex = list == null ? -1 : list.getEditingIndex();
         final boolean editing = isEditing();
-<<<<<<< HEAD
-        final boolean match = list != null && index != -1 && index == editIndex;
-=======
         final boolean match = (list != null) && (index != -1) && (index == editIndex);
->>>>>>> refs/heads/master
 
-<<<<<<< HEAD
-        if (match && ! editing) {
-            startEdit();
-        } else if (! match && editing) {
-            // If my index is not the one being edited then I need to cancel
-            // the edit. The tricky thing here is that as part of this call
-            // I cannot end up calling list.edit(-1) the way that the standard
-            // cancelEdit method would do. Yet, I need to call cancelEdit
-            // so that subclasses which override cancelEdit can execute. So,
-            // I have to use a kind of hacky flag workaround.
-                // try-finally to make certain that the flag is reliably reset to true
-            try {
-=======
         if (match && !editing) {
             startEdit();
         } else if (!match && editing) {
@@ -589,7 +572,6 @@ public class ListCell<T> extends IndexedCell<T> {
             // I have to use a kind of hacky flag workaround.
             try {
                 // try-finally to make certain that the flag is reliably reset to true
->>>>>>> refs/heads/master
                 updateEditingIndex = false;
                 cancelEdit();
             } finally {

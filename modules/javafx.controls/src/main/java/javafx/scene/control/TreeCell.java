@@ -614,25 +614,6 @@ public class TreeCell<T> extends IndexedCell<T> {
             startEdit();
         } else if (! match && editing) {
             doCancelEditing();
-<<<<<<< HEAD
-        }
-    }
-
-    private void doCancelEditing() {
-        // If my tree item is not the one being edited then I need to cancel
-        // the edit. The tricky thing here is that as part of this call
-        // I cannot end up calling tree.edit(null) the way that the standard
-        // cancelEdit method would do. Yet, I need to call cancelEdit
-        // so that subclasses which override cancelEdit can execute. So,
-        // I have to use a kind of hacky flag workaround.
-        try {
-            // try-finally to make certain that the flag is reliably reset to true
-            updateEditingIndex = false;
-            cancelEdit();
-        } finally {
-            updateEditingIndex = true;
-=======
->>>>>>> refs/heads/master
         }
     }
 
