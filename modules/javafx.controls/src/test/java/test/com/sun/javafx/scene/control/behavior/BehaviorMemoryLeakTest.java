@@ -84,9 +84,8 @@ public class BehaviorMemoryLeakTest {
                 PasswordField.class,
                 TableView.class,
                 TextArea.class,
-//                TextField.class,
+                TextField.class,
                 TreeTableView.class
-//                TreeView.class
          );
         // remove the known issues to make the test pass
         controlClasses.removeAll(leakingClasses);

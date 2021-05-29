@@ -50,7 +50,7 @@ import javafx.scene.control.TreeView;
 public class BehaviorCleanupTest {
 
 //----------- TreeView
-    
+
     /**
      * Test cleanup of selection listeners in TreeViewBehavior.
      */
