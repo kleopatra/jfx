@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,7 +33,6 @@ import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.Region;
 
 /**
  */
@@ -113,14 +112,7 @@ public class TreeTableCellBehavior<S,T> extends TableCellBehaviorBase<TreeItem<S
 
     @Override protected boolean handleDisclosureNode(double x, double y) {
         final TreeItem<S> treeItem = getNode().getTreeTableRow().getTreeItem();
-        // experiment around not selecting of leafs when clicking in region of  disclosure node
-        // beware: this cell is handling the mouse even though the disclosure node is 
-        // managed by the row skin - working only if the node is mouseTransparent
-        // which is set by TreeTableViewSkin .. what a mess ..
-        // the real culprit is somewhere in rowSkin? 
-        // returning here helps but might interfere with folders without children
-        // not our judgement call
-//        if (treeItem == null || treeItem.isLeaf()) return false; 
+
         final TreeTableView<S> treeTableView = getNode().getTreeTableView();
         final TreeTableColumn<S,T> column = getTableColumn();
         final TreeTableColumn<S,?> treeColumn = treeTableView.getTreeColumn() == null ?
@@ -128,9 +120,8 @@ public class TreeTableCellBehavior<S,T> extends TableCellBehaviorBase<TreeItem<S
 
         if (column == treeColumn) {
             final Node disclosureNode = getNode().getTreeTableRow().getDisclosureNode();
-            System.out.println("in treeColumn - " + x + " / " + y + " " + ((Region) disclosureNode).getWidth());
-            // check for visible helps - but is implementation detail of the row!!
-            if (disclosureNode != null) { // && disclosureNode.isVisible()) {
+          // fix JDK-8253597: check disclosure node for visibility along with existence
+          if (disclosureNode != null && disclosureNode.isVisible()) {
                 double startX = 0;
                 for (TreeTableColumn<S,?> tc : treeTableView.getVisibleLeafColumns()) {
                     if (tc == treeColumn) break;
@@ -145,7 +136,6 @@ public class TreeTableCellBehavior<S,T> extends TableCellBehaviorBase<TreeItem<S
                 }
             }
         }
-        System.out.println("don't handle");
         return false;
     }
 

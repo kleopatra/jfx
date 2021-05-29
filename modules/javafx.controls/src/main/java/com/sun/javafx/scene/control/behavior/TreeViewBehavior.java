@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,7 +33,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
-import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.input.*;
 import javafx.util.Callback;
 
