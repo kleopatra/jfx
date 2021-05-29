@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,10 +43,9 @@ import java.util.Set;
 abstract public class Selector {
 
     /**
-     * @deprecated This constructor was exposed erroneously and will be removed in the next version. Use {@link #createSelector(String)} instead.
+     * Package scoped constructor.
      */
-    @Deprecated(since="16", forRemoval=true)
-    public Selector() {
+    Selector() {
     }
 
     private static class UniversalSelector {

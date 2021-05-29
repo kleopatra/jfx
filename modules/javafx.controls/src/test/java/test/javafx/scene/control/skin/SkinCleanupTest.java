@@ -37,11 +37,14 @@ import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
 import javafx.scene.Scene;
+import javafx.scene.control.skin.TabPaneSkin;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -59,41 +62,41 @@ public class SkinCleanupTest {
     private Scene scene;
     private Stage stage;
     private Pane root;
-    
+
   //---------------- TreeView
-    
+
     /**
      * Sanity: replacing the root has no side-effect, listener to rootProperty
      * is registered with skin api
      */
     @Test
     public void testTreeViewSetRoot() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.setRoot(createRoot());
+        TreeView<String> treeView = new TreeView<>(createRoot());
+        installDefaultSkin(treeView);
+        replaceSkin(treeView);
+        treeView.setRoot(createRoot());
     }
-    
+
     /**
      * NPE from event handler to treeModification of root.
      */
     @Test
     public void testTreeViewAddRootChild() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.getRoot().getChildren().add(createRoot());
+        TreeView<String> treeView = new TreeView<>(createRoot());
+        installDefaultSkin(treeView);
+        replaceSkin(treeView);
+        treeView.getRoot().getChildren().add(createRoot());
     }
-    
+
     /**
      * NPE from event handler to treeModification of root.
      */
     @Test
     public void testTreeViewReplaceRootChildren() {
-        TreeView<String> listView = new TreeView<>(createRoot());
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.getRoot().getChildren().setAll(createRoot().getChildren());
+        TreeView<String> treeView = new TreeView<>(createRoot());
+        installDefaultSkin(treeView);
+        replaceSkin(treeView);
+        treeView.getRoot().getChildren().setAll(createRoot().getChildren());
     }
 
     /**
@@ -101,20 +104,20 @@ public class SkinCleanupTest {
      */
     @Test
     public void testTreeViewRefresh() {
-        TreeView<String> listView = new TreeView<>();
-        installDefaultSkin(listView);
-        replaceSkin(listView);
-        listView.refresh();
+        TreeView<String> treeView = new TreeView<>();
+        installDefaultSkin(treeView);
+        replaceSkin(treeView);
+        treeView.refresh();
     }
-    
+
     /**
      * Sanity: guard against potential memory leak from root property listener.
      */
     @Test
     public void testMemoryLeakAlternativeSkinWithRoot() {
-        TreeView<String> control = new TreeView<>(createRoot());
-        installDefaultSkin(control);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        TreeView<String> treeView = new TreeView<>(createRoot());
+        installDefaultSkin(treeView);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(treeView));
         assertNotNull(weakRef.get());
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
@@ -129,7 +132,7 @@ public class SkinCleanupTest {
         root.getChildren().addAll(new TreeItem<>("child one"), new TreeItem<>("child two"));
         return root;
     }
-    
+
 
 // ------------------ TreeCell
 
@@ -255,6 +258,63 @@ public class SkinCleanupTest {
         showControl(outside, true);
         bar.requestFocus();
         assertEquals("first item in toolbar must be focused", bar.getItems().get(0), scene.getFocusOwner());
+    }
+
+//-------- TabPane
+    @Test
+    public void testChildrenCountAfterSkinIsReplaced() {
+        TabPane tabPane = new TabPane();
+        tabPane.getTabs().addAll(new Tab("0"), new Tab("1"));
+        installDefaultSkin(tabPane);
+        int childrenCount = tabPane.getChildrenUnmodifiable().size();
+        replaceSkin(tabPane);
+        assertEquals(childrenCount, tabPane.getChildrenUnmodifiable().size());
+    }
+
+    @Test
+    public void testChildrenCountAfterSkinIsRemoved() {
+        TabPane tabPane = new TabPane();
+        assertEquals(0, tabPane.getChildrenUnmodifiable().size());
+        tabPane.getTabs().addAll(new Tab("0"), new Tab("1"));
+        installDefaultSkin(tabPane);
+        assertEquals(3, tabPane.getChildrenUnmodifiable().size());
+        tabPane.setSkin(null);
+        assertNull(tabPane.getSkin());
+        assertEquals(0, tabPane.getChildrenUnmodifiable().size());
+    }
+
+    @Test
+    public void testNPEWhenTabsAddedAfterSkinIsReplaced() {
+        TabPane tabPane = new TabPane();
+        tabPane.getTabs().addAll(new Tab("0"), new Tab("1"));
+        installDefaultSkin(tabPane);
+        replaceSkin(tabPane);
+        tabPane.getTabs().addAll(new Tab("2"), new Tab("3"));
+    }
+
+    @Test
+    public void testNPEWhenTabRemovedAfterSkinIsReplaced() {
+        TabPane tabPane = new TabPane();
+        tabPane.getTabs().addAll(new Tab("0"), new Tab("1"));
+        installDefaultSkin(tabPane);
+        replaceSkin(tabPane);
+        tabPane.getTabs().remove(0);
+    }
+
+    @Test
+    public void testAddRemoveTabsAfterSkinIsReplaced() {
+        TabPane tabPane = new TabPane();
+        tabPane.getTabs().addAll(new Tab("0"), new Tab("1"));
+        installDefaultSkin(tabPane);
+        assertEquals(2, tabPane.getTabs().size());
+        assertEquals(3, tabPane.getChildrenUnmodifiable().size());
+        replaceSkin(tabPane);
+        tabPane.getTabs().addAll(new Tab("2"), new Tab("3"));
+        assertEquals(4, tabPane.getTabs().size());
+        assertEquals(5, tabPane.getChildrenUnmodifiable().size());
+        tabPane.getTabs().clear();
+        assertEquals(0, tabPane.getTabs().size());
+        assertEquals(1, tabPane.getChildrenUnmodifiable().size());
     }
 
 //---------------- setup and initial

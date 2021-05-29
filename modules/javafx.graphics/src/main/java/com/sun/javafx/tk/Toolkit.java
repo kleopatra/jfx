@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -89,11 +89,12 @@ import com.sun.javafx.sg.prism.NGLightBase;
 import com.sun.javafx.sg.prism.NGNode;
 import com.sun.javafx.util.Utils;
 import com.sun.scenario.DelayedRunnable;
-import com.sun.scenario.animation.AbstractMasterTimer;
+import com.sun.scenario.animation.AbstractPrimaryTimer;
 import com.sun.scenario.effect.AbstractShadow.ShadowMode;
 import com.sun.scenario.effect.Color4f;
 import com.sun.scenario.effect.FilterContext;
 import com.sun.scenario.effect.Filterable;
+import java.util.Optional;
 
 
 public abstract class Toolkit {
@@ -257,7 +258,7 @@ public abstract class Toolkit {
                         + forcedToolkit);
             }
 
-            TOOLKIT = (Toolkit)clz.newInstance();
+            TOOLKIT = (Toolkit)clz.getDeclaredConstructor().newInstance();
             if (TOOLKIT.init()) {
                 if (printToolkit) {
                     System.err.println("JavaFX: using " + forcedToolkit);
@@ -715,7 +716,7 @@ public abstract class Toolkit {
     public abstract boolean isForwardTraversalKey(KeyEvent e);
     public abstract boolean isBackwardTraversalKey(KeyEvent e);
 
-    public abstract AbstractMasterTimer getMasterTimer();
+    public abstract AbstractPrimaryTimer getPrimaryTimer();
 
     public abstract FontLoader getFontLoader();
     public abstract TextLayoutFactory getTextLayoutFactory();
@@ -872,6 +873,13 @@ public abstract class Toolkit {
     public KeyCode getPlatformShortcutKey() {
         return PlatformUtil.isMac() ? KeyCode.META : KeyCode.CONTROL;
     }
+
+    /**
+     * Returns the lock state for the given keyCode.
+     * @param keyCode the keyCode to check
+     * @return the lock state for the given keyCode.
+     */
+    public abstract Optional<Boolean> isKeyLocked(KeyCode keyCode);
 
     public abstract FileChooserResult showFileChooser(
             TKStage ownerWindow,
