@@ -25,23 +25,36 @@
 
 package test.javafx.scene.control;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.sun.javafx.tk.Toolkit;
+
+import static javafx.scene.control.ControlShim.*;
+import static org.junit.Assert.*;
+import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
+import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.*;
+
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.FocusModel;
+import javafx.scene.control.IndexedCell;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.MultipleSelectionModelBaseShim;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.skin.TreeCellSkin;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static javafx.scene.control.ControlShim.*;
-import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.*;
-import static org.junit.Assert.*;
+import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
+import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
 
 public class TreeCellTest {
     private TreeCell<String> cell;
@@ -56,6 +69,7 @@ public class TreeCellTest {
     private TreeItem<String> apples;
     private TreeItem<String> oranges;
     private TreeItem<String> pears;
+    private StageLoader stageLoader;
 
     @Before public void setup() {
         cell = new TreeCell<String>();
@@ -68,6 +82,11 @@ public class TreeCellTest {
 
         tree = new TreeView<String>(root);
         root.setExpanded(true);
+    }
+
+    @After
+    public void cleanup() {
+        if (stageLoader != null) stageLoader.dispose();
     }
 
     /*********************************************************************
@@ -686,6 +705,216 @@ public class TreeCellTest {
         assertFalse(cell.isEditing());
     }
 
+    @Test
+    public void testEditCancelEventAfterCancelOnCell() {
+        tree.setEditable(true);
+        cell.updateTreeView(tree);
+        int editingIndex = 1;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        cell.updateIndex(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        cell.cancelEdit();
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+
+    @Test
+    public void testEditCancelEventAfterCancelOnTree() {
+        tree.setEditable(true);
+        cell.updateTreeView(tree);
+        int editingIndex = 1;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        cell.updateIndex(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        tree.edit(null);
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+
+    @Test
+    public void testEditCancelEventAfterCellReuse() {
+        tree.setEditable(true);
+        cell.updateTreeView(tree);
+        int editingIndex = 1;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        cell.updateIndex(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        cell.updateIndex(0);
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+
+    @Test
+    public void testEditCancelEventAfterCollapse() {
+        stageLoader = new StageLoader(tree);
+        tree.setEditable(true);
+        int editingIndex = 1;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        root.setExpanded(false);
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+
+    @Test
+    public void testEditCancelEventAfterModifyItems() {
+        stageLoader = new StageLoader(tree);
+        tree.setEditable(true);
+        int editingIndex = 2;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        root.getChildren().add(0, new TreeItem<>("added"));
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+
+//------------ experimenting with potential memory leak
+    
+    /**
+     * Note: cancel edit on removing the editingItem seems to be handled in 
+     * by skins (which? cell or tree?) - without the tree's editingItem
+     * still holds the old.
+     */
+    @Test
+    public void testEditCancelEventAfterRemoveEditingItem() {
+        stageLoader = new StageLoader(tree);
+        tree.setEditable(true);
+        int editingIndex = 2;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        root.getChildren().remove(editingItem);
+        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+    
+    /**
+     * Passes unexpectedly .. no cell with newly added item?
+     * 
+     * was error in test setup: must fire after modification to grab the correct
+     * cell
+     */
+    @Test
+    public void testEditMemoryLeakAfterRemoveEditingItem() {
+        stageLoader = new StageLoader(tree);
+        tree.setEditable(true);
+        // the item to test for being gc'ed
+        TreeItem<String> editingItem = new TreeItem<>("added");
+        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
+        root.getChildren().add(0, editingItem);
+        Toolkit.getToolkit().firePulse();
+        tree.edit(editingItem);
+        root.getChildren().remove(editingItem);
+        Toolkit.getToolkit().firePulse();
+        
+        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
+        editingItem = null;
+        attemptGC(itemRef);
+        assertEquals("treeItem must be gc'ed", null, itemRef.get());
+    }
+    
+    /**
+     * doc test setup: must fire pulse after modifications
+     */
+    @Test
+    public void testFindCellForAddedItem() {
+        stageLoader = new StageLoader(tree);
+        tree.setEditable(true);
+        TreeItem<String> editingItem = new TreeItem<>("added");
+        root.getChildren().add(0, editingItem);
+        Toolkit.getToolkit().firePulse();
+        int editingIndex = tree.getRow(editingItem);
+        tree.edit(editingItem);
+        assertEquals("sanity", editingItem, tree.getEditingItem());
+        TreeCell<?> editingCell = (TreeCell<?>) VirtualFlowTestUtils.getCell(tree, editingIndex);
+        assertEquals(editingItem, editingCell.getTreeItem());
+        assertTrue("cell must be editing", editingCell.isEditing());
+    }
+    
+    /**
+     * Note: cancel edit on removing the editingItem seems to be handled in 
+     * skins (which? not cell, must be treeViewSkin?) - without the tree's editingItem
+     * still holds the old.
+     */
+    @Test
+    public void testEditingItemAfterRemove() {
+        tree.setEditable(true);
+        int editingIndex = 2;
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        root.getChildren().remove(editingItem);
+        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
+    }
+    
+    @Test
+    public void testEditMemoryLeakAfterRemoveEditingItemNoCell() {
+        tree.setEditable(true);
+        TreeItem<String> editingItem = new TreeItem<>("added");
+        root.getChildren().add(editingItem);
+        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
+        tree.edit(editingItem);
+        root.getChildren().remove(editingItem);
+        tree.edit(null);
+        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
+        editingItem = null;
+        attemptGC(itemRef);
+        assertEquals("item must be gc'ed", null, itemRef.get());
+    }
+    
+    /**
+     * Sanity test: no reference to item after it's removed
+     */
+    @Test
+    public void testMemoryLeakAfterRemoveItem() {
+        // need a new item, test setup holds reference to all items
+        TreeItem<String> editingItem = new TreeItem<>("added");
+        root.getChildren().add(editingItem);
+        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
+        root.getChildren().remove(editingItem);
+        editingItem = null;
+        attemptGC(itemRef);
+        assertEquals("item must be gc'ed", null, itemRef.get());
+    }
+
+    /**
+     * FIXME: potential memory when storing TreeItem? How to test?
+     * 
+     * In synthetic context the cell doesn't switch into not-editing,
+     * in scene its re-use is undeterministic.
+     * 
+     * shouldn't the tree itself update its editing on removing the editingItem?
+     */
+    @Test
+    public void testEditMemoryLeak() {
+        tree.setEditable(true);
+        cell.updateTreeView(tree);
+        int editingIndex = 2;
+        cell.updateIndex(editingIndex);
+        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
+        tree.edit(editingItem);
+        List<EditEvent<String>> events = new ArrayList<>();
+        tree.setOnEditCancel(events::add);
+        root.getChildren().remove(editingItem);
+        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
+        fail("TBD: synthetic context doesn't reset cell into not-editing ");
+        assertEquals(1, events.size());
+        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
+    }
+
+//----------- end testing potential memory leak
+    
     // When the tree view item's change and affects a cell that is editing, then what?
     // When the tree cell's index is changed while it is editing, then what?
 

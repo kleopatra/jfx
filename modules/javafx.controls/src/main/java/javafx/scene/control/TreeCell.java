@@ -351,7 +351,10 @@ public class TreeCell<T> extends IndexedCell<T> {
      * Public API                                                              *
      *                                                                         *
      **************************************************************************/
+    // treeItem at time of startEdit - fix for JDK-8267094
+//    private TreeItem<T> treeItemAtStartEdit;
 
+    private WeakReference<TreeItem<T>> treeItemAtStartEditRef = new WeakReference<>(null);
     /** {@inheritDoc} */
     @Override public void startEdit() {
         if (isEditing()) return;
@@ -384,10 +387,9 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             tree.requestFocus();
         }
-        editingIndexAtStartEdit = getIndex();
+//        treeItemAtStartEdit = getTreeItem();
+        treeItemAtStartEditRef = new WeakReference<>(getTreeItem());
     }
-
-    int editingIndexAtStartEdit = -1;
 
      /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
@@ -446,10 +448,12 @@ public class TreeCell<T> extends IndexedCell<T> {
 //            TreeItem<T> editingItem = tree.getEditingItem();
 //            T value = editingItem != null ? editingItem.getValue() : null;
 
-            // next try: use same index as at start
+            // next try: use same item as at start
 
-            TreeItem<T> editingItem = tree.getTreeItem(editingIndexAtStartEdit);
+//            TreeItem<T> editingItem = treeItemAtStartEdit;
+            TreeItem<T> editingItem = treeItemAtStartEditRef != null ? treeItemAtStartEditRef.get() : null;
             T value = editingItem != null ? editingItem.getValue() : null;
+
 
             // use current cell state
 //            TreeItem<T> editingItem = getTreeItem();
@@ -466,12 +470,11 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             tree.fireEvent(new TreeView.EditEvent<T>(tree,
                     TreeView.<T>editCancelEvent(),
-//                    getTreeItem(),
-//                    getItem(),
                     editingItem,
                     value,
                     null));
         }
+//        treeItemAtStartEdit = null;
     }
 
     /** {@inheritDoc} */
