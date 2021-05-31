@@ -760,6 +760,8 @@ public class TreeCellTest {
         List<EditEvent<String>> events = new ArrayList<>();
         tree.setOnEditCancel(events::add);
         root.setExpanded(false);
+        Toolkit.getToolkit().firePulse();
+
         assertEquals(1, events.size());
         assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
     }
@@ -774,17 +776,14 @@ public class TreeCellTest {
         List<EditEvent<String>> events = new ArrayList<>();
         tree.setOnEditCancel(events::add);
         root.getChildren().add(0, new TreeItem<>("added"));
+        Toolkit.getToolkit().firePulse();
+
         assertEquals(1, events.size());
         assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
     }
 
 //------------ experimenting with potential memory leak
     
-    /**
-     * Note: cancel edit on removing the editingItem seems to be handled in 
-     * by skins (which? cell or tree?) - without the tree's editingItem
-     * still holds the old.
-     */
     @Test
     public void testEditCancelEventAfterRemoveEditingItem() {
         stageLoader = new StageLoader(tree);
@@ -795,16 +794,14 @@ public class TreeCellTest {
         List<EditEvent<String>> events = new ArrayList<>();
         tree.setOnEditCancel(events::add);
         root.getChildren().remove(editingItem);
+        Toolkit.getToolkit().firePulse();
         assertNull("removing item must cancel edit on tree", tree.getEditingItem());
         assertEquals(1, events.size());
         assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
     }
     
     /**
-     * Passes unexpectedly .. no cell with newly added item?
-     * 
-     * was error in test setup: must fire after modification to grab the correct
-     * cell
+     * Note: must fire after _every_ modification to get neither false reds nor false greens.
      */
     @Test
     public void testEditMemoryLeakAfterRemoveEditingItem() {
@@ -818,7 +815,6 @@ public class TreeCellTest {
         tree.edit(editingItem);
         root.getChildren().remove(editingItem);
         Toolkit.getToolkit().firePulse();
-        
         assertNull("removing item must cancel edit on tree", tree.getEditingItem());
         editingItem = null;
         attemptGC(itemRef);
@@ -826,7 +822,7 @@ public class TreeCellTest {
     }
     
     /**
-     * doc test setup: must fire pulse after modifications
+     * Document correct test setup: must fire pulse after modifications.
      */
     @Test
     public void testFindCellForAddedItem() {
@@ -844,36 +840,6 @@ public class TreeCellTest {
     }
     
     /**
-     * Note: cancel edit on removing the editingItem seems to be handled in 
-     * skins (which? not cell, must be treeViewSkin?) - without the tree's editingItem
-     * still holds the old.
-     */
-    @Test
-    public void testEditingItemAfterRemove() {
-        tree.setEditable(true);
-        int editingIndex = 2;
-        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
-        tree.edit(editingItem);
-        root.getChildren().remove(editingItem);
-        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
-    }
-    
-    @Test
-    public void testEditMemoryLeakAfterRemoveEditingItemNoCell() {
-        tree.setEditable(true);
-        TreeItem<String> editingItem = new TreeItem<>("added");
-        root.getChildren().add(editingItem);
-        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
-        tree.edit(editingItem);
-        root.getChildren().remove(editingItem);
-        tree.edit(null);
-        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
-        editingItem = null;
-        attemptGC(itemRef);
-        assertEquals("item must be gc'ed", null, itemRef.get());
-    }
-    
-    /**
      * Sanity test: no reference to item after it's removed
      */
     @Test
@@ -887,31 +853,32 @@ public class TreeCellTest {
         attemptGC(itemRef);
         assertEquals("item must be gc'ed", null, itemRef.get());
     }
-
+    
     /**
-     * FIXME: potential memory when storing TreeItem? How to test?
-     * 
-     * In synthetic context the cell doesn't switch into not-editing,
-     * in scene its re-use is undeterministic.
-     * 
-     * shouldn't the tree itself update its editing on removing the editingItem?
+     * Note: cancel edit on removing the editingItem seems to be handled in 
+     * skins (which? not cell, must be treeViewSkin?) - without the tree's editingItem
+     * still holds the old.
      */
+    @Ignore("treeView - editingItem spec")
     @Test
-    public void testEditMemoryLeak() {
+    public void testEditingItemAfterRemove() {
         tree.setEditable(true);
-        cell.updateTreeView(tree);
         int editingIndex = 2;
-        cell.updateIndex(editingIndex);
         TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
         tree.edit(editingItem);
-        List<EditEvent<String>> events = new ArrayList<>();
-        tree.setOnEditCancel(events::add);
         root.getChildren().remove(editingItem);
         assertNull("removing item must cancel edit on tree", tree.getEditingItem());
-        fail("TBD: synthetic context doesn't reset cell into not-editing ");
-        assertEquals(1, events.size());
-        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
     }
+    
+    @Ignore("treeView - editingItem spec")
+    @Test
+    public void testEditingItemUncontained() {
+        tree.setEditable(true);
+        TreeItem<String> editingItem = new TreeItem<>("uncontained");
+        tree.edit(editingItem);
+        assertNull("must not edit uncontained", tree.getEditingItem());
+    }
+    
 
 //----------- end testing potential memory leak
     

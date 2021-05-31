@@ -352,9 +352,9 @@ public class TreeCell<T> extends IndexedCell<T> {
      *                                                                         *
      **************************************************************************/
     // treeItem at time of startEdit - fix for JDK-8267094
-//    private TreeItem<T> treeItemAtStartEdit;
+    private TreeItem<T> treeItemAtStartEdit;
 
-    private WeakReference<TreeItem<T>> treeItemAtStartEditRef = new WeakReference<>(null);
+//    private WeakReference<TreeItem<T>> treeItemAtStartEditRef = new WeakReference<>(null);
     /** {@inheritDoc} */
     @Override public void startEdit() {
         if (isEditing()) return;
@@ -378,7 +378,7 @@ public class TreeCell<T> extends IndexedCell<T> {
         super.startEdit();
 
          // Inform the TreeView of the edit starting.
-        if (isEditing() && tree != null) {
+        if (/*isEditing() && */tree != null) {
             tree.fireEvent(new TreeView.EditEvent<T>(tree,
                     TreeView.<T>editStartEvent(),
                     getTreeItem(),
@@ -387,8 +387,8 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             tree.requestFocus();
         }
-//        treeItemAtStartEdit = getTreeItem();
-        treeItemAtStartEditRef = new WeakReference<>(getTreeItem());
+        treeItemAtStartEdit = getTreeItem();
+//        treeItemAtStartEditRef = new WeakReference<>(getTreeItem());
     }
 
      /** {@inheritDoc} */
@@ -450,8 +450,8 @@ public class TreeCell<T> extends IndexedCell<T> {
 
             // next try: use same item as at start
 
-//            TreeItem<T> editingItem = treeItemAtStartEdit;
-            TreeItem<T> editingItem = treeItemAtStartEditRef != null ? treeItemAtStartEditRef.get() : null;
+            TreeItem<T> editingItem = treeItemAtStartEdit;
+//            TreeItem<T> editingItem = treeItemAtStartEditRef != null ? treeItemAtStartEditRef.get() : null;
             T value = editingItem != null ? editingItem.getValue() : null;
 
 
@@ -474,7 +474,7 @@ public class TreeCell<T> extends IndexedCell<T> {
                     value,
                     null));
         }
-//        treeItemAtStartEdit = null;
+        treeItemAtStartEdit = null;
     }
 
     /** {@inheritDoc} */
