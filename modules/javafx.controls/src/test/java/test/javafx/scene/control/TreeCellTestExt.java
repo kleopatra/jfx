@@ -71,68 +71,6 @@ public class TreeCellTestExt {
     
 //------------ experimenting with potential memory leak
     
-    @Test
-    public void testEditCancelEventAfterRemoveEditingItem() {
-        stageLoader = new StageLoader(tree);
-        tree.setEditable(true);
-        int editingIndex = 2;
-        TreeItem<String> editingItem = tree.getTreeItem(editingIndex);
-        tree.edit(editingItem);
-        List<EditEvent<String>> events = new ArrayList<>();
-        tree.setOnEditCancel(events::add);
-        root.getChildren().remove(editingItem);
-        Toolkit.getToolkit().firePulse();
-        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
-        assertEquals(1, events.size());
-        assertEquals("editing location of cancel event", editingItem, events.get(0).getTreeItem());
-    }
-    
-    /**
-     * Remove item implicitly cancels the edit if cell has a skin/is in the scenegraph.
-     */
-    @Test
-    public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
-        stageLoader = new StageLoader(tree);
-        tree.setEditable(true);
-        // the item to test for being gc'ed
-        TreeItem<String> editingItem = new TreeItem<>("added");
-        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
-        root.getChildren().add(0, editingItem);
-        Toolkit.getToolkit().firePulse();
-        tree.edit(editingItem);
-        root.getChildren().remove(editingItem);
-        Toolkit.getToolkit().firePulse();
-        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
-        editingItem = null;
-        attemptGC(itemRef);
-        assertEquals("treeItem must be gc'ed", null, itemRef.get());
-    }
-    
-    
-    /**
-     * Remove item implicitly cancels the edit if cell has a skin/is in the scenegraph.
-     */
-    @Test
-    public void testEditCommitMemoryLeakAfterRemoveEditingItem() {
-        stageLoader = new StageLoader(tree);
-        tree.setEditable(true);
-        // the item to test for being gc'ed
-        TreeItem<String> editingItem = new TreeItem<>("added");
-        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
-        root.getChildren().add(0, editingItem);
-        int editingIndex = tree.getRow(editingItem);
-        Toolkit.getToolkit().firePulse();
-        tree.edit(editingItem);
-        TreeCell<String> editingCell = (TreeCell<String>) VirtualFlowTestUtils.getCell(tree, editingIndex);
-        editingCell.commitEdit("added changed");
-        root.getChildren().remove(editingItem);
-        Toolkit.getToolkit().firePulse();
-        assertNull("removing item must cancel edit on tree", tree.getEditingItem());
-        editingItem = null;
-        attemptGC(itemRef);
-        assertEquals("treeItem must be gc'ed", null, itemRef.get());
-    }
-    
     
     /**
      * Document correct test setup: must fire pulse after modifications.
