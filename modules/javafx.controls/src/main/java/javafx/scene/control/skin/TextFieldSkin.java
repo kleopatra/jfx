@@ -781,11 +781,6 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         return behavior;
     }
 
-    // for testing only!
-    Text getTextNode() {
-        return textNode;
-    }
-    
     private void updateTextNodeCaretPos(int pos) {
         if (pos == 0 || isForwardBias()) {
             textNode.setCaretPosition(pos);
@@ -1001,4 +996,26 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
         updateCaretOff();
     }
+    
+    // for testing only!
+    Text getTextNode() {
+        return textNode;
+    }
+    
+    // for testing only!
+    Text getPromptNode() {
+        return promptNode;
+    }
+    
+    // for testing only!
+    double getTextTranslateX() {
+        return textTranslateX.get();
+    }
+    
+    // for testing only!
+    public Path getSelectionPath() {
+        return selectionHighlightPath;
+    }
+    
+
 }

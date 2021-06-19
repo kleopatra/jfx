@@ -423,6 +423,11 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
     private Boolean mixed = null;
     private Boolean rtlText = null;
 
+    // test-only
+    Bidi getRawBidi() {
+        return bidi;
+    }
+    
     private void invalidateBidi() {
         bidi = null;
         mixed = null;

@@ -42,6 +42,7 @@ import com.sun.javafx.tk.Toolkit;
 
 import static com.sun.javafx.PlatformUtil.*;
 
+import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.ConditionalFeature;
@@ -806,6 +807,11 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
         return caretVisible;
     }
 
+    // package for testing 
+    boolean isCaretBlinking() {
+        return caretBlinking.caretTimeline.getStatus() == Status.RUNNING;
+    }
+    
     boolean isRTL() {
         return (getSkinnable().getEffectiveNodeOrientation() == NodeOrientation.RIGHT_TO_LEFT);
     };

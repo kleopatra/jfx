@@ -32,8 +32,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sun.javafx.tk.Toolkit;
+
 import static javafx.scene.control.ControlShim.*;
 import static javafx.scene.control.skin.TextInputSkinShim.*;
+import static javafx.scene.control.skin.UnusedSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
@@ -45,16 +48,13 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.event.EventHandler;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextField;
 import javafx.scene.control.skin.TextFieldSkin;
-import javafx.scene.control.skin.TextInputSkinShim;
-import javafx.scene.input.InputMethodRequests;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -66,35 +66,123 @@ import test.com.sun.javafx.scene.control.infrastructure.KeyEventFirer;
 /**
  * Temp test for TextField skin issues JDK-8240506
  * Extracted from SkinIssuesTest - to be moved to SkinCleanupTest and SkinMemoryTest for commit.
+ *
+ * Overall test structure:
+ *
+ * for each listener installation that's moved to use skin api
+ * - have a test that ensures
+ *   the listener is working: should fail/pass without the listener - must pass before/after the fix
+ *   this guarantees that it's correctly re-wired
+ * - have a test for a side-effect: failing before/passing after
+ *
+ * Note that removing some listeners seems to have no macroscopic effect in test context:
+ * - control text, font: also not in visual test
+ * - textNode selectionShape: selection highlight visually broken
+ *
  */
 public class SkinTextFieldIssuesTest {
 
     private Scene scene;
     private Stage stage;
     private Pane root;
-    
 
-//-------- empty test methods are stand-ins for testing effects of binding/mnanually registered listeners
-    
-    
-//----- TextFieldSkin
-    
+
+// -- caretPosition
+
+//-------- guarding against listeners not installed
+
     /**
-     * Test deleteNextChar
-     * NPE from updateSelection
+     * Unclear effect, see related test below and code comment in skin.
+     * Seems to be some internal update needed
+     *
+     * f.i. in a visual test, select text, change font -> selection not updated,
+     * broken rectangle (too small or unrelated at all)
+     *
+     * The selection highlight is not updated correctly in test context..
+     */
+//    @Test
+//    public void testListeningSelectionShape() {
+//        // field to get the selectionPath from
+//        TextField largeFont = new TextField("dummy");
+//        int fontSize = 30;
+//        largeFont.setFont(new Font(fontSize));
+//        showControl(largeFont, true);
+//        Toolkit.getToolkit().firePulse();
+////        System.out.println("selected? " + largeFont.getSelection());
+//        assertSame(scene.getFocusOwner(), largeFont);
+//        Path largeSelectionPath = getSelectionPath(largeFont);
+//        Toolkit.getToolkit().firePulse();
+//        largeFont.layout();
+////        assertFalse("" + selectionPath.getElements(), selectionPath.getElements().isEmpty());
+//        // field to test: start with left, then change to right align while showing
+//        TextField field = new TextField("dummy");
+//        showControl(field, true);
+//        Toolkit.getToolkit().firePulse();
+//        Path selectionPath = getSelectionPath(field);
+//        selectionPath.getElements().addListener((ListChangeListener)c -> {
+//            System.out.println("getting change?" + c);
+//        });
+//        assertFalse("" + selectionPath.getElements(), selectionPath.getElements().isEmpty());
+//    }
+
+    /**
+     * The textNode is bound directly to the control's font.
+     * triggers layout pass only, how to test?
+     *
+     * No macroscopic effect visible when removing font listener
      */
     @Test
-    public void failedDeleteNextChar() {
-        TextField field = new TextField();
-        field.setText("initial");
-        installDefaultSkin(field);
-        int index = 2;
-        field.positionCaret(index);
-        replaceSkin(field);
-        assertEquals(index, field.getCaretPosition());
-        field.deleteNextChar();
+    public void testListeningFont() {
+        TextField field = new TextField("some text");
+        assertEquals("sanity: ", Pos.CENTER_LEFT, field.getAlignment());
+        field.setPrefColumnCount(50);
+        showControl(field, true);
+        double textHeight = getTextNode(field).getLayoutBounds().getHeight();
+        field.setFont(new Font(30));
+//        Toolkit.getToolkit().firePulse();
+        assertEquals(10, getTextNode(field).getLayoutBounds().getHeight(), 0.1);
     }
-    
+
+    /**
+     * Text listener is updating translateX
+     *
+     * passes independently of whether the text listener is installed?
+     */
+    @Test
+    public void testListeningText() {
+//        TextField standin = new TextField("do nothing");
+//        standin.setPrefColumnCount(50);
+//        showControl(standin, true);
+        String first = "some";
+        String second = "dummy";
+        TextField comparing = new TextField();
+        comparing.setPrefColumnCount(50);
+        comparing.setAlignment(Pos.CENTER_RIGHT);
+        showControl(comparing, true);
+        Toolkit.getToolkit().firePulse();
+        double compareTranslate = getTextTranslateX(comparing);
+        Text textNode = getTextNode(comparing);
+        assertEquals(0, textNode.getLayoutBounds().getWidth(), 1);
+        comparing.appendText(second);
+        Toolkit.getToolkit().firePulse();
+        assertEquals(compareTranslate - textNode.getLayoutBounds().getWidth(), getTextTranslateX(comparing), 1);
+
+//        TextField field = new TextField(first);
+//        field.setPrefColumnCount(50);
+//        field.setAlignment(Pos.CENTER);
+//        showControl(field, true);
+//        field.appendText(second);
+//        Toolkit.getToolkit().firePulse();
+////        Path selectionPath = getSelectionPath(comparing);
+////        System.out.println(selectionPath.getElements());
+//        assertEquals(compareTranslate, getTextTranslateX(field), 1);
+    }
+
+
+
+
+//----- TextFieldSkin
+
     /**
      * Invalidation listener on prompt text fill: calls updateTextPos (no direct access to skinnable)
      * no side-effect, probably no leak (it's a property of the skin)
@@ -105,9 +193,9 @@ public class SkinTextFieldIssuesTest {
         field.setPromptText("prompt");
         installDefaultSkin(field);
         replaceSkin(field);
-        TextInputSkinShim.setPromptTextFill(field, Color.MAGENTA);
+        setPromptTextFill(field, Color.MAGENTA);
     }
-    
+
     /**
      * Prompt text: it's a binding that has no effect?
      * prompt -> replace skin -> changed prompt
@@ -118,9 +206,9 @@ public class SkinTextFieldIssuesTest {
         field.setPromptText("prompt");
         installDefaultSkin(field);
         replaceSkin(field);
-        field.setPromptText("newe text");
+        field.setPromptText("new text");
     }
-    
+
     /**
      * Prompt text: it's a binding that has no effect?
      * prompt -> replace skin -> null prompt
@@ -133,59 +221,24 @@ public class SkinTextFieldIssuesTest {
         replaceSkin(field);
         field.setPromptText(null);
     }
-    
+
     /**
-     * Prompt text: it's a binding that has no effect?
-     * 
-     * null prompt -> replace skin -> set prompt
-     * NPE in createPromptNode
-     * 
-     * called from skin's listener to usePrompt binding (which is not yet
-     * cleaned out)
-     * 
-     * open: fixed by overriding dispose in usePromptText binding and calling dispose
-     * in skin.dispose.
-     */
-    @Test
-    public void failedPromptText() {
-        TextField field = new TextField();
-        installDefaultSkin(field);
-        replaceSkin(field);
-        field.setPromptText("prompt");
-    }
-    
-    /**
-     * InvalidationListener to textProperty -> NPE
-     * 
-     * Note: bubbles up in updateSelection, caused somewhere else?
-     * - from listener to textNode.selectionShapeProperty ... must be some direct
-     *  binding from textNode/text internals?
-     */
-    @Test
-    public void failedText() {
-        TextField field = new TextField("some text");
-        installDefaultSkin(field);
-        replaceSkin(field);
-        field.setText("replaced");
-    }
-    
-    /**
-     * Side-effect: changing text after switching skin effects old textNode 
-     * 
-     * General issue: the binding will be gc'ed sooner or later but until then 
+     * Side-effect: changing text after switching skin effects old textNode
+     *
+     * General issue: the binding will be gc'ed sooner or later but until then
      * is updating itself it least along with the changes of the field.
-     * There are more bindings (untested) doing the same. 
-     * 
+     * There are more bindings (untested) doing the same.
+     *
      * Question: is that a problem or not? As long as the field isn't updated
      * to stale state, that should be okay? Also, replacement skin does the same.
-     * 
+     *
      * This text was completely wrong: it kept a strong reference to the node ..
-     * Replaced by both a weak ref to the skin and the node, trigger gc of skin: 
+     * Replaced by both a weak ref to the skin and the node, trigger gc of skin:
      * NPE because the skin/node indeed is gc'ed.
-     * 
+     *
      * So it's down to the usual: what happens between replacement of the skin and
-     * a gc - we have to make sure that the binding doesn't call back into the 
-     * skinnable. 
+     * a gc - we have to make sure that the binding doesn't call back into the
+     * skinnable.
      */
     @Test @Ignore("incorrect test setup")
     public void debatableTextNodeReplaced() {
@@ -201,45 +254,12 @@ public class SkinTextFieldIssuesTest {
         assertEquals("text of replaced textNode changed", replaced, getTextNode(field).getText());
         assertEquals("text of initial textNode unchanged", initial, textNode.get().getText());
     }
-    
-    
-    /**
-     * InvalidationListener on alignmentProperty -> NPE
-     * fixed by using skin api
-     */
-    @Test
-    public void failedAlignment() {
-        TextField field = new TextField("some text");
-        showControl(field, true);
-        assertTrue(field.getWidth() > 0);
-        replaceSkin(field);
-        field.setAlignment(Pos.TOP_RIGHT);
-    }
-    
-    /**
-     * InvalidationListener to font - not removed -> NPE
-     * bubbles up in updateSelection from manually installed listener to textNode.selectionShapeProperty 
-     * not fixed by using skin api on control.fontProperty: 
-     *          textNode font is bound to control.font
-     *          
-     * PENDING - analysis no longer correct? after removing selectionShapeProperty 
-     * this doesn't blow         
-     */
-    @Test
-    public void failedFont() {
-        TextField field = new TextField("some text");
-        installDefaultSkin(field);
-        replaceSkin(field);
-        // doesn't help: the skin isn't gc'ed, the binding not gc'ed
-//        WeakReference<?> weakSkin = new WeakReference<>(replaceSkin(field));
-//        attemptGC(weakSkin);
-        field.setFont(new Font(30));
-    }
-    
+
+
     /**
      * Test caret position and move - implicit selection change.
      * was: NPE from updateSelection
-     * 
+     *
      * install skin -> set caret -> replace skin -> change caret
      */
     @Test
@@ -252,46 +272,26 @@ public class SkinTextFieldIssuesTest {
         assertEquals(index, field.getCaretPosition());
         field.positionCaret(index + 1);
     }
-    
-    /**
-     * Test caret position and move - implicit selection change.
-     * 
-     * show -> set caret -> replace skin -> change caret
-     * 
-     * was: a) NPE from updateSelection b) NPE from listener to caretPosition
-     * 
-     * Note: the listener to caretPosition is a no-op if control.width <= 0
-     */
-    @Test
-    public void failedMoveShow() {
-        TextField field = new TextField("initial");
-        showControl(field, true);
-        int index = 2;
-        field.positionCaret(index);
-        replaceSkin(field);
-        assertEquals(index, field.getCaretPosition());
-        field.positionCaret(index + 1);
-    }
-    
+
     /**
      * TextNode (the view installed by the skin) has listener on its selectionShape
      * that calls skin updateSelection (which access getSkinnable)
-     * 
+     *
      * deep down is a binding to Text's selectionStart/-End
-     * 
-     * --------------- 
-     * 
+     *
+     * ---------------
+     *
      * here trying to find a failing test if the listener to selectionShape
      * is removed.
-     * 
+     *
      * Note: the listener calls skin.updateSelection which sync's from
-     * textField to textNode (not the other way round), so can't 
+     * textField to textNode (not the other way round), so can't
      * expect any change in the textField state.
-     * 
+     *
      * Which poses the eternal WHY? Probably not needed..
-     * 
-     * Decision: give up trying to detect changes, just register/remove 
-     * InvalidationListener (to neither throw NPE nor SO). 
+     *
+     * Decision: give up trying to detect changes, just register/remove
+     * InvalidationListener (to neither throw NPE nor SO).
      */
     @Test @Ignore("FIXME: unclear reason for having selectionShapeListener")
     public void testTextNodeSelectionShapeShow() {
@@ -307,33 +307,8 @@ public class SkinTextFieldIssuesTest {
 //        field.nextWord();
         assertEquals(target, field.getCaretPosition());
     }
-    
-    /**
-     * InvalidationListener to selection - not removed -> was: NPE 
-     */
-    @Test
-    public void failedSelectionUpdate() {
-        TextField field = new TextField("some text");
-        installDefaultSkin(field);
-        replaceSkin(field);
-        field.selectAll();
-    }
-    
-    /**
-     * Sanity test: ensure that skin's updating itself on selection change
-     */
-    @Test
-    public void testTextNodeSelectionUpdate() {
-        TextField field = new TextField("some text");
-        installDefaultSkin(field);
-        Text textNode = getTextNode(field);
-        field.selectAll();
-        int end = field.getLength();
-        assertEquals("sanity: field caret moved to end", end, field.getCaretPosition());
-        assertEquals("sanity: field selection updated", end, field.getSelection().getEnd());
-        assertEquals("textNode end", end, textNode.getSelectionEnd());
-    }
-    
+
+
     /**
      * Sanity: test textNode state for empty selection
      */
@@ -353,12 +328,12 @@ public class SkinTextFieldIssuesTest {
         assertEquals("textNode end", -1, textNode.getSelectionEnd());
         assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
     }
-    
+
     /**
      * fails before/after fix: textNode caret not updated to textField caret
-     * 
+     *
      * install skin -> select
-     * 
+     *
      * So here we have a wrong test assumption!
      */
     @Test @Ignore("wrong test assumption: control width must be > 0")
@@ -369,37 +344,12 @@ public class SkinTextFieldIssuesTest {
         field.selectAll();
         assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
     }
-    
-    /**
-     * 
-     * Sanity: textNode caret must be updated on change of control caret.
-     * 
-     * manual changeListener to control.caretPosition
-     * -> replace with api
-     * 
-     * show -> select
-     * 
-     * Note: textNode caretPosition only updated if control.width > 0 - why?
-     * There are more locations that guard against width > 0 .. 
-     * 
-     * Even though not understood: all tests trying to see effects of those
-     * syncs must install via the skin via show!
-     * 
-     */
-    @Test
-    public void testTextNodeCaretShow() {
-        TextField field = new TextField("some text");
-        showControl(field, true);
-        Text textNode = getTextNode(field);
-        field.selectAll();
-        assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
-    }
 
     /**
      * Sanity: initial textNode caret
-     * 
-     * select -> install skin 
-     * 
+     *
+     * select -> install skin
+     *
      */
     @Test
     public void testTextNodeCaretInitial() {
@@ -409,12 +359,45 @@ public class SkinTextFieldIssuesTest {
         Text textNode = getTextNode(field);
         assertEquals("textNode caret", field.getCaretPosition(), textNode.getCaretPosition());
     }
-    
+
+    /**
+     * NPE from listener to caretPosition
+     * without scene, this is the same update/failure path as selection
+     *
+     * Note: the listener itself a no-op if control.width <= 0, indirect effect
+     * PENDING: remove from test?
+     */
+    @Test
+    public void testTextFieldCaretPosition() {
+        TextField field = new TextField("initial");
+        installDefaultSkin(field);
+        int index = 2;
+        field.positionCaret(index);
+        replaceSkin(field);
+        field.positionCaret(index + 1);
+    }
+
+    /**
+     * NPE from listener to (skin internal) selectionShape
+     */
+    @Test
+    public void testTextFieldSelectionShape() {
+        TextField field = new TextField();
+        field.setText("initial");
+        installDefaultSkin(field);
+        int index = 2;
+        field.positionCaret(index);
+        replaceSkin(field);
+        assertEquals(index, field.getCaretPosition());
+        field.deleteNextChar();
+    }
+
+
     /**
      * listener to skin's property - no problem?
      * There are many  more internal bindings .. all with the same caveat as noted below
-     * 
-     * changeable only from skin internals (on mouse events from skin/behaviour), so 
+     *
+     * changeable only from skin internals (on mouse events from skin/behaviour), so
      * don't expect macroscopic residues after switching skin?
      */
     @Test
@@ -424,35 +407,20 @@ public class SkinTextFieldIssuesTest {
         showControl(field, true);
         TextFieldSkin skin = (TextFieldSkin) field.getSkin();
     }
-    
+
+//------- TextInputControlSkin
+
+//---------- listeners/eventhandler
+
     /**
-     * Children accumulating? textNode added via addAll (vs. setAll)
-     * This is jdk-?? (todo: find issue) - not yet reported?
-     * Only private test here, copied to special case in SpinnerSkin,
-     * JDK-8245145
-     */
-    @Test @Ignore("JDK-8245145")
-    public void failedChildren() {
-        TextField field = new TextField("some text");
-        installDefaultSkin(field);
-        int children = field.getChildrenUnmodifiable().size();
-        replaceSkin(field);
-        assertEquals("children size must be unchanged: ", children, field.getChildrenUnmodifiable().size());
-    }
-    
-//------- TextInputControlSkin  
-    
-//---------- listeners/eventhandler 
-    
-    /**
-     * package-private method accessing getSkinnable, 
+     * package-private method accessing getSkinnable,
      * used in private nextCharVisually which is called in public skin.moveCaret
      * which is called in TextInputControlBehavior.nextCharVisually (access of _current skin_
      * not the one stored!)
-     * 
+     *
      * should not cause trouble: the mappings are removed - if any, it's a problem of the
      * behavior (how to test?)
-     * 
+     *
      * Sanity: old behavior doesn't interfere.
      */
     @Test
@@ -468,59 +436,72 @@ public class SkinTextFieldIssuesTest {
         firer.doRightArrowPress();
         assertEquals(caret + 2, field.getCaretPosition());
     }
-    
+
     /**
-     * replaced by second skin - no effect expected?
-     * 
-     * Nevertheless, cleanup required
+     * Trying to test effect of listener textProperty in TextInputControlBehavior.
+     * Was added twice, need to make certain that it's still functional
+     * after cleanup
+     *
+     * Problem: navigation keys occasionally not working at all (in visual test)
+     * and direction always the same - misunderstanding of caretPosition?
+     *
+     * there's an open bug: https://bugs.openjdk.java.net/browse/JDK-8242616
+     * SO: https://stackoverflow.com/q/61184745/203657
+     *
      */
+    @Ignore("8242616")
     @Test
-    public void testInputMethodRequests() {
+    public void testBidiListener() {
         TextField field = new TextField("some text");
-        InputMethodRequests im = field.getInputMethodRequests();
-        installDefaultSkin(field);
-//        showControl(field, true);
-        assertNotNull("skin must have set inputMethodRequests", field.getInputMethodRequests());
-        field.getSkin().dispose();
-        assertEquals("inputMethodRequests must be reset", im, field.getInputMethodRequests());
+        showControl(field, true);
+        int caret = 2;
+        field.positionCaret(caret);
+        KeyEventFirer firer = new KeyEventFirer(field);
+        firer.doRightArrowPress();
+        assertEquals(caret + 1, field.getCaretPosition());
+        field.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        firer.doRightArrowPress();
+        assertEquals(caret, field.getCaretPosition());
     }
-    
-    /**
-     * singleton eventHandler: calls handleInputMethodEvent -> access getSkinnable
-     * expected: NPE
-     * also: only set if null, that is the second skin does not reset it
-     * 
-     * no effect on memory when commented? It's about input methods (composed text?
-     * touch screens? embedded only? language specific like chinese glyphs?)
-     * not supported on my desktop - should remove in skin, even though not testable?
-     * 
-     */
+
+    @Ignore("8242616")
     @Test
-    public void testOnInputMethodTextChanged() {
+    public void testRToLArrows() {
         TextField field = new TextField("some text");
-        EventHandler<?> handler = field.getOnInputMethodTextChanged();
-        installDefaultSkin(field);
-//        showControl(field, true);
-        if (handler != null) {
-            assertSame("inputMethodTextChanged handler must be unchanged",
-                 handler, field.getOnInputMethodTextChanged());
-        } else {
-            assertNotNull("inputMethodTextChanged handler must be set", field.getOnInputMethodTextChanged());
-        }
-        field.getSkin().dispose();
-        assertSame("inputMethodTextChanged handler must be reset", handler, field.getOnInputMethodTextChanged());
+        field.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        showControl(field, true);
+        int caret = 3;
+        field.positionCaret(caret);
+        assertEquals(caret, field.getCaretPosition());
+        KeyEventFirer firer = new KeyEventFirer(field);
+        firer.doRightArrowPress();
+        assertEquals(caret - 1, field.getCaretPosition());
     }
-    
+
+    @Ignore("8242616")
+    @Test
+    public void testLToRArrows() {
+        TextField field = new TextField("some text");
+        field.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+        showControl(field, true);
+        int caret = 3;
+        field.positionCaret(caret);
+        assertEquals("sanity caret position", caret, field.getCaretPosition());
+        KeyEventFirer firer = new KeyEventFirer(field);
+        firer.doRightArrowPress();
+        assertEquals("incremented caret by key-right", caret + 1, field.getCaretPosition());
+    }
+
 //------- bindings
-    
+
     /**
      * Binding to several control properties determining the caret visibility
-     * 
+     *
      * Used in TextFieldSkin to toggle opacity of caretPath (in a binding, also)
-     * 
+     *
      * Bindings as such are not a problem, as long as their value is not computed?
-     * Also, they remove themselves from the gc'ed - they don't here but: already are 
-     * invalidated in the replaced skin, no collaborator tries to query them 
+     * Also, they remove themselves from the gc'ed - they don't here but: already are
+     * invalidated in the replaced skin, no collaborator tries to query them
      * (because the skin is no longer part of the scenegraph) so
      * they don't blow, even when they are accessing control properties.
      */
@@ -532,7 +513,7 @@ public class SkinTextFieldIssuesTest {
         field.setEditable(false);
         field.nextWord();
     }
-    
+
     @Test
     public void testCaretVisibleSkin() {
         TextField field = new TextField("some text");
@@ -541,21 +522,34 @@ public class SkinTextFieldIssuesTest {
         field.setEditable(false);
         field.nextWord();
     }
-    
+
     /**
      * binding to control.fontProperty
-     * 
+     *
      * calling invalidateMetrics: no-op for textFieldSkin, resetting internal
      * cache in TextAreaSkin
-     * 
+     *
      * no side-effect expected
      */
     @Test
     public void testFontMetrics() {
-        
+
     }
-//--------------    
-    
+//--------------
+
+    /**
+     * Can't test?: a manually installed listener if VK is enabled.
+     * Changed to use skin api.
+     *
+     * Sanity test would be to test if still functional.
+     * Test: not/leaking after/before
+     */
+    @Ignore("FXVK")
+    @Test
+    public void testFXVKMemoryLeak() {
+        System.out.println("fxvk: " + Platform.isSupported(ConditionalFeature.VIRTUAL_KEYBOARD));
+        fail("tbd: test listener registered to focusedProperty with FXVK");
+    }
     /**
      * default skin -> set alternative
      */
@@ -563,6 +557,17 @@ public class SkinTextFieldIssuesTest {
     public void failedMemoryLeakAlternativeSkin() {
         TextField control = new TextField();
         installDefaultSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        assertNotNull(weakRef.get());
+        attemptGC(weakRef);
+        assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+
+    @Ignore("JDK-?? leaking when showing")
+    @Test
+    public void failedMemoryLeakAlternativeSkinShowing() {
+        TextField control = new TextField();
+        showControl(control, true);
         WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
         assertNotNull(weakRef.get());
         attemptGC(weakRef);
@@ -597,7 +602,7 @@ public class SkinTextFieldIssuesTest {
         }
     }
 
-    
+
     @After
     public void cleanup() {
         if (stage != null) stage.hide();
@@ -615,41 +620,50 @@ public class SkinTextFieldIssuesTest {
         });
     }
 
- // Testing binding: suspect that bindings in skin are not cleaned?    
+ // Testing binding: suspect that bindings in skin are not cleaned?
+
+    // Note: bindings will remove themselves as listener from the long-lived property
+    // if they are no longer reachable at the time of the notification
+    // drawbacks:
+    // a) cleanup not happening if the long-lived property doesn't change
+    // b) active between dispose and gc
+    // Note: all bindings access the parameter (vs. getSkinnable)
+    // so there's no NPE after dispose
+
     public static class LongLived {
-        
+
         BooleanProperty flag = new SimpleBooleanProperty();
         ObjectProperty<ShortLived> shortLived;
         String collected = "A";
-        
+
         public LongLived() {
             shortLived = new SimpleObjectProperty<>();
             setShortLived(new ShortLived(this));
         }
-        
+
         public ObjectProperty<ShortLived> shortLivedProperty() {
             return shortLived;
         }
-        
+
         public void setShortLived(ShortLived shortLived) {
             shortLivedProperty().set(shortLived);
         }
-        
+
         public ShortLived getShortLived() {
             return shortLivedProperty().get();
         }
-        
+
         public void addLog(String t) {
             collected += t;
         }
     }
-    
+
     public static class ShortLived {
         static int counter;
         int id;
         LongLived longLived;
         ObservableBooleanValue flagged;
-        
+
         public ShortLived(LongLived longLived) {
             id = counter++;
             this.longLived = longLived;
@@ -664,31 +678,31 @@ public class SkinTextFieldIssuesTest {
                     longLived.addLog("" + id);
                     return !longLived.flag.get();
                 }
-                
+
             };
         }
     }
-    
+
     /**
      * Memory does not leak, binding still active after reset "skin" - only on access, though.
-     * 
+     *
      * Still sitting in memory until the longLived prop _does_ change.
      */
     @Test @Ignore
     public void testBindingMemoryLeak() {
         LongLived longLived = new LongLived();
         WeakReference<ShortLived> weakRef = new WeakReference<>(longLived.getShortLived());
-//        System.out.println("before: ---- old:" + weakRef.get().flagged.getValue() + " new: " 
+//        System.out.println("before: ---- old:" + weakRef.get().flagged.getValue() + " new: "
 //                + longLived.getShortLived().flagged.getValue() + " collected: " + longLived.collected);
         longLived.setShortLived(new ShortLived(longLived));
         longLived.flag.set(true);
-        System.out.println("after: ------ old:" + weakRef.get().flagged.getValue() + " new: " 
+        System.out.println("after: ------ old:" + weakRef.get().flagged.getValue() + " new: "
                 + longLived.getShortLived().flagged.getValue() + " collected: " + longLived.collected);
         attemptGC(weakRef);
         assertEquals("binding must be gc'ed", null, weakRef.get());
         System.out.println(longLived.collected);
     }
-    
-//------------------ end    
-   
+
+//------------------ end
+
 }

@@ -27,48 +27,41 @@ package javafx.scene.control.skin;
 
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
-import javafx.scene.text.Text;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Path;
 
 /**
- * Utility methods to access package-private api in TextInput-related skins.
+ * contains unused accessors (which didn't make it to the code base, used
+ * while analysing)
  */
-public class TextInputSkinShim {
+public class UnusedSkinShim {
 
     /**
-     * Returns the promptNode from the textField's skin. The skin must be of type
-     * TextFieldSkin.
+     * Sets the fill of the promptText. The skin must be of type TextInputControlSkin.
      */
-    public static Text getPromptNode(TextField textField) {
-        TextFieldSkin skin = (TextFieldSkin) textField.getSkin();
-        return skin.getPromptNode();
-    }
-
-    /**
-     * Returns the textNode from the textField's skin. The skin must be of type
-     * TextFieldSkin.
-     */
-    public static Text getTextNode(TextField textField) {
-        TextFieldSkin skin = (TextFieldSkin) textField.getSkin();
-        return skin.getTextNode();
+    public static void setPromptTextFill(TextInputControl control, Paint fill) {
+        TextInputControlSkin<?> skin = (TextInputControlSkin<?>) control.getSkin();
+        skin.setPromptTextFill(fill);
     }
 
     /**
      * Returns the textTranslateX from the textField's skin. The skin must be of type
      * TextFieldSkin.
      */
-    public static double getTextTranslateX(TextField textField) {
-        TextFieldSkin skin = (TextFieldSkin) textField.getSkin();
-        return skin.getTextTranslateX();
-    }
+//    public static Path getSelectionPath(TextField textField) {
+//        TextFieldSkin skin = (TextFieldSkin) textField.getSkin();
+//        return skin.getSelectionPath();
+//    }
 
     /**
-     * Returns a boolean indicating whether or not the control's caret is blinking.
-     * The control's skin must be of type TextInputControlSkin.
+     *   deleted from TextFieldSkin: for testing only!
+     *   not useful in unit test, in test context selection highlight is not updated
      */
-    public static boolean isCaretBlinking(TextInputControl control) {
-        TextInputControlSkin<?> skin = (TextInputControlSkin<?>) control.getSkin();
-        return skin.isCaretBlinking();
-    }
+//  Path getSelectionPath() {
+//  textNode.getSelectionShape();
+//  updateSelection();
+//  return selectionHighlightPath;
+//}
+//
 
-    private TextInputSkinShim() {}
 }
