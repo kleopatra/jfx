@@ -54,6 +54,7 @@ import javafx.scene.control.Pagination;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Skin;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.SplitPane;
@@ -91,10 +92,12 @@ public class SkinMemoryLeakShowingTest {
     @Test
     public void testMemoryLeakAlternativeSkin() {
         showControl(control, true);
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        Skin<?> replacedSkin = replaceSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replacedSkin);
         assertNotNull(weakRef.get());
         // beware: this is important - we might get false leaks without!
         Toolkit.getToolkit().firePulse();
+        replacedSkin = null;
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
         System.out.println("passing: " + control.getClass().getSimpleName());

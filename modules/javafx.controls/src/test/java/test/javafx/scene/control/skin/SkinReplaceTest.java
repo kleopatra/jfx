@@ -69,6 +69,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Skin;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SplitMenuButton;
@@ -110,7 +111,7 @@ import javafx.stage.Stage;
  * <p>
  * This test is parameterized on control class.
  */
-@Ignore
+//@Ignore
 @RunWith(Parameterized.class)
 public class SkinReplaceTest {
 
@@ -131,9 +132,11 @@ public class SkinReplaceTest {
     @Test
     public void testMemoryLeakShowAlternativeSkin() {
         showControl();
-        WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        Skin<?> replacedSkin = replaceSkin(control);
+        WeakReference<?> weakRef = new WeakReference<>(replacedSkin);
         // beware: this is important - we might get false leaks without!
         Toolkit.getToolkit().firePulse();
+        replacedSkin = null;
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
     }
@@ -361,7 +364,7 @@ public class SkinReplaceTest {
 //            {TableView.class, null, null, }, //  @Ignore("JDK-8241364")
 //            {TabPane.class, null, null, }, //    @Ignore("JDK-8241364")
 //            // {TextArea.class, null, null, }, // @Ignore("8244419")
-            {TextField.class, null, null, },
+//            {TextField.class, null, null, },
 //            {TitledPane.class, null, null, },
 //            {ToggleButton.class, null, null, },
 //            {ToolBar.class, null, null, },//            @Ignore("JDK-8241364")
@@ -369,7 +372,7 @@ public class SkinReplaceTest {
 //            {TreeTableCell.class, null, null, },
 //            {TreeTableRow.class, null, null, },//            @Ignore("JDK-8241364")
 //            {TreeTableView.class, null, null, },//            @Ignore("JDK-8241364")
-//            {TreeView.class, null, null, },//            @Ignore("JDK-8241364")
+            {TreeView.class, null, null, },//            @Ignore("JDK-8241364")
 //
         };
         return Arrays.asList(data);
