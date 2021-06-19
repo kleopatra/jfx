@@ -923,7 +923,8 @@ final public class StyleManager {
                 try (final InputStream stream = url.openStream();
                     final DigestInputStream dis = new DigestInputStream(stream, MessageDigest.getInstance("MD5")); ) {
                     dis.getMessageDigest().reset();
-                    while (dis.read() != -1) { /* empty loop body is intentional */ }
+                    byte[] buffer = new byte[4096];
+                    while (dis.read(buffer) != -1) { /* empty loop body is intentional */ }
                     return dis.getMessageDigest().digest();
                 }
 
@@ -938,6 +939,7 @@ final public class StyleManager {
         return new byte[0];
     }
 
+    @SuppressWarnings("removal")
     public static Stylesheet loadStylesheet(final String fname) {
         try {
             return loadStylesheetUnPrivileged(fname);
@@ -1064,6 +1066,7 @@ final public class StyleManager {
     private static Stylesheet loadStylesheetUnPrivileged(final String fname) {
 
         synchronized (styleLock) {
+            @SuppressWarnings("removal")
             Boolean parse = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
 
                 final String bss = System.getProperty("binary.css");

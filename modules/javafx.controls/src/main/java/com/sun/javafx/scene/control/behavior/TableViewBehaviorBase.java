@@ -236,7 +236,7 @@ public abstract class TableViewBehaviorBase<C extends Control, T, TC extends Tab
     }
 
 
-    
+
     /**************************************************************************
      *                                                                        *
      * Abstract API                                                           *
