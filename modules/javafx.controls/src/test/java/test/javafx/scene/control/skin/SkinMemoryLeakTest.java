@@ -121,7 +121,7 @@ public class SkinMemoryLeakTest {
                 // @Ignore("8244419")
                 TextArea.class,
                 // @Ignore("8240506")
-                TextField.class,
+//                TextField.class,
                 TreeTableRow.class,
                 TreeTableView.class
         );

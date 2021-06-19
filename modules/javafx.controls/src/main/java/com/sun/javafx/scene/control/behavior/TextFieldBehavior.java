@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -56,9 +56,14 @@ import javafx.stage.Window;
 public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     private TextFieldSkin skin;
     private TwoLevelFocusBehavior tlFocus;
-    private ChangeListener<Scene> sceneListener;
-    private ChangeListener<Node> focusOwnerListener;
+
+    // listeners to focus-related state
     private ChangeListener<Boolean> focusListener;
+    private ChangeListener<Scene> sceneListener;
+    private WeakChangeListener<Scene> weakSceneListener;
+    private ChangeListener<Node> focusOwnerListener;
+    private WeakChangeListener<Node> weakFocusOwnerListener;
+
 
     public TextFieldBehavior(final TextField textField) {
         super(textField);
@@ -67,13 +72,11 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
             contextMenu.getStyleClass().add("text-input-context-menu");
         }
 
-        handleFocusChange();
-
-        // Register for change events
         focusListener = (observable, oldValue, newValue) -> {
             handleFocusChange();
         };
         textField.focusedProperty().addListener(focusListener);
+        handleFocusChange();
 
         focusOwnerListener = (observable, oldValue, newValue) -> {
             // RT-23699: The selection is now only affected when the TextField
@@ -87,8 +90,8 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                 textField.selectRange(0, 0);
             }
         };
-
         weakFocusOwnerListener = new WeakChangeListener<Node>(focusOwnerListener);
+
         sceneListener = (observable, oldValue, newValue) -> {
             if (oldValue != null) {
                 oldValue.focusOwnerProperty().removeListener(weakFocusOwnerListener);
@@ -98,8 +101,8 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
             }
         };
         weakSceneListener = new WeakChangeListener<Scene>(sceneListener);
-        textField.sceneProperty().addListener(weakSceneListener);
 
+        textField.sceneProperty().addListener(weakSceneListener);
         if (textField.getScene() != null) {
             textField.getScene().focusOwnerProperty().addListener(weakFocusOwnerListener);
         }
@@ -111,14 +114,11 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     }
 
     @Override public void dispose() {
-        // memory leak
         getNode().focusedProperty().removeListener(focusListener);
-//         no effect? or test artefact: no scene, no listener installed ?
         getNode().sceneProperty().removeListener(weakSceneListener);
         if (getNode().getScene() != null) {
             getNode().getScene().focusOwnerProperty().removeListener(weakFocusOwnerListener);
         }
-        skin = null;
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
     }
@@ -217,8 +217,6 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     private boolean focusGainedByMouseClick = false;
     private boolean shiftDown = false;
     private boolean deferClick = false;
-    private WeakChangeListener<Node> weakFocusOwnerListener;
-    private WeakChangeListener<Scene> weakSceneListener;
 
     @Override public void mousePressed(MouseEvent e) {
         TextField textField = getNode();

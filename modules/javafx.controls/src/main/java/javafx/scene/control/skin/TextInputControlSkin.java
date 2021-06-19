@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -47,7 +47,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
@@ -63,6 +62,7 @@ import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.converter.BooleanConverter;
 import javafx.css.converter.PaintConverter;
+import javafx.event.EventHandler;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -121,7 +121,8 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
 
     static boolean preload = false;
     static {
-        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+        @SuppressWarnings("removal")
+        var dummy = AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             String s = System.getProperty("com.sun.javafx.virtualKeyboard.preload");
             if (s != null) {
                 if (s.equalsIgnoreCase("PRERENDER")) {
@@ -167,6 +168,7 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
     // Holds concrete attributes for the composition runs
     private List<Shape> imattrs = new java.util.ArrayList<Shape>();
 
+    private EventHandler<InputMethodEvent> inputMethodTextChangedHandler;
 
 
     /**************************************************************************
@@ -185,24 +187,12 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
     public TextInputControlSkin(final T control) {
         super(control);
 
-        // Note: bindings will remove themselves as listener from the long-lived property
-        // if they are no longer reachable at the time of the notification
-        // drawbacks: 
-        // a) cleanup not happening if the long-lived property doesn't change
-        // b) active between dispose and gc
-        // Note: all bindings access the parameter (vs. getSkinnable)
-        // so there's no NPE after dispose
         fontMetrics = new ObjectBinding<FontMetrics>() {
             { bind(control.fontProperty()); }
             @Override protected FontMetrics computeValue() {
                 invalidateMetrics();
                 return Toolkit.getToolkit().getFontLoader().getFontMetrics(control.getFont());
             }
-//            @Override
-//            public void dispose() {
-//                unbind(control.fontProperty());
-//            }
-//            
         };
 
         /**
@@ -223,12 +213,6 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                         !control.isDisabled() &&
                         control.isEditable();
             }
-//            @Override
-//            public void dispose() {
-//                unbind(control.focusedProperty(), control.anchorProperty(), control.caretPositionProperty(),
-//                        control.disabledProperty(), control.editableProperty(), displayCaret, blinkProperty());
-//            }
-            
         };
 
         if (SHOW_HANDLES) {
@@ -301,8 +285,7 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
                     }
                 }
             }
-            // FIXME: manually installed listener that's not removed
-            control.focusedProperty().addListener(observable -> {
+            registerInvalidationListener(control.focusedProperty(), observable -> {
                 if (FXVK.useFXVK()) {
                     Scene scene = getSkinnable().getScene();
                     if (control.isEditable() && control.isFocused()) {
@@ -318,10 +301,10 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
             });
         }
 
+        // FIXME: JDK-8268877 - incorrectly wired handler on replacing skin
         if (control.getOnInputMethodTextChanged() == null) {
-            control.setOnInputMethodTextChanged(event -> {
-                handleInputMethodEvent(event);
-            });
+            inputMethodTextChangedHandler = this::handleInputMethodEvent;
+            control.setOnInputMethodTextChanged(inputMethodTextChangedHandler);
         }
 
         control.setInputMethodRequests(new ExtendedInputMethodRequests() {
@@ -381,24 +364,18 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
         });
     }
 
-    
-    
-
     @Override
     public void dispose() {
         if (getSkinnable() == null) return;
-        // remove to fix memory leak
-        getSkinnable().setOnInputMethodTextChanged(null);
-        // no effect on memory leak, sanity to guard against potential side-effects
-        // FIXME: write a test in environment with inputMethods
+        // the inputMethodEvent handler installed by this skin must be removed prevent a memory leak
+        // while a handler installed by the control must not be removed
+        if (getSkinnable().getOnInputMethodTextChanged() == inputMethodTextChangedHandler) {
+            getSkinnable().setOnInputMethodTextChanged(null);
+        }
+        // cleanup to guard against potential NPE
         getSkinnable().setInputMethodRequests(null);
-        // dispose bindings - no effect on memory leak, no macroscopic effects w/out?
-//        ((Binding) caretVisible).dispose();
-//        ((Binding) fontMetrics).dispose();
         super.dispose();
     }
-
-
 
 
     /**************************************************************************
@@ -733,7 +710,6 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
 
     protected void handleInputMethodEvent(InputMethodEvent event) {
         final TextInputControl textInput = getSkinnable();
-        System.out.println("handleInput: " + event);
         if (textInput.isEditable() && !textInput.textProperty().isBound() && !textInput.isDisabled()) {
 
             // remove previous input method text (if any) or selected text
@@ -807,11 +783,11 @@ public abstract class TextInputControlSkin<T extends TextInputControl> extends S
         return caretVisible;
     }
 
-    // package for testing 
+    // for testing only!
     boolean isCaretBlinking() {
         return caretBlinking.caretTimeline.getStatus() == Status.RUNNING;
     }
-    
+
     boolean isRTL() {
         return (getSkinnable().getEffectiveNodeOrientation() == NodeOrientation.RIGHT_TO_LEFT);
     };

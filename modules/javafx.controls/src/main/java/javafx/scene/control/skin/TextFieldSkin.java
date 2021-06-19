@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,8 +31,6 @@ import com.sun.javafx.scene.control.behavior.PasswordFieldBehavior;
 import com.sun.javafx.scene.control.behavior.TextFieldBehavior;
 import com.sun.javafx.scene.control.behavior.TextInputControlBehavior;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -77,8 +75,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
      *
      **************************************************************************/
 
-    // final hinders cleanup
-    private /* final*/ TextFieldBehavior behavior;
+    private final TextFieldBehavior behavior;
 
     /**
      * This group contains the text, caret, and selection rectangle.
@@ -130,8 +127,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
     // For use with PasswordField
     static final char BULLET = '\u25cf';
 
-    InvalidationListener selectionShapeListener = e -> updateSelection();
-    WeakInvalidationListener weakSelectionShapeListener = new WeakInvalidationListener(selectionShapeListener);
+
 
     /**************************************************************************
      *
@@ -156,10 +152,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         this.behavior.setTextFieldSkin(this);
 //        control.setInputMap(behavior.getInputMap());
 
-        // FIXME: manual listener registration
-//        control.caretPositionProperty().addListener((observable, oldValue, newValue) -> {
         registerChangeListener(control.caretPositionProperty(), e -> {
-            // FIXME: why noop for width <= 0?
             if (control.getWidth() > 0) {
                 updateTextNodeCaretPos(control.getCaretPosition());
                 if (!isForwardBias()) {
@@ -169,7 +162,6 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             }
         });
 
-        // invalidition not needed: updateTextNodeCaretPosition calls isForwardBias, validating
         forwardBiasProperty().addListener(observable -> {
             if (control.getWidth() > 0) {
                 updateTextNodeCaretPos(control.getCaretPosition());
@@ -195,14 +187,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // Hack to defeat the fact that otherwise when the caret blinks the parent group
         // bounds are completely invalidated and therefore the dirty region is much
         // larger than necessary.
-        Path localPath = new Path();
-        textGroup.getChildren().addAll(selectionHighlightPath, textNode, 
-                // experimenting: local field: leaking?
-                //localPath 
-//                 new Path() //- no problem
-                 // original: leaking without remove
-                 new Group(caretPath)
-                 );
+        textGroup.getChildren().addAll(selectionHighlightPath, textNode, new Group(caretPath));
         getChildren().add(textGroup);
         if (SHOW_HANDLES) {
             handleGroup = new Group();
@@ -214,13 +199,9 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         // Add text
         textNode.setManaged(false);
         textNode.getStyleClass().add("text");
-        // FIXME: this binding blows after replaceSkin/setFont - it's called _before_ the 
-        // listener to fontProperty installed below
-        // implicitly fixed?
         textNode.fontProperty().bind(control.fontProperty());
 
         textNode.layoutXProperty().bind(textTranslateX);
-        // FIXME - this (all?) bindings are still effective after switching skins 
         textNode.textProperty().bind(new StringBinding() {
             { bind(control.textProperty()); }
             @Override protected String computeValue() {
@@ -236,31 +217,16 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         });
         // updated by listener on caretPosition to ensure order
         updateTextNodeCaretPos(control.getCaretPosition());
-        // FIXME listener must be removed on dispose
-//        control.selectionProperty().addListener(observable -> {
-//            updateSelection();
-//        });
-        // FIXME replaced by skin api implies listening changed from invalidation to change
-        // invalidition not needed: updateSelection implicit validation by calling field.getSelection
-        registerChangeListener(control.selectionProperty(), e -> updateSelection());
-        
+        registerInvalidationListener(control.selectionProperty(), e -> updateSelection());
+
         // Add selection
         selectionHighlightPath.setManaged(false);
         selectionHighlightPath.setStroke(null);
         selectionHighlightPath.layoutXProperty().bind(textTranslateX);
         selectionHighlightPath.visibleProperty().bind(control.anchorProperty().isNotEqualTo(control.caretPositionProperty()).and(control.focusedProperty()));
         selectionHighlightPath.fillProperty().bind(highlightFillProperty());
-        
-        // FIXME this listener blows on replace skin 
-//        textNode.selectionShapeProperty().addListener(observable -> {
-//        // replace invalidationListener with changeListener introduces stackOverflowError ... why?    
-////        registerChangeListener(textNode.selectionShapeProperty(), e -> {;
-//            updateSelection();
-//        });
-        // replaced with listener to be removed in dispose
-        // FIXME: why needed at all? updateSelection syncs textField -> textNode, so this is 
-        // effectively updating itself
-        textNode.selectionShapeProperty().addListener(weakSelectionShapeListener);
+
+        registerInvalidationListener(textNode.selectionShapeProperty(), e -> updateSelection());
 
         // Add caret
         caretPath.setManaged(false);
@@ -291,11 +257,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
         // Be sure to get the control to request layout when the font changes,
         // since this will affect the pref height and pref width.
-        // FIXME: manual installed listener
-        // validation in computePrefWidth: queries fontMetrics which is a binding to fontProperty
-        // important or not?
-//        control.fontProperty().addListener(observable -> {
-        registerChangeListener(control.fontProperty(), e -> {
+        registerInvalidationListener(control.fontProperty(), e -> {
             // I do both so that any cached values for prefWidth/height are cleared.
             // The problem is that the skin is unmanaged and so calling request layout
             // doesn't walk up the tree all the way. I think....
@@ -306,9 +268,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         registerChangeListener(control.prefColumnCountProperty(), e -> getSkinnable().requestLayout());
         if (control.isFocused()) setCaretAnimating(true);
 
-        // FIXME: manual installed listener
-        // control.alignmentProperty().addListener(observable -> {
-        registerChangeListener(control.alignmentProperty(), e -> {
+        registerInvalidationListener(control.alignmentProperty(), e -> {
             if (control.getWidth() > 0) {
                 updateTextPos();
                 updateCaretOff();
@@ -321,32 +281,19 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
                    control.promptTextProperty(),
                    promptTextFillProperty()); }
             @Override protected boolean computeValue() {
-                String txt = getSkinnable().getText();
-                String promptTxt = getSkinnable().getPromptText();
+                String txt = control.getText();
+                String promptTxt = control.getPromptText();
                 return ((txt == null || txt.isEmpty()) &&
                         promptTxt != null && !promptTxt.isEmpty() &&
                         !getPromptTextFill().equals(Color.TRANSPARENT));
             }
-            // Fix for part of 8240506:
-            // overridden to unbind allowing skin.dispose to cleanup this binding
-            // without, setting the promptText after switching skin throws NPE
-            @Override
-            public void dispose() {
-                unbind(control.textProperty(),
-                        control.promptTextProperty(),
-                        promptTextFillProperty());
-            }
-            
-            
         };
 
         promptTextFillProperty().addListener(observable -> {
             updateTextPos();
         });
 
-        // FIXME throwing NPE after replacing skin, causes memory leak
-//        control.textProperty().addListener(observable -> {
-        registerChangeListener(control.textProperty(), e -> {
+        registerInvalidationListener(control.textProperty(), e -> {
             if (!behavior.isEditing()) {
                 // Text changed, but not by user action
                 updateTextPos();
@@ -357,11 +304,7 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
             createPromptNode();
         }
 
-        // alternative approaches for disposing usePromptText binding: 
-        // a) install listener via skin api
-        // b) have listener stored as fiedl and remove
-        registerChangeListener(usePromptText, e -> {;
-//        usePromptText.addListener(observable -> {
+        registerInvalidationListener(usePromptText, e -> {
             createPromptNode();
             control.requestLayout();
         });
@@ -444,26 +387,11 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
     /** {@inheritDoc} */
     @Override public void dispose() {
         if (getSkinnable() == null) return;
-        textNode.selectionShapeProperty().removeListener(weakSelectionShapeListener);
-        // no effect on mem0ry leak (looks cleanly implemented with weak references)
-//        setCaretAnimating(false);
-        // remove to fix memory leak 
-//        getChildren().remove(textGroup);
-        // testing removal of suspected culprit
-        // textNode only doesn't help
-//        textGroup.getChildren().remove(textNode);
-//        System.out.println(textGroup.getChildren());
-        textGroup.getChildren().removeAll(textNode, selectionHighlightPath, promptNode);
-//        System.out.println(textGroup.getChildren());
-        // clearing all is fine
-//        textGroup.getChildren().clear();
-        // with dispose implemented in binding
-        ((BooleanBinding) usePromptText).dispose();
+        getChildren().removeAll(textGroup, handleGroup);
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
-            behavior = null;
         }
     }
 
@@ -776,7 +704,6 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
      *
      **************************************************************************/
 
-    // unused?
     TextInputControlBehavior getBehavior() {
         return behavior;
     }
@@ -805,11 +732,6 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
         updateSelection();
     }
 
-    /**
-     * Updates selection state from textField to textNode (no the other way round)
-     * FIXME: being so, why is it called from listener to TextNode.selectionShapeProperty?
-     * And: it does NOT update the textNode's caret?
-     */
     private void updateSelection() {
         TextField textField = getSkinnable();
         IndexRange newValue = textField.getSelection();
@@ -996,26 +918,20 @@ public class TextFieldSkin extends TextInputControlSkin<TextField> {
 
         updateCaretOff();
     }
-    
+
     // for testing only!
     Text getTextNode() {
         return textNode;
     }
-    
+
     // for testing only!
     Text getPromptNode() {
         return promptNode;
     }
-    
+
     // for testing only!
     double getTextTranslateX() {
         return textTranslateX.get();
     }
-    
-    // for testing only!
-    public Path getSelectionPath() {
-        return selectionHighlightPath;
-    }
-    
 
 }

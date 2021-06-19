@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -91,7 +91,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
     final T textInputControl;
 
     protected ContextMenu contextMenu;
-    // this is properly removed!
+
     private InvalidationListener textListener = observable -> invalidateBidi();
 
     private final InputMap<T> inputMap;
@@ -109,8 +109,6 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
         super(c);
 
         this.textInputControl = c;
-        // added twice!
-//        textInputControl.textProperty().addListener(textListener);
 
         // create a map for text input-specific mappings (this reuses the default
         // InputMap installed on the control, if it is non-null, allowing us to pick up any user-specified mappings)
@@ -263,7 +261,6 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
 
         addKeyPadMappings(inputMap);
 
-        // was: added twice, removed once
         textInputControl.textProperty().addListener(textListener);
 
         contextMenu = new ContextMenu();
@@ -279,8 +276,6 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
     protected void addKeyPadMappings(InputMap<T> map) {
         // First create a temporary map for the keypad mappings
         InputMap<T> tmpMap = new InputMap<>(getNode());
-        // this loop introduces a memoryLeak - even if its contained mappings 
-        // are not copied to the real inputMap - must be disposed!!!
         for (Object o : map.getMappings()) {
             if (o instanceof KeyMapping) {
                 KeyMapping mapping = (KeyMapping)o;
@@ -304,8 +299,11 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
                 }
             }
         }
+
         if (map == getInputMap()) {
-            for (Mapping mapping : tmpMap.getMappings()) {
+            // install mappings in the top-level inputMap
+            // as default mappings to clear them on dispose
+            for (Mapping<?> mapping : tmpMap.getMappings()) {
                 addDefaultMapping(map, mapping);
             }
         } else {
@@ -314,14 +312,15 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
                 map.getMappings().add((KeyMapping)o);
             }
         }
-        // tmpMap introduces memory leak if not disposed
+
+        // temporary inputMap must be disposed to prevent memory leak
         tmpMap.dispose();
 
         // Recursive call for child maps
         for (Object o : map.getChildInputMaps()) {
             addKeyPadMappings((InputMap<T>)o);
         }
-        
+
     }
 
 
@@ -357,7 +356,6 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
      *************************************************************************/
 
     @Override public void dispose() {
-        // was: added twice, removed once
         textInputControl.textProperty().removeListener(textListener);
         super.dispose();
     }
@@ -427,7 +425,7 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
     Bidi getRawBidi() {
         return bidi;
     }
-    
+
     private void invalidateBidi() {
         bidi = null;
         mixed = null;
@@ -464,7 +462,6 @@ public abstract class TextInputControlBehavior<T extends TextInputControl> exten
 
     private void nextCharacterVisually(boolean moveRight) {
         if (isMixed()) {
-            // PENDING JW: this assumes the inputControl _has_ a skin!
             TextInputControlSkin<?> skin = (TextInputControlSkin<?>)textInputControl.getSkin();
             skin.moveCaret(TextUnit.CHARACTER, moveRight ? Direction.RIGHT : Direction.LEFT, false);
         } else if (moveRight != isRTLText()) {

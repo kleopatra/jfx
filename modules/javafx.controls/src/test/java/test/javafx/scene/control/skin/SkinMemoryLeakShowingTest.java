@@ -35,6 +35,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.sun.javafx.tk.Toolkit;
+
 import static javafx.scene.control.ControlShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
@@ -91,6 +93,8 @@ public class SkinMemoryLeakShowingTest {
         showControl(control, true);
         WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
         assertNotNull(weakRef.get());
+        // beware: this is important - we might get false leaks without!
+        Toolkit.getToolkit().firePulse();
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
         System.out.println("passing: " + control.getClass().getSimpleName());
@@ -99,7 +103,7 @@ public class SkinMemoryLeakShowingTest {
 //------------ parameters
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Object[]> data() {
         List<Class<Control>> controlClasses = getControlClasses();
         // FIXME as part of JDK-8241364

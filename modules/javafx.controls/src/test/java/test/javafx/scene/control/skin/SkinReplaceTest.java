@@ -132,6 +132,7 @@ public class SkinReplaceTest {
     public void testMemoryLeakShowAlternativeSkin() {
         showControl();
         WeakReference<?> weakRef = new WeakReference<>(replaceSkin(control));
+        // beware: this is important - we might get false leaks without!
         Toolkit.getToolkit().firePulse();
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
@@ -310,66 +311,66 @@ public class SkinReplaceTest {
     //---------------- parameterized
 
     // Note: name property not supported before junit 4.11
-    @Parameterized.Parameters //(name = "{index}: {0} ")
+    @Parameterized.Parameters (name = "{index}: {0} ")
     public static Collection<Object[]> data() {
         // 0: class of control to test, 
         // 1: consumer for testing for side-effects after skin replaced
         // 2: consumer to configure the control after installing default skin
         Object[][] data = new Object[][] {
-            {Accordion.class, null, null, }, // @Ignore("JDK-8241364")
-            {Button.class, null, null, }, 
-            {ButtonBar.class, null, null, }, // @Ignore("JDK-8241364")
-            {CheckBox.class, null, null, },
-            // @Ignore("JDK-8244657 memory leak and side-effect")
-            {ChoiceBox.class, 
-                (Consumer<Control>) c -> ((ChoiceBox) c).getItems().add("added"),
-                null, },
-            {ColorPicker.class, null, null, }, //  @Ignore("JDK-8241364")
-            {ComboBox.class, null, null, 
-                }, // @Ignore("JDK-8241364")
-            {ComboBox.class, null, 
-                    // editable combo
-                    (Consumer<Control>) c -> ((ComboBox) c).setEditable(true), 
-                }, // @Ignore("JDK-8241364")
-            {DateCell.class, null, null, },
-            {DatePicker.class, null, null, }, //  @Ignore("JDK-8241364")
-            {Hyperlink.class, null, null, },
-            {Label.class, 
-                null, 
-                // LabeledSkin keeps an invalidationListener on graphic
-                (Consumer<Control>) c -> ((Label) c).setGraphic(new Rectangle())
-                },
-            {ListCell.class, null, null, },// @Ignore("JDK-8241364")
-            {ListView.class, null, null, }, // @Ignore("JDK-8241364")
-            {MenuBar.class, null, null, }, //  @Ignore("JDK-8241364")
-            {MenuButton.class, null, null, }, //   @Ignore("JDK-8241364")
-            {Pagination.class, null, null, }, //  @Ignore("JDK-8241364")
-            {PasswordField.class, null, null, }, //  @Ignore("JDK-8241364")
-            {ProgressBar.class, null, null, },
-            {ProgressIndicator.class, null, null, },
-            {RadioButton.class, null, null, },
-            {ScrollBar.class, null, null, }, //  @Ignore("JDK-8241364")
-            {ScrollPane.class, null, null, }, // @Ignore("JDK-8241364")
-            {Separator.class, null, null, },
-            {Slider.class, null, null, },
-            {Spinner.class, null, null, }, // @Ignore("JDK-8241364")
-            {SplitMenuButton.class, null, null, }, //  @Ignore("JDK-8241364")
-            {SplitPane.class, null, null, }, // @Ignore("JDK-8241364")
-            {TableCell.class, null, null, },
-            {TableRow.class, null, null, }, // @Ignore("JDK-8241364")
-            {TableView.class, null, null, }, //  @Ignore("JDK-8241364")
-            {TabPane.class, null, null, }, //    @Ignore("JDK-8241364")
-            // {TextArea.class, null, null, }, // @Ignore("8244419")
+//            {Accordion.class, null, null, }, // @Ignore("JDK-8241364")
+//            {Button.class, null, null, }, 
+//            {ButtonBar.class, null, null, }, // @Ignore("JDK-8241364")
+//            {CheckBox.class, null, null, },
+//            // @Ignore("JDK-8244657 memory leak and side-effect")
+//            {ChoiceBox.class, 
+//                (Consumer<Control>) c -> ((ChoiceBox) c).getItems().add("added"),
+//                null, },
+//            {ColorPicker.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {ComboBox.class, null, null, 
+//                }, // @Ignore("JDK-8241364")
+//            {ComboBox.class, null, 
+//                    // editable combo
+//                    (Consumer<Control>) c -> ((ComboBox) c).setEditable(true), 
+//                }, // @Ignore("JDK-8241364")
+//            {DateCell.class, null, null, },
+//            {DatePicker.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {Hyperlink.class, null, null, },
+//            {Label.class, 
+//                null, 
+//                // LabeledSkin keeps an invalidationListener on graphic
+//                (Consumer<Control>) c -> ((Label) c).setGraphic(new Rectangle())
+//                },
+//            {ListCell.class, null, null, },// @Ignore("JDK-8241364")
+//            {ListView.class, null, null, }, // @Ignore("JDK-8241364")
+//            {MenuBar.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {MenuButton.class, null, null, }, //   @Ignore("JDK-8241364")
+//            {Pagination.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {PasswordField.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {ProgressBar.class, null, null, },
+//            {ProgressIndicator.class, null, null, },
+//            {RadioButton.class, null, null, },
+//            {ScrollBar.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {ScrollPane.class, null, null, }, // @Ignore("JDK-8241364")
+//            {Separator.class, null, null, },
+//            {Slider.class, null, null, },
+//            {Spinner.class, null, null, }, // @Ignore("JDK-8241364")
+//            {SplitMenuButton.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {SplitPane.class, null, null, }, // @Ignore("JDK-8241364")
+//            {TableCell.class, null, null, },
+//            {TableRow.class, null, null, }, // @Ignore("JDK-8241364")
+//            {TableView.class, null, null, }, //  @Ignore("JDK-8241364")
+//            {TabPane.class, null, null, }, //    @Ignore("JDK-8241364")
+//            // {TextArea.class, null, null, }, // @Ignore("8244419")
             {TextField.class, null, null, },
-            {TitledPane.class, null, null, },
-            {ToggleButton.class, null, null, },
-            {ToolBar.class, null, null, },//            @Ignore("JDK-8241364")
-            {TreeCell.class, null, null, },//            @Ignore("JDK-8241364")
-            {TreeTableCell.class, null, null, },
-            {TreeTableRow.class, null, null, },//            @Ignore("JDK-8241364")
-            {TreeTableView.class, null, null, },//            @Ignore("JDK-8241364")
-            {TreeView.class, null, null, },//            @Ignore("JDK-8241364")
-
+//            {TitledPane.class, null, null, },
+//            {ToggleButton.class, null, null, },
+//            {ToolBar.class, null, null, },//            @Ignore("JDK-8241364")
+//            {TreeCell.class, null, null, },//            @Ignore("JDK-8241364")
+//            {TreeTableCell.class, null, null, },
+//            {TreeTableRow.class, null, null, },//            @Ignore("JDK-8241364")
+//            {TreeTableView.class, null, null, },//            @Ignore("JDK-8241364")
+//            {TreeView.class, null, null, },//            @Ignore("JDK-8241364")
+//
         };
         return Arrays.asList(data);
     }
