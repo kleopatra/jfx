@@ -287,6 +287,10 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
         // for completeness - but no effect with/out?
         flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
         flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
+        
+        // without: no observable leak (except flow not being gc'ed - still child of tree)
+        // what about flow related cleanup above?
+        getChildren().remove(flow);
         super.dispose();
 
         if (behavior != null) {

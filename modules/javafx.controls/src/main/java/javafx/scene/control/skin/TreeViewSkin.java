@@ -85,7 +85,7 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
     private final VirtualFlow<TreeCell<T>> flow;
     private WeakReference<TreeItem<T>> weakRoot;
-    private final TreeViewBehavior<T> behavior;
+    private /* final */ TreeViewBehavior<T> behavior;
 
 
 
@@ -235,17 +235,21 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
         getSkinnable().getProperties().removeListener(propertiesMapListener);
         setRoot(null);
-        // leaking without nulling factory
+        // leaking without nulling factory 
         flow.setCellFactory(null);
         // for completeness - but no effect with/out? Same as in ListViewSkin
         // don't without seeing any effect - it's not on the skinnable, but on a child, so shouldn't
         flow.getVbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
         flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
 
+        // without: still leaking in scene - what about flow related cleanup above?
+        getChildren().remove(flow);
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
+            // no effect
+            behavior = null;
         }
     }
 

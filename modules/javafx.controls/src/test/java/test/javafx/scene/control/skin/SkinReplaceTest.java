@@ -33,7 +33,6 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,55 +40,19 @@ import org.junit.runners.Parameterized;
 import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
+import static javafx.scene.control.skin.UnusedSkinShim.*;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
 
 import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
-import javafx.scene.control.DateCell;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.Pagination;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
 import javafx.scene.control.Skin;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SplitMenuButton;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.skin.VirtualContainerBase;
+import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /**
@@ -134,11 +97,38 @@ public class SkinReplaceTest {
         showControl();
         Skin<?> replacedSkin = replaceSkin(control);
         WeakReference<?> weakRef = new WeakReference<>(replacedSkin);
+        replacedSkin = null;
         // beware: this is important - we might get false leaks without!
         Toolkit.getToolkit().firePulse();
-        replacedSkin = null;
         attemptGC(weakRef);
         assertEquals("Skin must be gc'ed", null, weakRef.get());
+    }
+    
+    @Test
+    public void testLogCellFactory() {
+        showControl();
+        if (control instanceof TreeView) {
+            System.out.println("treecell" + ((TreeView) control).getCellFactory());
+        }
+        if (control instanceof ListView) {
+            System.out.println("listcell" + ((ListView) control).getCellFactory());
+        }
+    }
+    
+    @Test
+    public void testFlow() {
+        installDefaultSkin(control);
+        VirtualFlow<?> flow = getVirtualFlow(control);
+        if (flow == null) return;
+        Skin<?> replaceSkin = replaceSkin(control);
+        WeakReference<?> weakSkinRef = new WeakReference<>(replaceSkin);
+        WeakReference<?> weakFlowRef = new WeakReference<>(flow);
+        flow = null;
+        replaceSkin = null;
+        attemptGC(weakSkinRef);
+        attemptGC(weakFlowRef);
+        assertEquals("skin must be gc'ed", null, weakSkinRef.get());
+        assertEquals("flow must be gc'ed", null, weakFlowRef.get());
     }
     
     @Test
@@ -344,7 +334,7 @@ public class SkinReplaceTest {
 //                (Consumer<Control>) c -> ((Label) c).setGraphic(new Rectangle())
 //                },
 //            {ListCell.class, null, null, },// @Ignore("JDK-8241364")
-//            {ListView.class, null, null, }, // @Ignore("JDK-8241364")
+            {ListView.class, null, null, }, // @Ignore("JDK-8241364")
 //            {MenuBar.class, null, null, }, //  @Ignore("JDK-8241364")
 //            {MenuButton.class, null, null, }, //   @Ignore("JDK-8241364")
 //            {Pagination.class, null, null, }, //  @Ignore("JDK-8241364")

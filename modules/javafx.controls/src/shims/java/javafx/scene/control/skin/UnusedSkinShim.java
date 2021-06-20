@@ -25,10 +25,10 @@
 
 package javafx.scene.control.skin;
 
-import javafx.scene.control.TextField;
+import javafx.scene.control.Control;
+import javafx.scene.control.Skin;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Path;
 
 /**
  * contains unused accessors (which didn't make it to the code base, used
@@ -44,6 +44,13 @@ public class UnusedSkinShim {
         skin.setPromptTextFill(fill);
     }
 
+    public static VirtualFlow<?> getVirtualFlow(Control control) {
+        Skin<?> skin = control.getSkin();
+        if (skin instanceof VirtualContainerBase) {
+            return ((VirtualContainerBase<?, ?>) skin).getVirtualFlow();
+        }
+        return null;
+    }
     /**
      * Returns the textTranslateX from the textField's skin. The skin must be of type
      * TextFieldSkin.
