@@ -290,7 +290,7 @@ public class ListViewSkin<T> extends VirtualContainerBase<ListView<T>, ListCell<
         
         // without: no observable leak (except flow not being gc'ed - still child of tree)
         // what about flow related cleanup above?
-        getChildren().remove(flow);
+//        getChildren().remove(flow);
         super.dispose();
 
         if (behavior != null) {

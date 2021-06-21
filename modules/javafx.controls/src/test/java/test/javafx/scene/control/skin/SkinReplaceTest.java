@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.tk.Toolkit;
 
 import static javafx.scene.control.ControlShim.*;
@@ -48,8 +49,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Skin;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeView;
-import javafx.scene.control.skin.VirtualContainerBase;
 import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -105,17 +106,6 @@ public class SkinReplaceTest {
     }
     
     @Test
-    public void testLogCellFactory() {
-        showControl();
-        if (control instanceof TreeView) {
-            System.out.println("treecell" + ((TreeView) control).getCellFactory());
-        }
-        if (control instanceof ListView) {
-            System.out.println("listcell" + ((ListView) control).getCellFactory());
-        }
-    }
-    
-    @Test
     public void testFlow() {
         installDefaultSkin(control);
         VirtualFlow<?> flow = getVirtualFlow(control);
@@ -129,6 +119,22 @@ public class SkinReplaceTest {
         attemptGC(weakFlowRef);
         assertEquals("skin must be gc'ed", null, weakSkinRef.get());
         assertEquals("flow must be gc'ed", null, weakFlowRef.get());
+    }
+    
+    @Test
+    public void testBehavior() {
+        installDefaultSkin(control);
+        BehaviorBase<?> behavior = getBehavior(control.getSkin());
+        Skin<?> replaceSkin = replaceSkin(control);
+        WeakReference<?> weakSkinRef = new WeakReference<>(replaceSkin);
+        WeakReference<?> weakBehaviorRef = new WeakReference<>(behavior);
+        behavior = null;
+        replaceSkin = null;
+        attemptGC(weakSkinRef);
+        attemptGC(weakBehaviorRef);
+        assertEquals("skin must be gc'ed", null, weakSkinRef.get());
+        assertEquals("flow must be gc'ed", null, weakBehaviorRef.get());
+        
     }
     
     @Test

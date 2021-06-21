@@ -243,13 +243,13 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
         flow.getHbar().removeEventFilter(MouseEvent.MOUSE_PRESSED, ml);
 
         // without: still leaking in scene - what about flow related cleanup above?
-        getChildren().remove(flow);
+//        getChildren().remove(flow);
         super.dispose();
 
         if (behavior != null) {
             behavior.dispose();
             // no effect
-            behavior = null;
+//            behavior = null;
         }
     }
 
@@ -427,7 +427,9 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
 
     // Note: This is a copy/paste of javafx.scene.control.cell.DefaultTreeCell,
     // which is package-protected
-    private TreeCell<T> createDefaultCellImpl() {
+    // FIXME: if not static, the cell keeps an implicit ref to this skin
+    // doesn't matter if flow is removed, otherwise the skin is leaking
+    private static <T> TreeCell<T> createDefaultCellImpl() {
         return new TreeCell<T>() {
             private HBox hbox;
 
