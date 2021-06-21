@@ -429,7 +429,7 @@ public class TreeViewSkin<T> extends VirtualContainerBase<TreeView<T>, TreeCell<
     // which is package-protected
     // FIXME: if not static, the cell keeps an implicit ref to this skin
     // doesn't matter if flow is removed, otherwise the skin is leaking
-    private static <T> TreeCell<T> createDefaultCellImpl() {
+    private /* static */ <T> TreeCell<T> createDefaultCellImpl() {
         return new TreeCell<T>() {
             private HBox hbox;
 

@@ -59,6 +59,7 @@ public class SkinTreeViewIssuesTest {
     private TreeView<String> control;
 
     /**
+     * Reported: https://bugs.openjdk.java.net/browse/JDK-8269081
      * set custom cell factory before showing: no leak
      * The reason is that skin creates the default cell with a not-static method - 
      * leading to cells having an implicit strong ref? Why?
