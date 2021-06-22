@@ -354,7 +354,6 @@ public class TreeCell<T> extends IndexedCell<T> {
     // treeItem at time of startEdit - fix for JDK-8267094
     private TreeItem<T> treeItemAtStartEdit;
 
-//    private WeakReference<TreeItem<T>> treeItemAtStartEditRef = new WeakReference<>(null);
     /** {@inheritDoc} */
     @Override public void startEdit() {
         if (isEditing()) return;
@@ -388,7 +387,6 @@ public class TreeCell<T> extends IndexedCell<T> {
             tree.requestFocus();
         }
         treeItemAtStartEdit = getTreeItem();
-//        treeItemAtStartEditRef = new WeakReference<>(getTreeItem());
     }
 
      /** {@inheritDoc} */
@@ -441,24 +439,8 @@ public class TreeCell<T> extends IndexedCell<T> {
         super.cancelEdit();
 
         if (tree != null) {
-            // FIXME: trying to fix incorrect event state - is wrong:
-            // this causes a NPE when cancel is triggered from tree.edit(null)
-            // guarding against null doesn't help:
-            // when reacting to changes of editingItem, the TreeItem of this
-            // is the correct value to send!
-//            TreeItem<T> editingItem = tree.getEditingItem();
-//            T value = editingItem != null ? editingItem.getValue() : null;
-
-            // next try: use same item as at start
-
             TreeItem<T> editingItem = treeItemAtStartEdit;
-//            TreeItem<T> editingItem = treeItemAtStartEditRef != null ? treeItemAtStartEditRef.get() : null;
             T value = editingItem != null ? editingItem.getValue() : null;
-
-
-            // use current cell state
-//            TreeItem<T> editingItem = getTreeItem();
-//            T value = getItem();
 
             // reset the editing index on the TreeView
             if (updateEditingIndex) tree.edit(null);
