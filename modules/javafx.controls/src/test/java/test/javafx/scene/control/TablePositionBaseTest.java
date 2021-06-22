@@ -43,7 +43,18 @@ public class TablePositionBaseTest {
 //---------- Table
     
     /**
+     * 
      * Doc error (?) instantiate with null throws NPE
+     * 
+     * No: 
+     * - not documented
+     * - accidentally introduced when fixing https://bugs.openjdk.java.net/browse/JDK-8093105 (selection related)
+     * - api doc warns users to expect null table/column (might be potentially gc'ed, though)
+     * - getColumn specified to be -1 if any of table/column is null
+     * 
+     * slightly unrelated
+     * - row/tableColumn might be -1/null to indicate a complete column/row, respectively (spec'ed in 
+     *   TableColumnBase
      */
     @Test
     public void testNullTable() {
