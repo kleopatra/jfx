@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -333,25 +333,11 @@ public class ListCell<T> extends IndexedCell<T> {
             // appear that a cell is uneditable as, despite being clicked, it
             // will not change to the editing state as a layout of VirtualFlow
             // is immediately invoked, which forces all cells to be updated.
-//            System.out.println("in indexChanged while editing and same old/new index: " + oldIndex);
-            if (oldIndex == -1)
-                throw new IllegalStateException("cell index must not be -1 while editing");
         } else {
-//            System.out.println("normal: ");
-            if (oldIndex == 16) {
-                int dummy = 16;
-            }
             updateItem(oldIndex);
             updateSelection();
             updateFocus();
             updateEditing();
-//<<<<<<< HEAD
-        }
-
-        if (isEditing() && getIndex() == -1) {
-            throw new IllegalStateException("cell index must not be -1 while editing");
-//=======
-//>>>>>>> refs/heads/master
         }
     }
 
@@ -366,6 +352,8 @@ public class ListCell<T> extends IndexedCell<T> {
      * Editing API                                                             *
      *                                                                         *
      **************************************************************************/
+    // index at time of startEdit - fix for JDK-8165214
+    private int indexAtStartEdit;
 
     /** {@inheritDoc} */
     @Override public void startEdit() {
@@ -380,19 +368,18 @@ public class ListCell<T> extends IndexedCell<T> {
         super.startEdit();
 
          // Inform the ListView of the edit starting.
-        if (isEditing() && list != null) {
+        if (list != null) {
             list.fireEvent(new ListView.EditEvent<T>(list,
                     ListView.<T>editStartEvent(),
                     null,
                     getIndex()));
             list.edit(getIndex());
             list.requestFocus();
-            editingIndexAtStartEdit = getIndex();
         }
+
+        indexAtStartEdit = getIndex();
     }
 
-    int editingIndexAtStartEdit;
-    
     /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
         if (! isEditing()) return;
@@ -435,15 +422,11 @@ public class ListCell<T> extends IndexedCell<T> {
     @Override public void cancelEdit() {
         if (! isEditing()) return;
 
-         // Inform the ListView of the edit being cancelled.
-        ListView<T> list = getListView();
-
         super.cancelEdit();
 
+        // Inform the ListView of the edit being cancelled.
+        ListView<T> list = getListView();
         if (list != null) {
-            int editingIndex = 
-                    editingIndexAtStartEdit; 
-//                list.getEditingIndex();
 
             // reset the editing index on the ListView
             if (updateEditingIndex) list.edit(-1);
@@ -456,8 +439,8 @@ public class ListCell<T> extends IndexedCell<T> {
 
             list.fireEvent(new ListView.EditEvent<T>(list,
                     ListView.<T>editCancelEvent(),
-                    getItem(),
-                    editingIndex));
+                    null,
+                    indexAtStartEdit));
         }
     }
 
@@ -579,8 +562,9 @@ public class ListCell<T> extends IndexedCell<T> {
             }
         }
     }
-    
-    
+
+
+
     /***************************************************************************
      *                                                                         *
      * Stylesheet Handling                                                     *
