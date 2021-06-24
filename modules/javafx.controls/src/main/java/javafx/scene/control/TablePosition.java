@@ -70,7 +70,7 @@ public class TablePosition<S,T> extends TablePositionBase<TableColumn<S,T>> {
         super(row, tableColumn);
         this.controlRef = new WeakReference<>(tableView);
 
-        List<S> items = tableView.getItems();
+        List<S> items = tableView != null ? tableView.getItems() : null;
         this.itemRef = new WeakReference<>(
                 items != null && row >= 0 && row < items.size() ? items.get(row) : null);
 

@@ -379,6 +379,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
     /** {@inheritDoc} */
     @Override public void cancelEdit() {
+        System.out.println("cancel called: " + getIndex());
         if (! isEditing()) return;
 
         final TableView<S> table = getTableView();
@@ -388,7 +389,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
         // reset the editing index on the TableView
         if (table != null) {
             TablePosition<S,?> editingCell = table.getEditingCell();
-            editingCell = editingCellAtStartEdit;
+//            editingCell = editingCellAtStartEdit;
             if (updateEditingIndex) table.edit(-1, null);
 
             // request focus back onto the table, only if the current focus

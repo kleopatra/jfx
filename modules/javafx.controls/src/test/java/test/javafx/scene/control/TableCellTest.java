@@ -25,33 +25,40 @@
 
 package test.javafx.scene.control;
 
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.skin.TableCellSkin;
-import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
-import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableCellShim;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.assertStyleClassContains;
+import com.sun.javafx.tk.Toolkit;
+
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.*;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableCellShim;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.skin.TableCellSkin;
+import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
+import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
 
 /**
  */
 public class TableCellTest {
     private TableCell<String,String> cell;
     private TableView<String> table;
+    private TableColumn<String, String> editingColumn;
     private TableRow<String> row;
     private ObservableList<String> model;
+    private StageLoader stageLoader;
 
     @Before public void setup() {
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
@@ -65,12 +72,14 @@ public class TableCellTest {
         cell = new TableCell<String,String>();
         model = FXCollections.observableArrayList("Four", "Five", "Fear"); // "Flop", "Food", "Fizz"
         table = new TableView<String>(model);
+        editingColumn = new TableColumn<>("TEST");
 
         row = new TableRow<>();
     }
 
     @After
     public void cleanup() {
+        if (stageLoader != null) stageLoader.dispose();
         Thread.currentThread().setUncaughtExceptionHandler(null);
     }
 
@@ -402,6 +411,113 @@ public class TableCellTest {
         assertFalse(cell.isEditing());
     }
 
+    /**
+     * Basic config of table-/cell to allow testing of editEvents: 
+     * table has editingColumn and cell is configured with table and column.
+     */
+    private void setupForEditing() {
+        table.setEditable(true);
+        table.getColumns().add(editingColumn);
+        cell.updateTableView(table);
+        cell.updateTableColumn(editingColumn);
+    }
+    
+    @Test
+    public void testEditCancelEventAfterCancelOnCell() {
+        setupForEditing();
+        int editingIndex = 1;
+        cell.updateIndex(editingIndex);
+        table.edit(editingIndex, editingColumn);
+        TablePosition<?, ?> editingPosition = table.getEditingCell();
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+        editingColumn.setOnEditCancel(events::add);
+        cell.cancelEdit();
+        assertEquals(1, events.size());
+        assertEquals(editingPosition, events.get(0).getTablePosition());
+    }
+    
+    @Test
+    public void testEditCancelEventAfterCancelOnTable() {
+        setupForEditing();
+        int editingIndex = 1;
+        cell.updateIndex(editingIndex);
+        table.edit(editingIndex, editingColumn);
+        TablePosition<?, ?> editingPosition = table.getEditingCell();
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+        editingColumn.setOnEditCancel(events::add);
+        table.edit(-1, null);
+        assertEquals(1, events.size());
+        assertEquals(editingPosition, events.get(0).getTablePosition());
+    }
+    
+    @Test
+    public void testEditCancelEventAfterCellReuse() {
+        setupForEditing();
+        int editingIndex = 1;
+        cell.updateIndex(editingIndex);
+        table.edit(editingIndex, editingColumn);
+        TablePosition<?, ?> editingPosition = table.getEditingCell();
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+        editingColumn.setOnEditCancel(events::add);
+        cell.updateIndex(0);
+        assertEquals(1, events.size());
+        assertEquals(editingPosition, events.get(0).getTablePosition());
+    }
+    
+//    @Test
+//    public void testEditCancelEventAfterCollapse() {
+
+    @Test
+    public void testEditCancelEventAfterModifyItems() {
+        setupForEditing();
+        stageLoader = new StageLoader(table);
+        int editingIndex = 1;
+        List<CellEditEvent<?, ?>> startEvents = new ArrayList<>();
+        editingColumn.setOnEditStart(startEvents::add);
+        table.edit(editingIndex, editingColumn);
+        Toolkit.getToolkit().firePulse();
+        TablePosition<?, ?> editingPosition = table.getEditingCell();
+        // table
+        assertNotNull("sanity: table is editing", editingPosition);
+        assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
+        assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
+        // startEvent
+        assertEquals("sanity: editingStarted", 1, startEvents.size());
+        assertEquals("sanity: position in editStart", editingPosition, startEvents.get(0).getTablePosition());
+        
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+        editingColumn.setOnEditCancel(events::add);
+        table.getItems().add(0, "added");
+        System.out.println(table.getItems());
+        Toolkit.getToolkit().firePulse();
+
+        assertNull("sanity: editing terminated on items modification", table.getEditingCell());
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals(editingPosition, events.get(0).getTablePosition());
+    }
+    
+    /**
+     * Test that removing the editing item implicitly cancels an ongoing
+     * edit and fires a correct cancel event.
+     */
+    @Test
+    public void testEditCancelEventAfterRemoveEditingItem() {
+    }
+    
+    /**
+     * Test that removing the editing item does not cause a memory leak.
+     */
+    @Test
+    public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
+    }
+    
+    /**
+     * Test that removing a committed editing item does not cause a memory leak.
+     */
+    @Test
+    public void testEditCommitMemoryLeakAfterRemoveEditingItem() {
+    }
+    
     /**
      * Test that cell.cancelEdit can switch table editing off
      * even if a subclass violates its contract.

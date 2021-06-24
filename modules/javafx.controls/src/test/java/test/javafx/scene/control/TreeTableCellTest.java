@@ -708,6 +708,49 @@ public class TreeTableCellTest {
         assertFalse(cell.isEditing());
     }
 
+    @Test
+    public void testEditCancelEventAfterCancelOnCell() {
+    }
+    
+    @Test
+    public void testEditCancelEventAfterCancelOnTree() {
+    }
+    
+    @Test
+    public void testEditCancelEventAfterCellReuse() {
+    }
+    
+    @Test
+    public void testEditCancelEventAfterCollapse() {
+    }
+    
+    @Test
+    public void testEditCancelEventAfterModifyItems() {
+    }
+    
+    /**
+     * Test that removing the editing item implicitly cancels an ongoing
+     * edit and fires a correct cancel event.
+     */
+    @Test
+    public void testEditCancelEventAfterRemoveEditingItem() {
+    }
+    
+    /**
+     * Test that removing the editing item does not cause a memory leak.
+     */
+    @Test
+    public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
+    }
+    
+    /**
+     * Test that removing a committed editing item does not cause a memory leak.
+     */
+    @Test
+    public void testEditCommitMemoryLeakAfterRemoveEditingItem() {
+    }
+    
+
     /**
      * Test that cell.cancelEdit can switch table editing off
      * even if a subclass violates its contract.
