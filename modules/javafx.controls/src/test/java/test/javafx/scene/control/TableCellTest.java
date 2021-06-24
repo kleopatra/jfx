@@ -37,6 +37,7 @@ import com.sun.javafx.tk.Toolkit;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.*;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
@@ -73,7 +74,6 @@ public class TableCellTest {
         model = FXCollections.observableArrayList("Four", "Five", "Fear"); // "Flop", "Food", "Fizz"
         table = new TableView<String>(model);
         editingColumn = new TableColumn<>("TEST");
-        editingColumn.setCellValueFactory(param -> null);
 
         row = new TableRow<>();
     }
@@ -471,6 +471,45 @@ public class TableCellTest {
     @Test
     public void testEditCancelEventAfterModifyItems() {
         setupForEditing();
+        assertStartCancelEditEvents();
+    }
+
+    /**
+     * editingColumn must have a cellFactory returning a not-null
+     * observable with a not-null value to trigger editCancel.
+     * FIXME: WHY? 
+     * 
+     */
+    @Test
+    public void testEditCancelSetupCellValueFactoryNull() {
+        setupForEditing();
+        editingColumn.setCellValueFactory(null);
+        assertStartCancelEditEvents();
+    }
+    
+    @Test
+    public void testEditCancelSetupCellValueFactoryNullObservable() {
+        setupForEditing();
+        editingColumn.setCellValueFactory(cc -> null);
+        assertStartCancelEditEvents();
+    }
+    
+    @Test
+    public void testEditCancelSetupCellValueFactoryNullObservableValue() {
+        setupForEditing();
+        editingColumn.setCellValueFactory(cc -> new SimpleObjectProperty<>());
+        assertStartCancelEditEvents();
+    }
+    
+    @Test
+    public void testEditCancelSetupCellValueFactoryNotNullObservableValue() {
+        setupForEditing();
+        editingColumn.setCellValueFactory(cc -> new SimpleObjectProperty<>(""));
+        assertStartCancelEditEvents();
+    }
+    
+    
+    private void assertStartCancelEditEvents() {
         stageLoader = new StageLoader(table);
         int editingIndex = 1;
         List<CellEditEvent<?, ?>> startEvents = new ArrayList<>();
@@ -485,7 +524,7 @@ public class TableCellTest {
         // startEvent
         assertEquals("sanity: editingStarted", 1, startEvents.size());
         assertEquals("sanity: position in editStart", editingPosition, startEvents.get(0).getTablePosition());
-        
+
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         table.getItems().add(0, "added");
