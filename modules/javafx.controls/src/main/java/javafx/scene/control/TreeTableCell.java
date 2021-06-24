@@ -306,9 +306,11 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
 
         final TreeTableView<S> table = getTreeTableView();
         final TreeTableColumn<S,T> column = getTableColumn();
-        if (! isEditable() ||
-                (table != null && ! table.isEditable()) ||
-                (column != null && ! getTableColumn().isEditable())) {
+        final TreeTableRow<S> row = getTreeTableRow();
+        if (!isEditable() ||
+                (table != null && !table.isEditable()) ||
+                (column != null && !column.isEditable()) ||
+                (row != null && !row.isEditable())) {
             return;
         }
 

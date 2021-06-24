@@ -3709,8 +3709,6 @@ public class TreeViewTest {
         childNode1.setExpanded(false);
     }
 
-//<<<<<<< HEAD
-//=======
     @Test public void testRemovedSelectedItemsWhenBranchIsCollapsed() {
         TreeItem<String> c1, c2, c3;
         TreeItem<String> root = new TreeItem<>("foo");
@@ -3732,7 +3730,6 @@ public class TreeViewTest {
     }
 
 
-//>>>>>>> refs/heads/master
 
     /**
      * Test that cell.cancelEdit can switch tree editing off
