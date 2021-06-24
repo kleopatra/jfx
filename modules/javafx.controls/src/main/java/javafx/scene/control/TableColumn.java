@@ -214,6 +214,8 @@ public class TableColumn<S,T> extends TableColumnBase<S,T> implements EventTarge
         @Override public TableCell<?,?> call(TableColumn<?,?> param) {
             return new TableCell<Object,Object>() {
                 @Override protected void updateItem(Object item, boolean empty) {
+                    // FIXME: we must call super always! 
+                    // leads to not firing cancel event reliably
                     if (item == getItem()) return;
 
                     super.updateItem(item, empty);

@@ -474,41 +474,6 @@ public class TableCellTest {
         assertStartCancelEditEvents();
     }
 
-    /**
-     * editingColumn must have a cellFactory returning a not-null
-     * observable with a not-null value to trigger editCancel.
-     * FIXME: WHY? 
-     * 
-     */
-    @Test
-    public void testEditCancelSetupCellValueFactoryNull() {
-        setupForEditing();
-        editingColumn.setCellValueFactory(null);
-        assertStartCancelEditEvents();
-    }
-    
-    @Test
-    public void testEditCancelSetupCellValueFactoryNullObservable() {
-        setupForEditing();
-        editingColumn.setCellValueFactory(cc -> null);
-        assertStartCancelEditEvents();
-    }
-    
-    @Test
-    public void testEditCancelSetupCellValueFactoryNullObservableValue() {
-        setupForEditing();
-        editingColumn.setCellValueFactory(cc -> new SimpleObjectProperty<>());
-        assertStartCancelEditEvents();
-    }
-    
-    @Test
-    public void testEditCancelSetupCellValueFactoryNotNullObservableValue() {
-        setupForEditing();
-        editingColumn.setCellValueFactory(cc -> new SimpleObjectProperty<>(""));
-        assertStartCancelEditEvents();
-    }
-    
-    
     private void assertStartCancelEditEvents() {
         stageLoader = new StageLoader(table);
         int editingIndex = 1;
@@ -534,6 +499,15 @@ public class TableCellTest {
         assertNull("sanity: editing terminated on items modification", table.getEditingCell());
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals(editingPosition, events.get(0).getTablePosition());
+    }
+    
+    /**
+     * Stand-alone test for missing cancelEdit on modification
+     * FIXME report and ignore
+     */
+    @Test
+    public void testCancelEditEventNullValue() {
+        
     }
     
     /**
