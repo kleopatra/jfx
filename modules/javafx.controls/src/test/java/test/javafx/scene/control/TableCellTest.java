@@ -73,6 +73,7 @@ public class TableCellTest {
         model = FXCollections.observableArrayList("Four", "Five", "Fear"); // "Flop", "Food", "Fizz"
         table = new TableView<String>(model);
         editingColumn = new TableColumn<>("TEST");
+        editingColumn.setCellValueFactory(param -> null);
 
         row = new TableRow<>();
     }
