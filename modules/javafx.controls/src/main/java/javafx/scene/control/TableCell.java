@@ -332,11 +332,16 @@ public class TableCell<S,T> extends IndexedCell<T> {
             );
 
             Event.fireEvent(column, editEvent);
-            editingCellAtStartEdit = new TablePosition<>(table, getIndex(), column);
         }
+        editingCellAtStartEdit = new TablePosition<>(table, getIndex(), column);
     }
 
-    TablePosition<S, ?> editingCellAtStartEdit = null;
+    private TablePosition<S, T> editingCellAtStartEdit;
+    
+    // package for test!
+    TablePosition<S, T> getEditingCellAtStartEdit() {
+        return editingCellAtStartEdit;
+    }
 
     /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
@@ -375,6 +380,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
             // It would be rude of us to request it back again.
             ControlUtils.requestFocusOnControlOnlyIfCurrentFocusOwnerIsChild(table);
         }
+        editingCellAtStartEdit = null;
     }
 
     /** {@inheritDoc} */
@@ -389,7 +395,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
         // reset the editing index on the TableView
         if (table != null) {
             TablePosition<S,?> editingCell = table.getEditingCell();
-//            editingCell = editingCellAtStartEdit;
+            editingCell = editingCellAtStartEdit;
             if (updateEditingIndex) table.edit(-1, null);
 
             // request focus back onto the table, only if the current focus
@@ -407,6 +413,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
             Event.fireEvent(getTableColumn(), editEvent);
         }
+        editingCellAtStartEdit = null;
     }
 
 

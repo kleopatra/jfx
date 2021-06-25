@@ -34,5 +34,12 @@ public class TableCellShim<S,T> extends TableCell<S,T> {
     public static void set_lockItemOnEdit(TableCell tc, boolean b) {
         tc.lockItemOnEdit = b;
     }
+    
+    /**
+     * Returns the editing cell used as editing location in edit events.
+     */
+    public static <S, T> TablePosition<S, T> getEditingCellAtStart(TableCell<S, T> cell) {
+        return cell.getEditingCellAtStartEdit();
+    }
 
 }

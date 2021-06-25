@@ -55,7 +55,13 @@ import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 
 /**
- * Tests around missing cancel for null values - test error?.
+ * Tests around missing cancel for null values.
+ * 
+ * Only happens for default tableCell impl on TableColumn: it's not calling super.updateItem
+ * for same item. Effect not understood and definitely wrong, but practically not important - the
+ * default cell cannot be used for editing anyway (or can it?) 
+ * 
+ * Decision: post-pone - but report!
  */
 @RunWith(Parameterized.class)
 public class TableCellStartCancelEditTest {
