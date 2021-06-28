@@ -300,6 +300,9 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
      *                                                                         *
      **************************************************************************/
 
+    // editing location at start of edit - fix for JDK-8187229
+    private TreeTablePosition<S, ?> editingCellAtStartEdit = null;
+    
     /** {@inheritDoc} */
     @Override public void startEdit() {
         if (isEditing()) return;
@@ -335,12 +338,10 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
             );
 
             Event.fireEvent(column, editEvent);
-            editingCellAtStartEdit = new TreeTablePosition<>(table, getIndex(), column);
         }
+        editingCellAtStartEdit = new TreeTablePosition<>(table, getIndex(), column);
     }
 
-    TreeTablePosition<S, ?> editingCellAtStartEdit = null;
-    
     /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
         if (! isEditing()) return;
