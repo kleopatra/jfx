@@ -583,6 +583,24 @@ public class TableCellTest {
         assertEquals(table.getEditingCell(), getEditingCellAtStart(cell));
         cell.commitEdit("edited");
         assertNull(getEditingCellAtStart(cell));
+    }
+    
+    /**
+     * Doesn't make sense: there's no reference to the cell except here.
+     */
+    @Test
+    public void testEditCancelMemoryLeakCell() {
+        setupForEditing();
+        int editingIndex = 1;
+        cell.updateIndex(editingIndex);
+        table.edit(editingIndex, editingColumn);
+        assertEquals("sanity: cell has editing cell ref", table.getEditingCell(), getEditingCellAtStart(cell));
+        assertEquals(table.getEditingCell(), getEditingCellAtStart(cell));
+        cell.cancelEdit();
+        WeakReference<TableCell> cellRef = new WeakReference<>(cell);
+        cell = null;
+        attemptGC(cellRef);
+        assertEquals("cell must be gc'ed", null, cellRef.get());
         
     }
     /**
@@ -617,7 +635,7 @@ public class TableCellTest {
         assertNotNull("sanity: table is editing", editingPosition);
         assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
         assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
-        editingPosition = null;
+//        editingPosition = null;
         table.getItems().remove(editingIndex);
         editingItem = null;
         Toolkit.getToolkit().firePulse();

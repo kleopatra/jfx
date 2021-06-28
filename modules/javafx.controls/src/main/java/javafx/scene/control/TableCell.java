@@ -338,11 +338,6 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
     private TablePosition<S, T> editingCellAtStartEdit;
     
-    // package for test!
-    TablePosition<S, T> getEditingCellAtStartEdit() {
-        return editingCellAtStartEdit;
-    }
-
     /** {@inheritDoc} */
     @Override public void commitEdit(T newValue) {
         if (! isEditing()) return;
@@ -716,6 +711,10 @@ public class TableCell<S,T> extends IndexedCell<T> {
         super.layoutChildren();
     }
 
+    // package for test!
+    TablePosition<S, T> getEditingCellAtStartEdit() {
+        return editingCellAtStartEdit;
+    }
 
 
 
