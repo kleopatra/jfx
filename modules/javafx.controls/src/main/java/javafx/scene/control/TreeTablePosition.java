@@ -72,7 +72,8 @@ public class TreeTablePosition<S,T> extends TablePositionBase<TreeTableColumn<S,
     TreeTablePosition(@NamedArg("treeTableView") TreeTableView<S> treeTableView, @NamedArg("row") int row, @NamedArg("tableColumn") TreeTableColumn<S,T> tableColumn, boolean doLookup) {
         super(row, tableColumn);
         this.controlRef = new WeakReference<>(treeTableView);
-        this.treeItemRef = new WeakReference<>(doLookup ? treeTableView.getTreeItem(row) : null);
+        this.treeItemRef = new WeakReference<>(doLookup ? 
+                (treeTableView != null ? treeTableView.getTreeItem(row) : null) : null);
 
         nonFixedColumnIndex = treeTableView == null || tableColumn == null ? -1 : treeTableView.getVisibleLeafIndex(tableColumn);
     }

@@ -27,34 +27,64 @@ package test.javafx.scene.control;
 
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTablePosition;
 
 /**
- * Test Tree/TablePosition.
+ * Test specification of Tree/TablePosition.
  */
-public class TablePositionBaseTest {
+public class TablePositionBaseTestExt {
 
-//---------- TableView
+//---------- Table
     
     /**
-     * JDK-8269136: must not throw on null Table.
+     * 
+     * Doc error (?) instantiate with null throws NPE
+     * 
+     * No: 
+     * - not documented
+     * - accidentally introduced when fixing https://bugs.openjdk.java.net/browse/JDK-8093105 (selection related)
+     * - api doc warns users to expect null table/column (might be potentially gc'ed, though)
+     * - getColumn specified to be -1 if any of table/column is null
+     * 
+     * slightly unrelated
+     * - row/tableColumn might be -1/null to indicate a complete column/row, respectively (spec'ed in 
+     *   TableColumnBase
      */
     @Test
     public void testNullTable() {
         new TablePosition<>(null, 2, new TableColumn<>());
     }
     
-//------------- TreeTableView    
-
+    @Test
+    public void testNullColumn() {
+        new TablePosition<>(new TableView<>(), 2, null);
+    }
+    
+    @Test
+    public void testUncontainedColumn() {
+        new TablePosition<>(new TableView<>(), 2, new TableColumn<>());
+    }
+    
+    @Test
+    public void testGetUncontainedColumn() {
+        TablePosition<?,?> pos = new TablePosition<>(new TableView<>(), 2, new TableColumn<>());
+        int columnIndex = pos.getColumn();
+        assertEquals(-1, columnIndex);
+        assertEquals(2, pos.getRow());
+    }
+    
+//------------- TreeTable    
     /**
-     * JDK-8269136: must not throw on null TreeTable.
+     * Doc error (?) instantiate with null throws NPE
      */
     @Test
     public void testNullTreeTable() {
         new TreeTablePosition<>(null, 2, new TreeTableColumn<>());
     }
-    
 }
