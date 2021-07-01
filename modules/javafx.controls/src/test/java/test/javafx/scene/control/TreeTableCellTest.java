@@ -726,6 +726,8 @@ public class TreeTableCellTest {
         assertFalse(cell.isEditing());
     }
 
+//------------ testing editCancel event: location on event - JDK-8187229
+    
     /**
      * Basic config of treeTable-/cell to allow testing of editEvents: 
      * table has editingColumn and cell is configured with table and column.
@@ -739,10 +741,9 @@ public class TreeTableCellTest {
         cell.updateTreeTableView(tree);
         cell.updateTreeTableColumn(editingColumn);
     }
-    
 
     /**
-     * Passes before, must pass after fix.
+     * Sanity test: passes before fix of JDK-8187229, must pass after.
      */
     @Test
     public void testEditCancelEventAfterCancelOnCell() {
@@ -754,14 +755,10 @@ public class TreeTableCellTest {
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         cell.cancelEdit();
-        assertEquals(1, events.size());
-        assertEquals(editingPosition, events.get(0).getTreeTablePosition());
-
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
     
-    /**
-     * fails before fix
-     */
     @Test
     public void testEditCancelEventAfterCancelOnTreeTable() {
         setupForEditing();
@@ -772,12 +769,12 @@ public class TreeTableCellTest {
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         tree.edit(-1, null);
-        assertEquals(1, events.size());
-        assertEquals(editingPosition, events.get(0).getTreeTablePosition());
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
     
     /**
-     * Passes before fix, must pass after
+     * Sanity test: passes before fix of JDK-8187229, must pass after.
      */
     @Test
     public void testEditCancelEventAfterCellReuse() {
@@ -789,13 +786,10 @@ public class TreeTableCellTest {
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         cell.updateIndex(0);
-        assertEquals(1, events.size());
-        assertEquals(editingPosition, events.get(0).getTreeTablePosition());
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
     
-    /**
-     * Fails before fix.
-     */
     @Test
     public void testEditCancelEventAfterCollapse() {
         setupForEditing();
@@ -807,39 +801,24 @@ public class TreeTableCellTest {
         editingColumn.setOnEditCancel(events::add);
         root.setExpanded(false);
         Toolkit.getToolkit().firePulse();
-        assertEquals(1, events.size());
+        assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
     
-    /**
-     * Fails before fix.
-     */
     @Test
     public void testEditCancelEventAfterModifyItems() {
         setupForEditing();
         stageLoader = new StageLoader(tree);
         int editingIndex = 2;
-        List<CellEditEvent<?, ?>> startEvents = new ArrayList<>();
-        editingColumn.setOnEditStart(startEvents::add);
         tree.edit(editingIndex, editingColumn);
-        Toolkit.getToolkit().firePulse();
         TreeTablePosition<?, ?> editingPosition = tree.getEditingCell();
-        // table
-        assertNotNull("sanity: table is editing", editingPosition);
-        assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
-        assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
-        // startEvent
-        assertEquals("sanity: editingStarted", 1, startEvents.size());
-        assertEquals("sanity: position in editStart", editingPosition, startEvents.get(0).getTreeTablePosition());
-        
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         root.getChildren().add(0, new TreeItem<>("added"));
         Toolkit.getToolkit().firePulse();
-        
         assertNull("sanity: editing terminated on items modification", tree.getEditingCell());
         assertEquals("column must have received editCancel", 1, events.size());
-        assertEquals(editingPosition, events.get(0).getTreeTablePosition());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
     
     /**
@@ -851,31 +830,21 @@ public class TreeTableCellTest {
         setupForEditing();
         stageLoader = new StageLoader(tree);
         int editingIndex = 1;
-        List<CellEditEvent<?, ?>> startEvents = new ArrayList<>();
-        editingColumn.setOnEditStart(startEvents::add);
         tree.edit(editingIndex, editingColumn);
-        Toolkit.getToolkit().firePulse();
         TreeTablePosition<?, ?> editingPosition = tree.getEditingCell();
-        // table
-        assertNotNull("sanity: table is editing", editingPosition);
-        assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
-        assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
-        // startEvent
-        assertEquals("sanity: editingStarted", 1, startEvents.size());
-        assertEquals("sanity: position in editStart", editingPosition, startEvents.get(0).getTreeTablePosition());
-        
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         root.getChildren().remove(editingIndex - 1);
         Toolkit.getToolkit().firePulse();
-        
         assertNull("sanity: editing terminated on items modification", tree.getEditingCell());
         assertEquals("column must have received editCancel", 1, events.size());
-        assertEquals(editingPosition, events.get(0).getTreeTablePosition());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
     
     /**
-     * Test that removing the editing item does not cause a memory leak.
+     * Sanity test: fix must not introduce a memory leak.
+     * Note: not an issue for Tree/TableCell because we store the Tree/TablePosition which
+     * takes care of wrapping everything into weakRefs.
      */
     @Test
     public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
@@ -890,31 +859,6 @@ public class TreeTableCellTest {
         tree.edit(editingIndex, editingColumn);
         root.getChildren().remove(editingItem);
         Toolkit.getToolkit().firePulse();
-        assertNull("removing item must cancel edit on tree", tree.getEditingCell());
-        editingItem = null;
-        attemptGC(itemRef);
-        assertEquals("treeItem must be gc'ed", null, itemRef.get());
-    }
-    
-    /**
-     * Test that removing a committed editing item does not cause a memory leak.
-     */
-    @Test
-    public void testEditCommitMemoryLeakAfterRemoveEditingItem() {
-        setupForEditing();
-        stageLoader = new StageLoader(tree);
-        // the item to test for being gc'ed
-        TreeItem<String> editingItem = new TreeItem<>("added");
-        WeakReference<TreeItem<?>> itemRef = new WeakReference<>(editingItem);
-        root.getChildren().add(0, editingItem);
-        Toolkit.getToolkit().firePulse();
-        int editingIndex = tree.getRow(editingItem);
-        tree.edit(editingIndex, editingColumn);
-        TreeTableCell<String,String> editingCell = (TreeTableCell<String, String>) VirtualFlowTestUtils.getCell(tree, editingIndex, 0);
-        editingCell.commitEdit("added changed");
-        root.getChildren().remove(editingItem);
-        Toolkit.getToolkit().firePulse();
-        assertNull("removing item must cancel edit on tree", tree.getEditingCell());
         editingItem = null;
         attemptGC(itemRef);
         assertEquals("treeItem must be gc'ed", null, itemRef.get());

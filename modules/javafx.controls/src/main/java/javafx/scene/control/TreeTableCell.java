@@ -394,11 +394,6 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
 
         // reset the editing index on the TableView
         if (table != null) {
-            @SuppressWarnings("unchecked")
-            TreeTablePosition<S,?> editingCell = // (TreeTablePosition<S,T>) 
-                table.getEditingCell();
-
-            editingCell = editingCellAtStartEdit;
             if (updateEditingIndex) table.edit(-1, null);
 
             // request focus back onto the table, only if the current focus
@@ -409,7 +404,7 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
 
             CellEditEvent<S,?> editEvent = new CellEditEvent<>(
                 table,
-                editingCell,
+                editingCellAtStartEdit,
                 TreeTableColumn.editCancelEvent(),
                 null
             );
