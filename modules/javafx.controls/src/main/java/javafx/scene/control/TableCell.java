@@ -376,12 +376,10 @@ public class TableCell<S,T> extends IndexedCell<T> {
             // It would be rude of us to request it back again.
             ControlUtils.requestFocusOnControlOnlyIfCurrentFocusOwnerIsChild(table);
         }
-        editingCellAtStartEdit = null;
     }
 
     /** {@inheritDoc} */
     @Override public void cancelEdit() {
-//        System.out.println("cancel called: " + getIndex());
         if (! isEditing()) return;
 
         final TableView<S> table = getTableView();
@@ -390,8 +388,6 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
         // reset the editing index on the TableView
         if (table != null) {
-            TablePosition<S,?> editingCell = table.getEditingCell();
-            editingCell = editingCellAtStartEdit;
             if (updateEditingIndex) table.edit(-1, null);
 
             // request focus back onto the table, only if the current focus
@@ -402,14 +398,13 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
             CellEditEvent<S,?> editEvent = new CellEditEvent<>(
                 table,
-                editingCell,
+                editingCellAtStartEdit,
                 TableColumn.editCancelEvent(),
                 null
             );
 
             Event.fireEvent(getTableColumn(), editEvent);
         }
-        editingCellAtStartEdit = null;
     }
 
 
@@ -711,13 +706,6 @@ public class TableCell<S,T> extends IndexedCell<T> {
         }
         super.layoutChildren();
     }
-
-    // package for test!
-    TablePosition<S, T> getEditingCellAtStartEdit() {
-        return editingCellAtStartEdit;
-    }
-
-
 
     /***************************************************************************
      *                                                                         *

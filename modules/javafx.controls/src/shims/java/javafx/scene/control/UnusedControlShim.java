@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,17 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
 package javafx.scene.control;
 
-public class TableCellShim<S,T> extends TableCell<S,T> {
 
-    @Override
-    public void updateItem(T item, boolean empty) {
-        super.updateItem(item, empty);
-    }
+/**
+ * Unused accessors for package-private state/methods in controls.
+ */
+public class UnusedControlShim {
 
-    public static void set_lockItemOnEdit(TableCell tc, boolean b) {
-        tc.lockItemOnEdit = b;
-    }
-    
+    /**
+     * Returns the editing cell used as editing location in edit events.
+     */
+//    public static <S, T> TablePosition<S, T> getEditingCellAtStart(TableCell<S, T> cell) {
+//        return cell.getEditingCellAtStartEdit();
+//    }
+
+
 }

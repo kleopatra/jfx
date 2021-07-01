@@ -417,6 +417,8 @@ public class TableCellTest {
         assertFalse(cell.isEditing());
     }
 
+//------------ testing editCancel event: location on event - JDK-8187229
+    
     /**
      * Basic config of table-/cell to allow testing of editEvents: 
      * table has editingColumn and cell is configured with table and column.
@@ -431,8 +433,9 @@ public class TableCellTest {
         cell.updateTableColumn(editingColumn);
     }
     
+    
     /**
-     * Passes before, must pass after fix.
+     * Passes before fix of JDK-8187229, must pass after.
      */
     @Test
     public void testEditCancelEventAfterCancelOnCell() {
@@ -444,12 +447,12 @@ public class TableCellTest {
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         cell.cancelEdit();
-        assertEquals(1, events.size());
-        assertEquals(editingPosition, events.get(0).getTablePosition());
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
     
     /**
-     * Fails before fix.
+     * Fails before fix of JDK-8187229.
      */
     @Test
     public void testEditCancelEventAfterCancelOnTable() {
@@ -461,12 +464,12 @@ public class TableCellTest {
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         table.edit(-1, null);
-        assertEquals(1, events.size());
-        assertEquals(editingPosition, events.get(0).getTablePosition());
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
     
     /**
-     * Passes before fix, must pass after.
+     * Passes before fix of JDK-8187229, must pass after.
      */
     @Test
     public void testEditCancelEventAfterCellReuse() {
@@ -478,141 +481,52 @@ public class TableCellTest {
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         cell.updateIndex(0);
-        assertEquals(1, events.size());
-        assertEquals(editingPosition, events.get(0).getTablePosition());
+        assertEquals("column must have received editCancel", 1, events.size());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
     
-//    @Test
-//    public void testEditCancelEventAfterCollapse() {
-
     /**
-     * Fails before fix.
-     * 
-     * FIXME: remove sanity tests in-between - we rely on the editing mechanism itself
-     * working as expected, anyway.
+     * Fails before fix of JDK-8187229.
      */
     @Test
     public void testEditCancelEventAfterModifyItems() {
         setupForEditing();
         stageLoader = new StageLoader(table);
         int editingIndex = 1;
-        List<CellEditEvent<?, ?>> startEvents = new ArrayList<>();
-        editingColumn.setOnEditStart(startEvents::add);
         table.edit(editingIndex, editingColumn);
-        Toolkit.getToolkit().firePulse();
         TablePosition<?, ?> editingPosition = table.getEditingCell();
-        // table
-        assertNotNull("sanity: table is editing", editingPosition);
-        assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
-        assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
-        // startEvent
-        assertEquals("sanity: editingStarted", 1, startEvents.size());
-        assertEquals("sanity: position in editStart", editingPosition, startEvents.get(0).getTablePosition());
-        
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         table.getItems().add(0, "added");
         Toolkit.getToolkit().firePulse();
-        
-        assertNull("sanity: editing terminated on items modification", table.getEditingCell());
         assertEquals("column must have received editCancel", 1, events.size());
-        assertEquals(editingPosition, events.get(0).getTablePosition());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
 
     /**
      * Test that removing the editing item implicitly cancels an ongoing
      * edit and fires a correct cancel event.
-     * 
-     * Fails before fix.
-     * 
-     * FIXME: remove sanity tests in-between - we rely on the editing mechanism itself
-     * working as expected, anyway.
      */
     @Test
     public void testEditCancelEventAfterRemoveEditingItem() {
         setupForEditing();
         stageLoader = new StageLoader(table);
         int editingIndex = 1;
-        List<CellEditEvent<?, ?>> startEvents = new ArrayList<>();
-        editingColumn.setOnEditStart(startEvents::add);
         table.edit(editingIndex, editingColumn);
-        Toolkit.getToolkit().firePulse();
         TablePosition<?, ?> editingPosition = table.getEditingCell();
-        // table
-        assertNotNull("sanity: table is editing", editingPosition);
-        assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
-        assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
-        // startEvent
-        assertEquals("sanity: editingStarted", 1, startEvents.size());
-        assertEquals("sanity: position in editStart", editingPosition, startEvents.get(0).getTablePosition());
-        
         List<CellEditEvent<?, ?>> events = new ArrayList<>();
         editingColumn.setOnEditCancel(events::add);
         table.getItems().remove(editingIndex);
         Toolkit.getToolkit().firePulse();
-        
         assertNull("sanity: editing terminated on items modification", table.getEditingCell());
         assertEquals("column must have received editCancel", 1, events.size());
-        assertEquals(editingPosition, events.get(0).getTablePosition());
+        assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
     
     /**
-     * Note: ideally we would test a macroscopic effect of missing cleanup of 
-     * the (cell local) storage at the editing cell (f.i. a memory leak as in
-     * TreeCellTest) - there is none (good!) nevertheless it should be cleaned
-     * for sanity. So testing with brute force lookup of impl detail ..
-     */
-    @Test
-    public void testEditCancelEditingCellAtStartCleanupAfterCancel() {
-        setupForEditing();
-        int editingIndex = 1;
-        cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
-        assertEquals("sanity: cell has editing cell ref", table.getEditingCell(), getEditingCellAtStart(cell));
-        cell.cancelEdit();
-        assertNull(getEditingCellAtStart(cell));
-    }
-    
-    @Test
-    public void testEditCancelEditingCellAtStartCleanupAfterCommit() {
-        setupForEditing();
-        int editingIndex = 1;
-        cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
-        assertEquals("sanity: cell has editing cell ref", table.getEditingCell(), getEditingCellAtStart(cell));
-        assertEquals(table.getEditingCell(), getEditingCellAtStart(cell));
-        cell.commitEdit("edited");
-        assertNull(getEditingCellAtStart(cell));
-    }
-    
-    /**
-     * Doesn't make sense: there's no reference to the cell except here.
-     */
-    @Test
-    public void testEditCancelMemoryLeakCell() {
-        setupForEditing();
-        int editingIndex = 1;
-        cell.updateIndex(editingIndex);
-        table.edit(editingIndex, editingColumn);
-        assertEquals("sanity: cell has editing cell ref", table.getEditingCell(), getEditingCellAtStart(cell));
-        assertEquals(table.getEditingCell(), getEditingCellAtStart(cell));
-        cell.cancelEdit();
-        WeakReference<TableCell> cellRef = new WeakReference<>(cell);
-        cell = null;
-        attemptGC(cellRef);
-        assertEquals("cell must be gc'ed", null, cellRef.get());
-        
-    }
-    /**
-     * Test that removing the editing item does not cause a memory leak.
-     * 
-     * Might not be an issue with TablePosition: all refs are weakRefs?
-     * Anyway, need something different from String.
-     * 
-     * - no change (null editingPostionAtStart at end of cancel/commit doesn't 
-     * make a difference)
-     * - but: PropertyValueFactory prevents gc of removed item?
-     * 
+     * Sanity test: fix must not introduce a memory leak.
+     * Note: not an issue for Tree/TableCell because we store the Tree/TablePosition which
+     * takes care of wrapping everything into weakRefs.
      */
     @Test
     public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
@@ -620,8 +534,6 @@ public class TableCellTest {
                 new MenuItem("some"), new MenuItem("other")));
         TableColumn<MenuItem, String> editingColumn = new TableColumn<>("Text");
         editingColumn.setCellValueFactory(cc -> new SimpleObjectProperty<>(""));
-        // PropertyValueFactory is leaking?
-//        editingColumn.setCellValueFactory(new PropertyValueFactory<>("text"));
         table.setEditable(true);
         table.getColumns().add(editingColumn);
         stageLoader = new StageLoader(table);
@@ -629,28 +541,13 @@ public class TableCellTest {
         MenuItem editingItem = table.getItems().get(editingIndex);
         WeakReference<MenuItem> itemRef = new WeakReference<>(editingItem);
         table.edit(editingIndex, editingColumn);
-        Toolkit.getToolkit().firePulse();
-        TablePosition<?, ?> editingPosition = table.getEditingCell();
-        // table
-        assertNotNull("sanity: table is editing", editingPosition);
-        assertEquals("sanity: editing row", editingIndex, editingPosition.getRow());
-        assertEquals("sanity: editing column", editingColumn, editingPosition.getTableColumn());
-//        editingPosition = null;
         table.getItems().remove(editingIndex);
         editingItem = null;
         Toolkit.getToolkit().firePulse();
-        assertNull(table.getEditingCell());
         attemptGC(itemRef);
-        assertEquals("treeItem must be gc'ed", null, itemRef.get());
+        assertEquals("item must be gc'ed", null, itemRef.get());
     }
-    
-    /**
-     * Test that removing a committed editing item does not cause a memory leak.
-     */
-    @Test
-    public void testEditCommitMemoryLeakAfterRemoveEditingItem() {
-    }
-    
+ 
     /**
      * Test that cell.cancelEdit can switch table editing off
      * even if a subclass violates its contract.
