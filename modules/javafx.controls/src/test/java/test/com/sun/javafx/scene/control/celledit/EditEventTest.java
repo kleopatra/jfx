@@ -44,6 +44,10 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.util.Callback;
 import test.com.sun.javafx.scene.control.celledit.infrastructure.EditEventReport;
 import test.com.sun.javafx.scene.control.celledit.infrastructure.EditableControl;
@@ -92,7 +96,7 @@ public class EditEventTest {
         cell.updateIndex(editingIndex);
         report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
     }
-
+    
     /**
      * Test do-nothing block in indexChanged (was RT-31165, is JDK-8123482)
      */
@@ -131,6 +135,19 @@ public class EditEventTest {
         assertEquals(1, report.getEditEventSize());
         report.assertLastCommitIndex(editingIndex, editableControl.getTargetColumn(), edited);
     }
+    
+    @Test
+    public void testCommitEditOnCellTwice() {
+        int editingIndex = 1;
+        String edited = "edited";
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
+        cell.commitEdit(edited);
+        cell.commitEdit(edited);
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastCommitIndex(editingIndex, editableControl.getTargetColumn(), edited);
+    }
 
     @Test
     public void testCancelEditOnCell() {
@@ -142,12 +159,38 @@ public class EditEventTest {
         assertEquals(1, report.getEditEventSize());
         report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
     }
+    
+    @Test
+    public void testCancelEditOnCellTwice() {
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        editableControl.edit(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
+        cell.cancelEdit();
+        cell.cancelEdit();
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastCancelIndex(editingIndex, editableControl.getTargetColumn());
+    }
 
     @Test
     public void testStartEditOnCell() {
         int editingIndex = 1;
         IndexedCell cell = createEditableCellAt(editingIndex);
         EditEventReport report = editableControl.createEditReport();
+        cell.startEdit();
+        assertEquals(1, report.getEditEventSize());
+        report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
+    }
+    
+    /**
+     * JDK-8188027
+     */
+    @Test
+    public void testStartEditOnCellTwice() {
+        int editingIndex = 1;
+        IndexedCell cell = createEditableCellAt(editingIndex);
+        EditEventReport report = editableControl.createEditReport();
+        cell.startEdit();
         cell.startEdit();
         assertEquals(1, report.getEditEventSize());
         report.assertLastStartIndex(editingIndex, editableControl.getTargetColumn());
@@ -264,14 +307,14 @@ public class EditEventTest {
                     "TreeView, TreeCell", (Callback) lv -> new TreeCell<>()},
         { (Supplier) EditableControlFactory::createEditableTreeTableView, 
                         "TreeTableView, TreeTableCell", (Callback) lv -> new TreeTableCell<>()},
-//        { (Supplier) EditableControlFactory::createEditableListView, 
-//                "ListView, TextFieldListCell", TextFieldListCell.forListView()},
-//        { (Supplier) EditableControlFactory::createEditableTableView, 
-//                "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
-//        { (Supplier) EditableControlFactory::createEditableTreeView, 
-//                "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
-//        { (Supplier) EditableControlFactory::createEditableTreeTableView, 
-//                "TreeTableView, TextFieldTreeTableCell", TextFieldTreeTableCell.forTreeTableColumn()},
+        { (Supplier) EditableControlFactory::createEditableListView, 
+                "ListView, TextFieldListCell", TextFieldListCell.forListView()},
+        { (Supplier) EditableControlFactory::createEditableTableView, 
+                "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
+        { (Supplier) EditableControlFactory::createEditableTreeView, 
+                "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
+        { (Supplier) EditableControlFactory::createEditableTreeTableView, 
+                "TreeTableView, TextFieldTreeTableCell", TextFieldTreeTableCell.forTreeTableColumn()},
 
         });
     }
