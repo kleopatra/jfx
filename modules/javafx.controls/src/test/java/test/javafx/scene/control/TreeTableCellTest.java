@@ -29,18 +29,14 @@ import javafx.scene.control.skin.TreeTableCellSkin;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.control.TablePosition;
-import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableCellShim;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
-import javafx.scene.control.TreeView.EditEvent;
 import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.util.Callback;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -74,7 +70,7 @@ public class TreeTableCellTest {
     private StageLoader stageLoader;
 
     private TreeTableColumn<String, String> editingColumn;
-    
+
     @Before public void setup() {
         Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RuntimeException) {
@@ -95,7 +91,7 @@ public class TreeTableCellTest {
         tree = new TreeTableView<String>(root);
         root.setExpanded(true);
         editingColumn = new TreeTableColumn<>("TEST");
-        
+
         row = new TreeTableRow<>();
     }
 
@@ -726,11 +722,9 @@ public class TreeTableCellTest {
         assertFalse(cell.isEditing());
     }
 
-//------------ testing editCancel event: location on event - JDK-8187229
-    
     /**
-     * Basic config of treeTable-/cell to allow testing of editEvents: 
-     * table has editingColumn and cell is configured with table and column.
+     * Basic config of treeTable-/cell to allow testing of editEvents:
+     * table is editable, has editingColumn and cell is configured with table and column.
      */
     private void setupForEditing() {
         tree.setEditable(true);
@@ -742,9 +736,6 @@ public class TreeTableCellTest {
         cell.updateTreeTableColumn(editingColumn);
     }
 
-    /**
-     * Sanity test: passes before fix of JDK-8187229, must pass after.
-     */
     @Test
     public void testEditCancelEventAfterCancelOnCell() {
         setupForEditing();
@@ -758,7 +749,7 @@ public class TreeTableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
-    
+
     @Test
     public void testEditCancelEventAfterCancelOnTreeTable() {
         setupForEditing();
@@ -772,10 +763,7 @@ public class TreeTableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
-    
-    /**
-     * Sanity test: passes before fix of JDK-8187229, must pass after.
-     */
+
     @Test
     public void testEditCancelEventAfterCellReuse() {
         setupForEditing();
@@ -789,7 +777,7 @@ public class TreeTableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
-    
+
     @Test
     public void testEditCancelEventAfterCollapse() {
         setupForEditing();
@@ -804,7 +792,7 @@ public class TreeTableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
-    
+
     @Test
     public void testEditCancelEventAfterModifyItems() {
         setupForEditing();
@@ -820,7 +808,7 @@ public class TreeTableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
-    
+
     /**
      * Test that removing the editing item implicitly cancels an ongoing
      * edit and fires a correct cancel event.
@@ -840,11 +828,9 @@ public class TreeTableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTreeTablePosition());
     }
-    
+
     /**
-     * Sanity test: fix must not introduce a memory leak.
-     * Note: not an issue for Tree/TableCell because we store the Tree/TablePosition which
-     * takes care of wrapping everything into weakRefs.
+     * Test that removing the editing item does not cause a memory leak.
      */
     @Test
     public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
@@ -863,7 +849,7 @@ public class TreeTableCellTest {
         attemptGC(itemRef);
         assertEquals("treeItem must be gc'ed", null, itemRef.get());
     }
-    
+
 
     /**
      * Test that cell.cancelEdit can switch table editing off

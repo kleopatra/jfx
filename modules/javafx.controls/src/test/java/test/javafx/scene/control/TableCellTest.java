@@ -38,7 +38,6 @@ import com.sun.javafx.tk.Toolkit;
 import static org.junit.Assert.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlTestUtils.*;
 import static test.com.sun.javafx.scene.control.infrastructure.ControlSkinFactory.*;
-import static javafx.scene.control.TableCellShim.*;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -51,7 +50,6 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableCellSkin;
 import test.com.sun.javafx.scene.control.infrastructure.StageLoader;
 import test.com.sun.javafx.scene.control.infrastructure.VirtualFlowTestUtils;
@@ -417,11 +415,9 @@ public class TableCellTest {
         assertFalse(cell.isEditing());
     }
 
-//------------ testing editCancel event: location on event - JDK-8187229
-    
     /**
-     * Basic config of table-/cell to allow testing of editEvents: 
-     * table has editingColumn and cell is configured with table and column.
+     * Basic config of table-/cell to allow testing of editEvents:
+     * table is editable, has editingColumn and cell is configured with table and column.
      */
     private void setupForEditing() {
         table.setEditable(true);
@@ -432,11 +428,7 @@ public class TableCellTest {
         cell.updateTableView(table);
         cell.updateTableColumn(editingColumn);
     }
-    
-    
-    /**
-     * Passes before fix of JDK-8187229, must pass after.
-     */
+
     @Test
     public void testEditCancelEventAfterCancelOnCell() {
         setupForEditing();
@@ -450,10 +442,7 @@ public class TableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
-    
-    /**
-     * Fails before fix of JDK-8187229.
-     */
+
     @Test
     public void testEditCancelEventAfterCancelOnTable() {
         setupForEditing();
@@ -467,10 +456,7 @@ public class TableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
-    
-    /**
-     * Passes before fix of JDK-8187229, must pass after.
-     */
+
     @Test
     public void testEditCancelEventAfterCellReuse() {
         setupForEditing();
@@ -484,10 +470,7 @@ public class TableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
-    
-    /**
-     * Fails before fix of JDK-8187229.
-     */
+
     @Test
     public void testEditCancelEventAfterModifyItems() {
         setupForEditing();
@@ -522,11 +505,9 @@ public class TableCellTest {
         assertEquals("column must have received editCancel", 1, events.size());
         assertEquals("editing location of cancel event", editingPosition, events.get(0).getTablePosition());
     }
-    
+
     /**
-     * Sanity test: fix must not introduce a memory leak.
-     * Note: not an issue for Tree/TableCell because we store the Tree/TablePosition which
-     * takes care of wrapping everything into weakRefs.
+     * Test that removing the editing item does not cause a memory leak.
      */
     @Test
     public void testEditCancelMemoryLeakAfterRemoveEditingItem() {
@@ -547,7 +528,7 @@ public class TableCellTest {
         attemptGC(itemRef);
         assertEquals("item must be gc'ed", null, itemRef.get());
     }
- 
+
     /**
      * Test that cell.cancelEdit can switch table editing off
      * even if a subclass violates its contract.
