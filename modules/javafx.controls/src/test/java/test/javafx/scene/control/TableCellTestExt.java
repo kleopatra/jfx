@@ -39,7 +39,9 @@ import static org.junit.Assert.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.CellShim;
 import javafx.scene.control.TableCell;
+import javafx.scene.control.TableCellShim;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
@@ -58,10 +60,99 @@ public class TableCellTestExt {
     private TableCell<String,String> cell;
     private TableView<String> table;
     private TableColumn<String, String> editingColumn;
-    private TableRow<String> row;
+    private TableRow<String> tableRow;
     private ObservableList<String> model;
     private StageLoader stageLoader;
 
+    /**
+     * Why:
+     * start checks for column != null, the other edit methods check for table != null
+     * 
+     * no table, but column and row
+     * tests in cellTest are incomplete: they explicitly test editing for null control 
+     * but always without column ..
+     * doing so, throws a NPE from CellEditEvent
+     * 
+     * also playing with handlers: which are notified for combinations of missing 
+     * collaborators? incomplete ..
+     */
+    @Test
+    public void testEditStartFireEvent() {
+        CellShim.updateItem(tableRow, "TableRow", false);
+        cell.updateTableRow(tableRow);
+        TableCellShim.set_lockItemOnEdit(cell, true);
+        CellShim.updateItem(cell, "something", false);
+        // FIXME: default cell (of tableColumn) needs not-null value for firing cancel
+//        editingColumn.setCellValueFactory(cc -> new SimpleObjectProperty<>(""));
+        cell.updateTableColumn(editingColumn);
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+//        cell.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        editingColumn.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        cell.startEdit();
+        assertTrue(cell.isEditing());
+        assertEquals(1, events.size());
+    }
+    
+    @Test
+    public void testEditStartFireEventComplete() {
+        setupForEditing();
+//        CellShim.updateItem(tableRow, "TableRow", false);
+        cell.updateTableRow(tableRow);
+        cell.updateIndex(0);
+//        TableCellShim.set_lockItemOnEdit(cell, true);
+//        CellShim.updateItem(cell, "something", false);
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+        cell.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        editingColumn.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        table.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        
+        cell.startEdit();
+        assertTrue(cell.isEditing());
+        assertEquals(1, events.size());
+    }
+    
+    @Test
+    public void testEditStartFireEventCompleteInScene() {
+        setupForEditing();
+        List<CellEditEvent<?, ?>> events = new ArrayList<>();
+//        cell.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        editingColumn.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        table.addEventHandler(TableColumn.editAnyEvent(), events::add);
+        stageLoader = new StageLoader(table);
+        int editingIndex = 1;
+        table.edit(editingIndex, editingColumn);
+//        assertTrue(cell.isEditing());
+        assertEquals(1, events.size());
+    }
+    
+    @Test
+    public void testEditStartNoColumn() {
+        table.setEditable(true);
+        cell.updateTableView(table);
+        // force artificially not-empty cell state
+        TableCellShim.set_lockItemOnEdit(cell, true);
+        CellShim.updateItem(cell, "something", false);
+        
+        cell.startEdit();
+        assertTrue(cell.isEditing());
+    }
+    
+    @Test
+    public void testEditCancelNoColumn() {
+        table.setEditable(true);
+        cell.updateTableView(table);
+        // force artificially not-empty cell state
+        TableCellShim.set_lockItemOnEdit(cell, true);
+        CellShim.updateItem(cell, "something", false);
+        // start edit: succeeds without firing event (null check against column)
+        cell.startEdit();
+        assertTrue(cell.isEditing());
+        // cancel edit: NPE from Event.fire (all params must be != null)
+        cell.cancelEdit();
+        assertFalse(cell.isEditing());
+    }
+    
+    
   //------------ testing editCancel event: location on event - JDK-8187229
     
     /**
@@ -214,7 +305,7 @@ public class TableCellTestExt {
         table = new TableView<String>(model);
         editingColumn = new TableColumn<>("TEST");
 
-        row = new TableRow<>();
+        tableRow = new TableRow<>();
     }
 
     @After

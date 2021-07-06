@@ -785,9 +785,9 @@ public class TableColumn<S,T> extends TableColumnBase<S,T> implements EventTarge
                 EventType<CellEditEvent<S,T>> eventType, T newValue) {
             super(table, Event.NULL_SOURCE_TARGET, eventType);
 
-            if (table == null) {
-                throw new NullPointerException("TableView can not be null");
-            }
+//            if (table == null) {
+//                throw new NullPointerException("TableView can not be null");
+//            }
             this.pos = pos;
             this.newValue = newValue;
         }
