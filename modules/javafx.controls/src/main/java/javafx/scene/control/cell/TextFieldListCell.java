@@ -179,9 +179,9 @@ public class TextFieldListCell<T> extends ListCell<T> {
 
     /** {@inheritDoc} */
     @Override public void startEdit() {
-        if (! isEditable() || ! getListView().isEditable()) {
-            return;
-        }
+//        if (! isEditable() || ! getListView().isEditable()) {
+//            return;
+//        }
         super.startEdit();
 
         if (isEditing()) {

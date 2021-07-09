@@ -189,9 +189,9 @@ public class TextFieldTreeCell<T> extends DefaultTreeCell<T> {
 
     /** {@inheritDoc} */
     @Override public void startEdit() {
-        if (! isEditable() || ! getTreeView().isEditable()) {
-            return;
-        }
+//        if (! isEditable() || ! getTreeView().isEditable()) {
+//            return;
+//        }
         super.startEdit();
 
         if (isEditing()) {

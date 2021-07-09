@@ -43,7 +43,10 @@ import javafx.scene.control.CellShim;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TableCell;
+import javafx.scene.control.TableCellShim;
 import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableCellShim;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.TextFieldTreeCell;
@@ -281,7 +284,7 @@ public class EditStateTest {
      * Note: going even further are tests in CellTest - f.i. updatingACellBeingEditedDoesNotResultInACancelOfEdit
      * test that startEdit switches a cell (all base cells) into editing as long as it is not empty
      */
-    @Ignore("JDK-8188026")
+//    @Ignore("JDK-8188026")
     @Test
     public void testStartEditNullControlAllowed() {
         IndexedCell cell = editableControl.createCell();
@@ -310,19 +313,40 @@ public class EditStateTest {
     @Test
     public void testStartEditNotEmptyNullControl() {
         IndexedCell cell = editableControl.createCell();
+        if (cell instanceof TableCell) {
+            TableCellShim.set_lockItemOnEdit((TableCell) cell, true);
+        }
+        if (cell instanceof TreeTableCell) {
+            TreeTableCellShim.set_lockItemOnEdit((TreeTableCell) cell, true); 
+        }
         CellShim.updateItem(cell, "value", false);
         cell.startEdit();
         assertTrue("not empty cell should be editing", cell.isEditing());
     }
     
-    @Ignore("JDK-8188026")
+    @Test
+    public void testStartEditNotEmptyNullControlTwice() {
+        IndexedCell cell = editableControl.createCell();
+        if (cell instanceof TableCell) {
+            TableCellShim.set_lockItemOnEdit((TableCell) cell, true);
+        }
+        if (cell instanceof TreeTableCell) {
+            TreeTableCellShim.set_lockItemOnEdit((TreeTableCell) cell, true); 
+        }
+        CellShim.updateItem(cell, "value", false);
+        cell.startEdit();
+        cell.startEdit();
+        assertTrue("not empty cell should be editing", cell.isEditing());
+    }
+    
+//    @Ignore("JDK-8188026")
     @Test
     public void testCancelEditNullControlAllowed() {
         IndexedCell cell = editableControl.createCell();
         cell.cancelEdit();
     }
     
-    @Ignore("JDK-8188026")
+//    @Ignore("JDK-8188026")
     @Test
     public void testCommitEditNullControlAllowed() {
         IndexedCell cell = editableControl.createCell();
@@ -354,15 +378,15 @@ public class EditStateTest {
             { (Supplier) EditableControlFactory::createEditableTreeView, 
                         "TreeView, TreeCell", (Callback) lv -> new TreeCell<>()},
             { (Supplier) EditableControlFactory::createEditableTreeTableView, 
-                            "TreeTableView, TreeTableCell", (Callback) lv -> new TreeCell<>()},
-//            { (Supplier) EditableControlFactory::createEditableListView, 
-//                    "ListView, TextFieldListCell", TextFieldListCell.forListView()},
-//            { (Supplier) EditableControlFactory::createEditableTableView, 
-//                    "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
-//            { (Supplier) EditableControlFactory::createEditableTreeView, 
-//                    "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
-//            { (Supplier) EditableControlFactory::createEditableTreeTableView, 
-//                    "TreeTableView, TextFieldTreeTableCell", TextFieldTreeTableCell.forTreeTableColumn()},
+                            "TreeTableView, TreeTableCell", (Callback) lv -> new TreeTableCell<>()},
+            { (Supplier) EditableControlFactory::createEditableListView, 
+                    "ListView, TextFieldListCell", TextFieldListCell.forListView()},
+            { (Supplier) EditableControlFactory::createEditableTableView, 
+                    "TableView, TextFieldTableCell", TextFieldTableCell.forTableColumn()},
+            { (Supplier) EditableControlFactory::createEditableTreeView, 
+                    "TreeView, TextFieldTreeCell", TextFieldTreeCell.forTreeView()},
+            { (Supplier) EditableControlFactory::createEditableTreeTableView, 
+                    "TreeTableView, TextFieldTreeTableCell", TextFieldTreeTableCell.forTreeTableColumn()},
         });
     }
 

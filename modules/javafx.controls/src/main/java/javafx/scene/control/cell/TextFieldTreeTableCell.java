@@ -185,11 +185,11 @@ public class TextFieldTreeTableCell<S,T> extends TreeTableCell<S,T> {
 
     /** {@inheritDoc} */
     @Override public void startEdit() {
-        if (! isEditable()
-                || ! getTreeTableView().isEditable()
-                || ! getTableColumn().isEditable()) {
-            return;
-        }
+//        if (! isEditable()
+//                || ! getTreeTableView().isEditable()
+//                || ! getTableColumn().isEditable()) {
+//            return;
+//        }
         super.startEdit();
 
         if (isEditing()) {

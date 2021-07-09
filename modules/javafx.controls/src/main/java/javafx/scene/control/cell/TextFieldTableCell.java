@@ -183,11 +183,11 @@ public class TextFieldTableCell<S,T> extends TableCell<S,T> {
 
     /** {@inheritDoc} */
     @Override public void startEdit() {
-        if (! isEditable()
-                || ! getTableView().isEditable()
-                || ! getTableColumn().isEditable()) {
-            return;
-        }
+//        if (! isEditable()
+//                || ! getTableView().isEditable()
+//                || ! getTableColumn().isEditable()) {
+//            return;
+//        }
         super.startEdit();
 
         if (isEditing()) {
