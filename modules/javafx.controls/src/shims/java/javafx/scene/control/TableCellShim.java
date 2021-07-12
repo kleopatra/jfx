@@ -34,5 +34,5 @@ public class TableCellShim<S,T> extends TableCell<S,T> {
     public static void set_lockItemOnEdit(TableCell tc, boolean b) {
         tc.lockItemOnEdit = b;
     }
-    
+
 }

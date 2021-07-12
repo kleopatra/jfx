@@ -301,7 +301,7 @@ public class TableCell<S,T> extends IndexedCell<T> {
 
     // editing location at start of edit - fix for JDK-8187229
     private TablePosition<S, T> editingCellAtStartEdit;
-    
+
     /** {@inheritDoc} */
     @Override public void startEdit() {
         if (isEditing()) return;

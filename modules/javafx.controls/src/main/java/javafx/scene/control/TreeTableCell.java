@@ -301,8 +301,8 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
      **************************************************************************/
 
     // editing location at start of edit - fix for JDK-8187229
-    private TreeTablePosition<S, ?> editingCellAtStartEdit = null;
-    
+    private TreeTablePosition<S, T> editingCellAtStartEdit = null;
+
     /** {@inheritDoc} */
     @Override public void startEdit() {
         if (isEditing()) return;
@@ -402,10 +402,10 @@ public class TreeTableCell<S,T> extends IndexedCell<T> {
             // It would be rude of us to request it back again.
             ControlUtils.requestFocusOnControlOnlyIfCurrentFocusOwnerIsChild(table);
 
-            CellEditEvent<S,?> editEvent = new CellEditEvent<>(
+            CellEditEvent<S,T> editEvent = new CellEditEvent<S,T>(
                 table,
                 editingCellAtStartEdit,
-                TreeTableColumn.editCancelEvent(),
+                TreeTableColumn.<S,T>editCancelEvent(),
                 null
             );
 

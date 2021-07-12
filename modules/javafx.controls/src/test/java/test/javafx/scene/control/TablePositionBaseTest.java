@@ -38,7 +38,7 @@ import javafx.scene.control.TreeTablePosition;
 public class TablePositionBaseTest {
 
 //---------- TableView
-    
+
     /**
      * JDK-8269136: must not throw on null Table.
      */
@@ -46,8 +46,8 @@ public class TablePositionBaseTest {
     public void testNullTable() {
         new TablePosition<>(null, 2, new TableColumn<>());
     }
-    
-//------------- TreeTableView    
+
+//------------- TreeTableView
 
     /**
      * JDK-8269136: must not throw on null TreeTable.
@@ -56,5 +56,5 @@ public class TablePositionBaseTest {
     public void testNullTreeTable() {
         new TreeTablePosition<>(null, 2, new TreeTableColumn<>());
     }
-    
+
 }
